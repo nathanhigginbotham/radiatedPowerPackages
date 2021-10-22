@@ -6,8 +6,8 @@
 #include "TMath.h"
 
 // Electric field at the field point, calculated from Lienard-Wiechert potentials
-TVector3 CalcEField(const TVector3 fieldPoint, const TVector3 ePosition,
-		    const TVector3 eVelocity, const TVector3 eAcceleration)
+TVector3 rad::CalcEField(const TVector3 fieldPoint, const TVector3 ePosition,
+			 const TVector3 eVelocity, const TVector3 eAcceleration)
 {  
   const TVector3 beta = eVelocity * (1.0 / TMath::C());
   const TVector3 betaDot = eAcceleration * (1.0 / TMath::C());
@@ -21,8 +21,8 @@ TVector3 CalcEField(const TVector3 fieldPoint, const TVector3 ePosition,
 }
 
 // Magnetic field at the field point, calculated from Lienard-Wiechert potentials
-TVector3 CalcBField(const TVector3 fieldPoint, const TVector3 ePosition,
-		    const TVector3 eVelocity, const TVector3 eAcceleration)
+TVector3 rad::CalcBField(const TVector3 fieldPoint, const TVector3 ePosition,
+			 const TVector3 eVelocity, const TVector3 eAcceleration)
 {
   double premult = -1.0 * MU0 * TMath::Qe() / (4.0 * TMath::Pi());
   const TVector3 beta = eVelocity * (1.0 / TMath::C());
@@ -35,12 +35,18 @@ TVector3 CalcBField(const TVector3 fieldPoint, const TVector3 ePosition,
   return field;
 }
 
-// Calculate 
-TVector3 PoyntingVecFull(const TVector3 fieldPoint, const TVector3 ePosition,
-                         const TVector3 eVelocity, const TVector3 eAcceleration)
+// Calculate Poynting vector
+TVector3 rad::CalcPoyntingVec(const TVector3 fieldPoint, const TVector3 ePosition,
+			      const TVector3 eVelocity, const TVector3 eAcceleration)
 {
   TVector3 EField = CalcEField(fieldPoint, ePosition, eVelocity, eAcceleration);
   TVector3 BField = CalcBField(fieldPoint, ePosition, eVelocity, eAcceleration);
+  TVector3 vec = EField.Cross(BField) * (1.0 / MU0);
+  return vec;
+}
+
+TVector3 rad::CalcPoyntingVec(const TVector3 EField, const TVector3 BField)
+{
   TVector3 vec = EField.Cross(BField) * (1.0 / MU0);
   return vec;
 }

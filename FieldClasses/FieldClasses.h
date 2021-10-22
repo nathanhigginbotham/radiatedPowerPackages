@@ -2,6 +2,7 @@
 #ifndef FIELD_CLASSES_H
 #define FIELD_CLASSES_H
 
+#include "TFile.h"
 #include "TGraph.h"
 #include "TVector3.h"
 
@@ -23,9 +24,11 @@ namespace rad
     
   public:
     FieldPoint();
+    FieldPoint(const TVector3 inputAntenna);
     ~FieldPoint();
-    
-    //GenerateFields(TFile *, const double maxTime
+
+    void ResetFields();    
+    void GenerateFields(const char* inputFile, const double maxTime);
   };
 
 }
