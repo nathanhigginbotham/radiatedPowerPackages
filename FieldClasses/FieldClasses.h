@@ -21,14 +21,22 @@ namespace rad
     TGraph* Bx;
     TGraph* By;
     TGraph* Bz;
+
+    void ResetFields();    
     
   public:
     FieldPoint();
     FieldPoint(const TVector3 inputAntenna);
     ~FieldPoint();
-
-    void ResetFields();    
+    
     void GenerateFields(const char* inputFile, const double maxTime);
+
+    TGraph* GetEx();
+    TGraph* GetEy();
+    TGraph* GetEz();
+    TGraph* GetBx();
+    TGraph* GetBy();
+    TGraph* GetBz();
   };
 
 }

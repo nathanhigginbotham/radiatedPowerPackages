@@ -4,7 +4,10 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-extern const int EPSILON0;
-extern const int MU0;
-
+namespace rad
+{
+  const double EPSILON0 = 8.8541878128e-12;
+  const double MU0 = 1.25663706212e-6;
+}
+ 
 #endif

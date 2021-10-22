@@ -7,6 +7,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
+#include "TAxis.h"
 #include "TVector3.h"
 
 rad::FieldPoint::FieldPoint() {
@@ -30,6 +31,12 @@ rad::FieldPoint::~FieldPoint() {
 
 // Parametrised constructor
 rad::FieldPoint::FieldPoint(TVector3 inputAntenna) {
+  Ex = new TGraph();
+  Ey = new TGraph();
+  Ez = new TGraph();
+  Bx = new TGraph();
+  By = new TGraph();
+  Bz = new TGraph();
   antennaPoint = inputAntenna;
 }
 
@@ -88,4 +95,40 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
 
   fin->Close();
   delete fin;
+}
+
+TGraph* rad::FieldPoint::GetEx() {
+  setGraphAttr(Ex);
+  Ex->GetXaxis()->SetTitle("E_{x} [V m^{-1}]");
+  return Ex;
+}
+
+TGraph* rad::FieldPoint::GetEy() {
+  setGraphAttr(Ey);
+  Ey->GetXaxis()->SetTitle("E_{y} [V m^{-1}]");
+  return Ey;
+}
+
+TGraph* rad::FieldPoint::GetEz() {
+  setGraphAttr(Ez);
+  Ez->GetXaxis()->SetTitle("E_{z} [V m^{-1}]");
+  return Ez;
+}
+
+TGraph* rad::FieldPoint::GetBx() {
+  setGraphAttr(Bx);
+  Bx->GetXaxis()->SetTitle("B_{x} [T]");
+  return Bx;
+}
+
+TGraph* rad::FieldPoint::GetBy() {
+  setGraphAttr(By);
+  By->GetXaxis()->SetTitle("B_{y} [T]");
+  return By;
+}
+
+TGraph* rad::FieldPoint::GetBz() {
+  setGraphAttr(Bz);
+  Bz->GetXaxis()->SetTitle("B_{z} [T]");
+  return Bz;
 }
