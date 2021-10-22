@@ -23,7 +23,11 @@ add_subdirectory(BasicFunctions)
 list(APPEND EXTRA_LIBS BasicFunctions)
 list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/BasicFunctions")
 
+add_subdirectory(FieldClasses)
+list(APPEND EXTRA_LIBS FieldClasses)
+list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/FieldClasses")
+
 # Add any executables
 add_executable(dipoleRadiationPattern dipoleRadiationPattern.cxx)
-target_link_libraries(dipoleRadiationPattern PUBLIC BasicFunctions ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
+target_link_libraries(dipoleRadiationPattern PUBLIC BasicFunctions FieldClasses ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 

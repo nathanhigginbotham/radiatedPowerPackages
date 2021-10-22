@@ -1,0 +1,33 @@
+// FieldClasses.h
+#ifndef FIELD_CLASSES_H
+#define FIELD_CLASSES_H
+
+#include "TGraph.h"
+#include "TVector3.h"
+
+#include "BasicFunctions/BasicFunctions.h"
+
+namespace rad
+{
+  class FieldPoint
+  {
+  private:
+    TVector3 antennaPoint;
+    // Time series for field components
+    TGraph* Ex;
+    TGraph* Ey;
+    TGraph* Ez;
+    TGraph* Bx;
+    TGraph* By;
+    TGraph* Bz;
+    
+  public:
+    FieldPoint();
+    ~FieldPoint();
+    
+    //GenerateFields(TFile *, const double maxTime
+  };
+
+}
+
+#endif
