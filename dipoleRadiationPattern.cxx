@@ -7,6 +7,9 @@
 // ROOT includes
 #include "TVector3.h"
 
+// ROOT FFTW Wrapper
+#include "FFTtools.h"
+
 // My files
 #include "BasicFunctions/BasicFunctions.h"
 
