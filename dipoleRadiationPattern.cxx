@@ -46,12 +46,12 @@ int main()
 
   TGraph *grExPower = fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kX);
   TGraph *grEyPower = fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kY);
-  TGraph *grEzPower = fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kZ);
-  // TGraph *grTotalPower = fp.EFieldPeriodogram();
+  TGraph *grEzPower = fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kZ);  
+  TGraph *grTotalEFieldPower = fp.GetTotalEFieldPeriodogram();
   grExPower->Write("grExPower");
   grEyPower->Write("grEyPower");
   grEzPower->Write("grEzPower");
-  // grTotalPower->Write("grTotalPower");
+  grTotalEFieldPower->Write("grTotalEFieldPower");
   
   fout->Close();
   delete fout;

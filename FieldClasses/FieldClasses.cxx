@@ -159,16 +159,18 @@ TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord) {
   return grFFT;
 }
  
-// TGraph* rad::FieldPoint::EFieldPeriodogram() {
-//   TGraph *grTotal = new TGraph();
-//   TGraph *grX = EPeriodogram("x");
-//   TGraph *grY = EPeriodogram("y");
-//   TGraph *grZ = EPeriodogram("z");
+TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram() {
+  TGraph *grTotal = new TGraph();
+  TGraph *grX = GetEFieldPeriodogram(kX);
+  TGraph *grY = GetEFieldPeriodogram(kY);
+  TGraph *grZ = GetEFieldPeriodogram(kZ);
 
-//   for (int n = 0; n < grX->GetN(); n++) {
-//     double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
-//     grTotal->SetPoint(n, grX->GetPointX(n), tot);
-//   }
+  for (int n = 0; n < grX->GetN(); n++) {
+    double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
+    grTotal->SetPoint(n, grX->GetPointX(n), tot);
+  }
+  setGraphAttr(grTotal);
+  grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
   
-//   return grTotal;
-// }
+  return grTotal;
+}

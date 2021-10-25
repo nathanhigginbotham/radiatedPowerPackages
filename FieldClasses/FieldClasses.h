@@ -38,6 +38,7 @@ namespace rad
     TGraph* GetBFieldTimeDomain(Coord_t coord);
 
     TGraph* GetEFieldPeriodogram(Coord_t coord);
+    TGraph* GetTotalEFieldPeriodogram();
   };
 
 }
