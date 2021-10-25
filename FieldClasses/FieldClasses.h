@@ -36,7 +36,11 @@ namespace rad
 
     TGraph* GetEFieldTimeDomain(Coord_t coord);
     TGraph* GetBFieldTimeDomain(Coord_t coord);
-
+   
+    TGraph* GetEFieldMagTimeDomain();
+    TGraph* GetBFieldMagTimeDomain();
+    TGraph* GetPoyntingMagTimeDomain();
+    
     TGraph* GetEFieldPeriodogram(Coord_t coord);
     TGraph* GetTotalEFieldPeriodogram();
   };

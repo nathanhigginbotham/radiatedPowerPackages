@@ -1,7 +1,9 @@
 // FieldClasses.cxx
 
 #include <cassert>
+#include <cmath>
 
+#include "BasicFunctions/Constants.h"
 #include "FieldClasses.h"
 
 #include "TFile.h"
@@ -85,7 +87,7 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
     TVector3 eVel(xVel, yVel, zVel);
     TVector3 eAcc(xAcc, yAcc, zAcc);
     TVector3 EField = CalcEField(antennaPoint, ePos, eVel, eAcc);
-    TVector3 BField = CalcEField(antennaPoint, ePos, eVel, eAcc);
+    TVector3 BField = CalcBField(antennaPoint, ePos, eVel, eAcc);
 
     Ex->SetPoint(Ex->GetN(), time, EField.X());
     Ey->SetPoint(Ey->GetN(), time, EField.Y());
@@ -119,6 +121,21 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord) {
   return gr;
 }
 
+TGraph* rad::FieldPoint::GetEFieldMagTimeDomain() {
+  TGraph* grMag = new TGraph();
+  assert((Ex->GetN() == Ey->GetN()) && (Ey->GetN() == Ez->GetN()));
+  
+  for (int i = 0; i < Ex->GetN(); i++) {
+    double mag = sqrt( pow(Ex->GetPointY(i), 2) + pow(Ey->GetPointY(i), 2) + pow(Ez->GetPointY(i), 2) );
+    grMag->SetPoint(grMag->GetN(), Ex->GetPointX(i), mag);
+  }
+  setGraphAttr(grMag);
+  grMag->GetXaxis()->SetTitle("Time [s]");
+  grMag->GetYaxis()->SetTitle("|E| [V m^{-1}]");
+  
+  return grMag;
+}
+
 TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
   TGraph* gr = 0;
   if (coord == kX) {
@@ -138,6 +155,42 @@ TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
   
   return gr;
 }
+
+TGraph* rad::FieldPoint::GetBFieldMagTimeDomain() {
+  TGraph* grMag = new TGraph();
+  assert((Bx->GetN() == By->GetN()) && (By->GetN() == Bz->GetN()));
+  
+  for (int i = 0; i < Bx->GetN(); i++) {
+    double mag = sqrt( pow(Bx->GetPointY(i), 2) + pow(By->GetPointY(i), 2) + pow(Bz->GetPointY(i), 2) );
+    grMag->SetPoint(grMag->GetN(), Bx->GetPointX(i), mag);
+  }
+  setGraphAttr(grMag);
+  grMag->GetXaxis()->SetTitle("Time [s]");
+  grMag->GetYaxis()->SetTitle("|B| [T]");
+  
+  return grMag;
+}
+
+TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain() {
+  TGraph* grSMag = new TGraph();
+  TGraph* grEMag = GetEFieldMagTimeDomain();
+  TGraph* grBMag = GetBFieldMagTimeDomain();
+  assert(grEMag->GetN() == grBMag->GetN());
+
+  for (int i = 0; i < grEMag->GetN(); i++) {
+    double smag = grEMag->GetPointY(i) * grBMag->GetPointY(i) / MU0;
+    grSMag->SetPoint(grSMag->GetN(), grEMag->GetPointX(i), smag);
+  }
+  setGraphAttr(grSMag);
+  grSMag->GetXaxis()->SetTitle("Time [s]");
+  grSMag->GetYaxis()->SetTitle("|S| [W m^{-2}]");
+  
+  return grSMag;
+}
+
+/*
+  Frequency domain functions
+*/
 
 TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord) {
   TGraph* grFFT = 0;

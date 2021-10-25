@@ -52,6 +52,13 @@ int main()
   grEyPower->Write("grEyPower");
   grEzPower->Write("grEzPower");
   grTotalEFieldPower->Write("grTotalEFieldPower");
+
+  TGraph *grEMag = fp.GetEFieldMagTimeDomain();
+  TGraph *grBMag = fp.GetBFieldMagTimeDomain();
+  TGraph *grSMag = fp.GetPoyntingMagTimeDomain();
+  grSMag->Write("grSMag");
+  grEMag->Write("grEMag");
+  grBMag->Write("grBMag");
   
   fout->Close();
   delete fout;
