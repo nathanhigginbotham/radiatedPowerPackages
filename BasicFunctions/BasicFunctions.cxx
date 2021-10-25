@@ -55,9 +55,9 @@ TVector3 rad::CalcPoyntingVec(const TVector3 EField, const TVector3 BField)
 
 void rad::setGraphAttr(TGraph *gr)
 {
-  gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetXaxis()->SetTitleSize(0.05);
   gr->GetYaxis()->SetTitleSize(0.05);
   gr->GetXaxis()->SetLabelSize(0.05);
   gr->GetYaxis()->SetLabelSize(0.05);
+  gr->SetLineWidth(2);
 }

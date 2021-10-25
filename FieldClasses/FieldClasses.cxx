@@ -10,6 +10,8 @@
 #include "TAxis.h"
 #include "TVector3.h"
 
+#include "FFTtools.h"
+
 rad::FieldPoint::FieldPoint() {
   Ex = new TGraph();
   Ey = new TGraph();
@@ -97,38 +99,76 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
   delete fin;
 }
 
-TGraph* rad::FieldPoint::GetEx() {
-  setGraphAttr(Ex);
-  Ex->GetXaxis()->SetTitle("E_{x} [V m^{-1}]");
-  return Ex;
+TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord) {
+  TGraph* gr = 0;
+  if (coord == kX) {
+    gr = (TGraph*)Ex->Clone("grEx");
+    gr->GetYaxis()->SetTitle("E_{x} [V m^{-1}]");
+  }
+  else if (coord == kY) {
+    gr = (TGraph*)Ey->Clone("grEy");
+    gr->GetYaxis()->SetTitle("E_{y} [V m^{-1}]");
+  }
+  else if (coord = kZ) {
+    gr = (TGraph*)Ez->Clone("grEz");
+    gr->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
+  }
+  setGraphAttr(gr);
+  gr->GetXaxis()->SetTitle("Time [s]");
+  
+  return gr;
 }
 
-TGraph* rad::FieldPoint::GetEy() {
-  setGraphAttr(Ey);
-  Ey->GetXaxis()->SetTitle("E_{y} [V m^{-1}]");
-  return Ey;
+TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
+  TGraph* gr = 0;
+  if (coord == kX) {
+    gr = (TGraph*)Bx->Clone("grBx");
+    gr->GetYaxis()->SetTitle("B_{x} [T]");
+  }
+  else if (coord == kY) {
+    gr = (TGraph*)By->Clone("grBy");
+    gr->GetYaxis()->SetTitle("B_{y} [T]");
+  }
+  else if (coord = kZ) {
+    gr = (TGraph*)Bz->Clone("grBz");
+    gr->GetYaxis()->SetTitle("B_{z} [T]");
+  }
+  setGraphAttr(gr);
+  gr->GetXaxis()->SetTitle("Time [s]");
+  
+  return gr;
 }
 
-TGraph* rad::FieldPoint::GetEz() {
-  setGraphAttr(Ez);
-  Ez->GetXaxis()->SetTitle("E_{z} [V m^{-1}]");
-  return Ez;
+TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord) {
+  TGraph* grFFT = 0;
+  if (coord == kX) {
+    grFFT = FFTtools::makePowerSpectrumPeriodogram(Ex);
+    grFFT->GetYaxis()->SetTitle("E_{x}^{2} [V^{2} m^{-2}]");
+  }
+  else if (coord == kY) {
+    grFFT = FFTtools::makePowerSpectrumPeriodogram(Ey);
+    grFFT->GetYaxis()->SetTitle("E_{y}^{2} [V^{2} m^{-2}]");
+  }
+  else if (coord == kZ) {
+    grFFT = FFTtools::makePowerSpectrumPeriodogram(Ez);
+    grFFT->GetYaxis()->SetTitle("E_{z}^{2} [V^{2} m^{-2}]");
+  }
+  setGraphAttr(grFFT);
+  grFFT->GetXaxis()->SetTitle("Frequency [Hz]");
+  
+  return grFFT;
 }
+ 
+// TGraph* rad::FieldPoint::EFieldPeriodogram() {
+//   TGraph *grTotal = new TGraph();
+//   TGraph *grX = EPeriodogram("x");
+//   TGraph *grY = EPeriodogram("y");
+//   TGraph *grZ = EPeriodogram("z");
 
-TGraph* rad::FieldPoint::GetBx() {
-  setGraphAttr(Bx);
-  Bx->GetXaxis()->SetTitle("B_{x} [T]");
-  return Bx;
-}
-
-TGraph* rad::FieldPoint::GetBy() {
-  setGraphAttr(By);
-  By->GetXaxis()->SetTitle("B_{y} [T]");
-  return By;
-}
-
-TGraph* rad::FieldPoint::GetBz() {
-  setGraphAttr(Bz);
-  Bz->GetXaxis()->SetTitle("B_{z} [T]");
-  return Bz;
-}
+//   for (int n = 0; n < grX->GetN(); n++) {
+//     double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
+//     grTotal->SetPoint(n, grX->GetPointX(n), tot);
+//   }
+  
+//   return grTotal;
+// }

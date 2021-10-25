@@ -25,18 +25,19 @@ namespace rad
     void ResetFields();    
     
   public:
+    enum Coord_t{
+      kX, kY, kZ
+    };
     FieldPoint();
     FieldPoint(const TVector3 inputAntenna);
     ~FieldPoint();
     
     void GenerateFields(const char* inputFile, const double maxTime);
 
-    TGraph* GetEx();
-    TGraph* GetEy();
-    TGraph* GetEz();
-    TGraph* GetBx();
-    TGraph* GetBy();
-    TGraph* GetBz();
+    TGraph* GetEFieldTimeDomain(Coord_t coord);
+    TGraph* GetBFieldTimeDomain(Coord_t coord);
+
+    TGraph* GetEFieldPeriodogram(Coord_t coord);
   };
 
 }
