@@ -61,3 +61,12 @@ void rad::setGraphAttr(TGraph *gr)
   gr->GetYaxis()->SetLabelSize(0.05);
   gr->SetLineWidth(2);
 }
+
+double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,
+				 const TVector3 ePosition, const TVector3 position)
+{
+  double Ae = 3 * pow(wavelength, 2) / (8*TMath::Pi());
+  const double psi = ((ePosition - position).Unit()).Angle(dipoleDir);
+  Ae *= pow(TMath::Sin(psi), 2);
+  return Ae;
+}

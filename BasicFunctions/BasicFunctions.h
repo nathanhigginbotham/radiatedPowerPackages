@@ -20,6 +20,9 @@ namespace rad
   TVector3 CalcPoyntingVec(const TVector3 EField, const TVector3 BField);
 
   void setGraphAttr(TGraph *gr);
+
+  double CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,
+			      const TVector3 ePosition, const TVector3 position);
  
 }
  

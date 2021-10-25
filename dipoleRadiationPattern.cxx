@@ -59,6 +59,16 @@ int main()
   grSMag->Write("grSMag");
   grEMag->Write("grEMag");
   grBMag->Write("grBMag");
+
+  // Transform E field magnitude
+  TGraph *grEMagPower = FFTtools::makePowerSpectrumPeriodogram(grEMag);
+  setGraphAttr(grEMagPower);
+  grEMagPower->GetYaxis()->SetTitle("|E|^{2}");
+  grEMagPower->GetXaxis()->SetTitle("Frequency [Hz]");
+  grEMagPower->Write("grEMagPower");
+
+  TGraph *grDipolePower = fp.GetDipolePowerTimeDomain();
+  grDipolePower->Write("grDipolePower");
   
   fout->Close();
   delete fout;

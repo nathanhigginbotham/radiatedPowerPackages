@@ -22,6 +22,15 @@ rad::FieldPoint::FieldPoint() {
   By = new TGraph();
   Bz = new TGraph();
   antennaPoint = TVector3(0.0, 0.0, 0.0);
+  pos[0] = new TGraph();
+  pos[1] = new TGraph();
+  pos[2] = new TGraph();
+  vel[0] = new TGraph();
+  vel[1] = new TGraph();
+  vel[2] = new TGraph();
+  acc[0] = new TGraph();
+  acc[1] = new TGraph();
+  acc[2] = new TGraph();
 }
 
 rad::FieldPoint::~FieldPoint() {
@@ -31,6 +40,16 @@ rad::FieldPoint::~FieldPoint() {
   delete Bx;
   delete By;
   delete Bz;
+
+  delete pos[0];
+  delete pos[1];
+  delete pos[2];
+  delete vel[0];
+  delete vel[1];
+  delete vel[2];
+  delete acc[0];
+  delete acc[1];
+  delete acc[2];
 }
 
 // Parametrised constructor
@@ -41,6 +60,15 @@ rad::FieldPoint::FieldPoint(TVector3 inputAntenna) {
   Bx = new TGraph();
   By = new TGraph();
   Bz = new TGraph();
+  pos[0] = new TGraph();
+  pos[1] = new TGraph();
+  pos[2] = new TGraph();
+  vel[0] = new TGraph();
+  vel[1] = new TGraph();
+  vel[2] = new TGraph();
+  acc[0] = new TGraph();
+  acc[1] = new TGraph();
+  acc[2] = new TGraph();
   antennaPoint = inputAntenna;
 }
 
@@ -95,6 +123,16 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
     Bx->SetPoint(Bx->GetN(), time, BField.X());
     By->SetPoint(By->GetN(), time, BField.Y());
     Bz->SetPoint(Bz->GetN(), time, BField.Z());
+
+    pos[0]->SetPoint(pos[0]->GetN(), time, xPos);
+    pos[1]->SetPoint(pos[1]->GetN(), time, yPos);
+    pos[2]->SetPoint(pos[2]->GetN(), time, zPos);
+    vel[0]->SetPoint(vel[0]->GetN(), time, xVel);
+    vel[1]->SetPoint(vel[1]->GetN(), time, yVel);
+    vel[2]->SetPoint(vel[2]->GetN(), time, zVel);
+    acc[0]->SetPoint(acc[0]->GetN(), time, xAcc);
+    acc[1]->SetPoint(acc[1]->GetN(), time, yAcc);
+    acc[2]->SetPoint(acc[2]->GetN(), time, zAcc);
   }
 
   fin->Close();
@@ -226,4 +264,20 @@ TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram() {
   grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
   
   return grTotal;
+}
+
+TGraph* rad::FieldPoint::GetDipolePowerTimeDomain() {
+  TGraph *grPower = new TGraph();
+  TGraph *grSMag = GetPoyntingMagTimeDomain();
+  TVector3 dipoleDir(0.0, 1.0, 0.0);
+  
+  for (int i = 0; i < grSMag->GetN(); i++) {
+    TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
+    double Ae = CalcAeHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
+    grPower->SetPoint(grPower->GetN(), grSMag->GetPointX(i), grSMag->GetPointY(i) * Ae);
+  }
+  setGraphAttr(grPower);
+  
+  delete grSMag;
+  return grPower;
 }

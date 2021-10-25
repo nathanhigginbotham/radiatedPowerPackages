@@ -22,6 +22,10 @@ namespace rad
     TGraph* By;
     TGraph* Bz;
 
+    TGraph* pos[3];
+    TGraph* vel[3];
+    TGraph* acc[3];
+    
     void ResetFields();    
     
   public:
@@ -43,6 +47,8 @@ namespace rad
     
     TGraph* GetEFieldPeriodogram(Coord_t coord);
     TGraph* GetTotalEFieldPeriodogram();
+
+    TGraph* GetDipolePowerTimeDomain();
   };
 
 }
