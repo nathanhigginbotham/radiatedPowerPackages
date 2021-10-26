@@ -304,6 +304,30 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
   }
 }
 
+TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
+  TGraph *grPower = new TGraph();
+  TGraph *grSMag = GetPoyntingMagTimeDomain();
+  TVector3 dipoleDir(0.0, 1.0, 0.0);
+  
+  for (int i = 0; i < grSMag->GetN(); i++) {
+    TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
+    double Ae = CalcAeHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
+    grPower->SetPoint(grPower->GetN(), grSMag->GetPointX(i), grSMag->GetPointY(i) * Ae);
+  }
+  setGraphAttr(grPower);
+
+  if (!kUseRetardedTime) {
+    delete grSMag;
+    return grPower;
+  }
+  else {
+    TGraph* grPowerRet = MakeRetardedTimeGraph(grPower);
+    delete grPower;
+    delete grSMag;
+    return grPowerRet;
+  }
+}
+
 /////////////// Frequency domain functions /////////////////
 
 TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime) {
@@ -340,20 +364,4 @@ TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram(const bool kUseRetardedTime) 
   grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
   
   return grTotal;
-}
-
-TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
-  TGraph *grPower = new TGraph();
-  TGraph *grSMag = GetPoyntingMagTimeDomain();
-  TVector3 dipoleDir(0.0, 1.0, 0.0);
-  
-  for (int i = 0; i < grSMag->GetN(); i++) {
-    TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
-    double Ae = CalcAeHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
-    grPower->SetPoint(grPower->GetN(), grSMag->GetPointX(i), grSMag->GetPointY(i) * Ae);
-  }
-  setGraphAttr(grPower);
-  
-  delete grSMag;
-  return grPower;
 }
