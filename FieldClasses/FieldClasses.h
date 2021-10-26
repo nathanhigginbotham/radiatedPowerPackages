@@ -15,16 +15,14 @@ namespace rad
   private:
     TVector3 antennaPoint;
     // Time series for field components
-    TGraph* Ex;
-    TGraph* Ey;
-    TGraph* Ez;
-    TGraph* Bx;
-    TGraph* By;
-    TGraph* Bz;
+    TGraph* EField[3];
+    TGraph* BField[3];
 
     TGraph* pos[3];
     TGraph* vel[3];
     TGraph* acc[3];
+
+    TGraph* tPrime; // Relationship between time and retarded time
     
     void ResetFields();    
     

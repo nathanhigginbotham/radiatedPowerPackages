@@ -15,12 +15,12 @@
 #include "FFTtools.h"
 
 rad::FieldPoint::FieldPoint() {
-  Ex = new TGraph();
-  Ey = new TGraph();
-  Ez = new TGraph();
-  Bx = new TGraph();
-  By = new TGraph();
-  Bz = new TGraph();
+  EField[0] = new TGraph();
+  EField[1] = new TGraph();
+  EField[2] = new TGraph();
+  BField[0] = new TGraph();
+  BField[1] = new TGraph();
+  BField[2] = new TGraph();
   antennaPoint = TVector3(0.0, 0.0, 0.0);
   pos[0] = new TGraph();
   pos[1] = new TGraph();
@@ -31,15 +31,16 @@ rad::FieldPoint::FieldPoint() {
   acc[0] = new TGraph();
   acc[1] = new TGraph();
   acc[2] = new TGraph();
+  tPrime = new TGraph();
 }
 
 rad::FieldPoint::~FieldPoint() {
-  delete Ex;
-  delete Ey;
-  delete Ez;
-  delete Bx;
-  delete By;
-  delete Bz;
+  delete EField[0];
+  delete EField[1];
+  delete EField[2];
+  delete BField[0];
+  delete BField[1];
+  delete BField[2];
 
   delete pos[0];
   delete pos[1];
@@ -50,16 +51,18 @@ rad::FieldPoint::~FieldPoint() {
   delete acc[0];
   delete acc[1];
   delete acc[2];
+
+  delete tPrime;
 }
 
 // Parametrised constructor
 rad::FieldPoint::FieldPoint(TVector3 inputAntenna) {
-  Ex = new TGraph();
-  Ey = new TGraph();
-  Ez = new TGraph();
-  Bx = new TGraph();
-  By = new TGraph();
-  Bz = new TGraph();
+  EField[0] = new TGraph();
+  EField[1] = new TGraph();
+  EField[2] = new TGraph();
+  BField[0] = new TGraph();
+  BField[1] = new TGraph();
+  BField[2] = new TGraph();
   pos[0] = new TGraph();
   pos[1] = new TGraph();
   pos[2] = new TGraph();
@@ -69,16 +72,27 @@ rad::FieldPoint::FieldPoint(TVector3 inputAntenna) {
   acc[0] = new TGraph();
   acc[1] = new TGraph();
   acc[2] = new TGraph();
+  tPrime = new TGraph();
   antennaPoint = inputAntenna;
 }
 
 void rad::FieldPoint::ResetFields() {
-  Ex->Clear();
-  Ey->Clear();
-  Ez->Clear();
-  Bx->Clear();
-  By->Clear();
-  Bz->Clear();
+  EField[0]->Clear();
+  EField[1]->Clear();
+  EField[2]->Clear();
+  BField[0]->Clear();
+  BField[1]->Clear();
+  BField[2]->Clear();
+  pos[0]->Clear();
+  pos[1]->Clear();
+  pos[2]->Clear();
+  vel[0]->Clear();
+  vel[1]->Clear();
+  vel[2]->Clear();
+  acc[0]->Clear();
+  acc[1]->Clear();
+  acc[2]->Clear();
+  tPrime->Clear();
 }
 
 // From an input TFile generate the E and B fields for a given time
@@ -114,15 +128,15 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
     TVector3 ePos(xPos, yPos, zPos);
     TVector3 eVel(xVel, yVel, zVel);
     TVector3 eAcc(xAcc, yAcc, zAcc);
-    TVector3 EField = CalcEField(antennaPoint, ePos, eVel, eAcc);
-    TVector3 BField = CalcBField(antennaPoint, ePos, eVel, eAcc);
+    TVector3 EFieldCalc = CalcEField(antennaPoint, ePos, eVel, eAcc);
+    TVector3 BFieldCalc = CalcBField(antennaPoint, ePos, eVel, eAcc);
 
-    Ex->SetPoint(Ex->GetN(), time, EField.X());
-    Ey->SetPoint(Ey->GetN(), time, EField.Y());
-    Ez->SetPoint(Ez->GetN(), time, EField.Z());
-    Bx->SetPoint(Bx->GetN(), time, BField.X());
-    By->SetPoint(By->GetN(), time, BField.Y());
-    Bz->SetPoint(Bz->GetN(), time, BField.Z());
+    EField[0]->SetPoint(EField[0]->GetN(), time, EFieldCalc.X());
+    EField[1]->SetPoint(EField[1]->GetN(), time, EFieldCalc.Y());
+    EField[2]->SetPoint(EField[2]->GetN(), time, EFieldCalc.Z());
+    BField[0]->SetPoint(BField[0]->GetN(), time, BFieldCalc.X());
+    BField[1]->SetPoint(BField[1]->GetN(), time, BFieldCalc.Y());
+    BField[2]->SetPoint(BField[2]->GetN(), time, BFieldCalc.Z());
 
     pos[0]->SetPoint(pos[0]->GetN(), time, xPos);
     pos[1]->SetPoint(pos[1]->GetN(), time, yPos);
@@ -142,15 +156,15 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
 TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord) {
   TGraph* gr = 0;
   if (coord == kX) {
-    gr = (TGraph*)Ex->Clone("grEx");
+    gr = (TGraph*)EField[0]->Clone("grEx");
     gr->GetYaxis()->SetTitle("E_{x} [V m^{-1}]");
   }
   else if (coord == kY) {
-    gr = (TGraph*)Ey->Clone("grEy");
+    gr = (TGraph*)EField[1]->Clone("grEy");
     gr->GetYaxis()->SetTitle("E_{y} [V m^{-1}]");
   }
   else if (coord = kZ) {
-    gr = (TGraph*)Ez->Clone("grEz");
+    gr = (TGraph*)EField[2]->Clone("grEz");
     gr->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
   }
   setGraphAttr(gr);
@@ -161,11 +175,11 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord) {
 
 TGraph* rad::FieldPoint::GetEFieldMagTimeDomain() {
   TGraph* grMag = new TGraph();
-  assert((Ex->GetN() == Ey->GetN()) && (Ey->GetN() == Ez->GetN()));
+  assert((EField[0]->GetN() == EField[1]->GetN()) && (EField[1]->GetN() == EField[2]->GetN()));
   
-  for (int i = 0; i < Ex->GetN(); i++) {
-    double mag = sqrt( pow(Ex->GetPointY(i), 2) + pow(Ey->GetPointY(i), 2) + pow(Ez->GetPointY(i), 2) );
-    grMag->SetPoint(grMag->GetN(), Ex->GetPointX(i), mag);
+  for (int i = 0; i < EField[0]->GetN(); i++) {
+    double mag = sqrt( pow(EField[0]->GetPointY(i), 2) + pow(EField[1]->GetPointY(i), 2) + pow(EField[2]->GetPointY(i), 2) );
+    grMag->SetPoint(grMag->GetN(), EField[0]->GetPointX(i), mag);
   }
   setGraphAttr(grMag);
   grMag->GetXaxis()->SetTitle("Time [s]");
@@ -177,15 +191,15 @@ TGraph* rad::FieldPoint::GetEFieldMagTimeDomain() {
 TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
   TGraph* gr = 0;
   if (coord == kX) {
-    gr = (TGraph*)Bx->Clone("grBx");
+    gr = (TGraph*)BField[0]->Clone("grBx");
     gr->GetYaxis()->SetTitle("B_{x} [T]");
   }
   else if (coord == kY) {
-    gr = (TGraph*)By->Clone("grBy");
+    gr = (TGraph*)BField[1]->Clone("grBy");
     gr->GetYaxis()->SetTitle("B_{y} [T]");
   }
   else if (coord = kZ) {
-    gr = (TGraph*)Bz->Clone("grBz");
+    gr = (TGraph*)BField[2]->Clone("grBz");
     gr->GetYaxis()->SetTitle("B_{z} [T]");
   }
   setGraphAttr(gr);
@@ -196,11 +210,11 @@ TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
 
 TGraph* rad::FieldPoint::GetBFieldMagTimeDomain() {
   TGraph* grMag = new TGraph();
-  assert((Bx->GetN() == By->GetN()) && (By->GetN() == Bz->GetN()));
+  assert((BField[0]->GetN() == BField[1]->GetN()) && (BField[1]->GetN() == BField[2]->GetN()));
   
-  for (int i = 0; i < Bx->GetN(); i++) {
-    double mag = sqrt( pow(Bx->GetPointY(i), 2) + pow(By->GetPointY(i), 2) + pow(Bz->GetPointY(i), 2) );
-    grMag->SetPoint(grMag->GetN(), Bx->GetPointX(i), mag);
+  for (int i = 0; i < BField[0]->GetN(); i++) {
+    double mag = sqrt( pow(BField[0]->GetPointY(i), 2) + pow(BField[1]->GetPointY(i), 2) + pow(BField[2]->GetPointY(i), 2) );
+    grMag->SetPoint(grMag->GetN(), BField[0]->GetPointX(i), mag);
   }
   setGraphAttr(grMag);
   grMag->GetXaxis()->SetTitle("Time [s]");
@@ -233,15 +247,15 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain() {
 TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord) {
   TGraph* grFFT = 0;
   if (coord == kX) {
-    grFFT = FFTtools::makePowerSpectrumPeriodogram(Ex);
+    grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[0]);
     grFFT->GetYaxis()->SetTitle("E_{x}^{2} [V^{2} m^{-2}]");
   }
   else if (coord == kY) {
-    grFFT = FFTtools::makePowerSpectrumPeriodogram(Ey);
+    grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[1]);
     grFFT->GetYaxis()->SetTitle("E_{y}^{2} [V^{2} m^{-2}]");
   }
   else if (coord == kZ) {
-    grFFT = FFTtools::makePowerSpectrumPeriodogram(Ez);
+    grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[2]);
     grFFT->GetYaxis()->SetTitle("E_{z}^{2} [V^{2} m^{-2}]");
   }
   setGraphAttr(grFFT);
