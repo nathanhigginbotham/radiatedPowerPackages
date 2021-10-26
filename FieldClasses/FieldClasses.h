@@ -24,7 +24,9 @@ namespace rad
 
     TGraph* tPrime; // Relationship between time and retarded time
     
-    void ResetFields();    
+    void ResetFields();
+
+    TGraph* MakeRetardedTimeGraph(const TGraph* grOriginal);
     
   public:
     enum Coord_t{
@@ -36,17 +38,17 @@ namespace rad
     
     void GenerateFields(const char* inputFile, const double maxTime);
 
-    TGraph* GetEFieldTimeDomain(Coord_t coord);
-    TGraph* GetBFieldTimeDomain(Coord_t coord);
+    TGraph* GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
+    TGraph* GetBFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
    
-    TGraph* GetEFieldMagTimeDomain();
-    TGraph* GetBFieldMagTimeDomain();
-    TGraph* GetPoyntingMagTimeDomain();
+    TGraph* GetEFieldMagTimeDomain(const bool kUseRetardedTime=false);
+    TGraph* GetBFieldMagTimeDomain(const bool kUseRetardedTime=false);
+    TGraph* GetPoyntingMagTimeDomain(const bool kUseRetardedTime=false);
     
-    TGraph* GetEFieldPeriodogram(Coord_t coord);
-    TGraph* GetTotalEFieldPeriodogram();
+    TGraph* GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime=false);
+    TGraph* GetTotalEFieldPeriodogram(const bool kUseRetardedTime=false);
 
-    TGraph* GetDipolePowerTimeDomain();
+    TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
   };
 
 }

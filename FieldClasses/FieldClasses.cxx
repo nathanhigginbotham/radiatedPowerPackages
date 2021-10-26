@@ -4,13 +4,15 @@
 #include <cmath>
 
 #include "BasicFunctions/Constants.h"
-#include "FieldClasses.h"
+#include "BasicFunctions/BasicFunctions.h"
+#include "FieldClasses/FieldClasses.h"
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TGraph.h"
 #include "TAxis.h"
 #include "TVector3.h"
+#include "TSpline.h"
 
 #include "FFTtools.h"
 
@@ -95,6 +97,30 @@ void rad::FieldPoint::ResetFields() {
   tPrime->Clear();
 }
 
+/*
+  Takes the inputted TGraph and produces the same variable plotted using the retarded time
+  grOriginal is the inputted TGraph
+  returns a TGraph which takes the retarded time into account
+ */
+TGraph* rad::FieldPoint::MakeRetardedTimeGraph(const TGraph* grOriginal) {
+  TSpline3 *sptPrime = new TSpline3("sptPrime", tPrime);
+  TSpline3 *spgrOriginal = new TSpline3("spgrOriginal", grOriginal);
+
+  TGraph *grOut = new TGraph();
+  for (int i = 0; i < grOriginal->GetN(); i++) {
+    if (grOriginal->GetPointX(i) < 0.2e-9) continue;
+    double tRet = sptPrime->Eval(grOriginal->GetPointX(i));
+    grOut->SetPoint(grOut->GetN(), grOriginal->GetPointX(i), spgrOriginal->Eval(tRet));
+  }
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Time [s]");
+  grOut->GetYaxis()->SetTitle(grOriginal->GetYaxis()->GetTitle());
+  
+  delete sptPrime;
+  delete spgrOriginal;
+  return grOut;
+}
+
 // From an input TFile generate the E and B fields for a given time
 // inputFile is the input file which should have the relevant branches
 // maxTime is the final time in seconds (if less than the time in the file)
@@ -155,7 +181,7 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
   delete fin;
 }
 
-TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord) {
+TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime) {
   TGraph* gr = 0;
   if (coord == kX) {
     gr = (TGraph*)EField[0]->Clone("grEx");
@@ -170,12 +196,20 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord) {
     gr->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
   }
   setGraphAttr(gr);
-  gr->GetXaxis()->SetTitle("Time [s]");
   
-  return gr;
+  gr->GetXaxis()->SetTitle("Time [s]");
+
+  if (!kUseRetardedTime) {
+    return gr;
+  }
+  else {
+    TGraph* grRet = MakeRetardedTimeGraph(gr);
+    delete gr;    
+    return grRet;
+  }
 }
 
-TGraph* rad::FieldPoint::GetEFieldMagTimeDomain() {
+TGraph* rad::FieldPoint::GetEFieldMagTimeDomain(const bool kUseRetardedTime) {
   TGraph* grMag = new TGraph();
   assert((EField[0]->GetN() == EField[1]->GetN()) && (EField[1]->GetN() == EField[2]->GetN()));
   
@@ -186,11 +220,18 @@ TGraph* rad::FieldPoint::GetEFieldMagTimeDomain() {
   setGraphAttr(grMag);
   grMag->GetXaxis()->SetTitle("Time [s]");
   grMag->GetYaxis()->SetTitle("|E| [V m^{-1}]");
-  
-  return grMag;
+
+  if (!kUseRetardedTime) {
+    return grMag;
+  }
+  else {
+    TGraph* grMagRet = MakeRetardedTimeGraph(grMag);
+    delete grMag;
+    return grMagRet;
+  }
 }
 
-TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
+TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime) {
   TGraph* gr = 0;
   if (coord == kX) {
     gr = (TGraph*)BField[0]->Clone("grBx");
@@ -206,11 +247,18 @@ TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord) {
   }
   setGraphAttr(gr);
   gr->GetXaxis()->SetTitle("Time [s]");
-  
-  return gr;
+
+  if (!kUseRetardedTime) {
+    return gr;
+  }
+  else {
+    TGraph* grRet = MakeRetardedTimeGraph(gr);
+    delete gr;
+    return grRet;
+  }
 }
 
-TGraph* rad::FieldPoint::GetBFieldMagTimeDomain() {
+TGraph* rad::FieldPoint::GetBFieldMagTimeDomain(const bool kUseRetardedTime) {
   TGraph* grMag = new TGraph();
   assert((BField[0]->GetN() == BField[1]->GetN()) && (BField[1]->GetN() == BField[2]->GetN()));
   
@@ -221,11 +269,18 @@ TGraph* rad::FieldPoint::GetBFieldMagTimeDomain() {
   setGraphAttr(grMag);
   grMag->GetXaxis()->SetTitle("Time [s]");
   grMag->GetYaxis()->SetTitle("|B| [T]");
-  
-  return grMag;
+
+  if (!kUseRetardedTime) {
+    return grMag;
+  }
+  else {
+    TGraph* grMagRet = MakeRetardedTimeGraph(grMag);
+    delete grMag;
+    return grMagRet;
+  }
 }
 
-TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain() {
+TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
   TGraph* grSMag = new TGraph();
   TGraph* grEMag = GetEFieldMagTimeDomain();
   TGraph* grBMag = GetBFieldMagTimeDomain();
@@ -238,15 +293,20 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain() {
   setGraphAttr(grSMag);
   grSMag->GetXaxis()->SetTitle("Time [s]");
   grSMag->GetYaxis()->SetTitle("|S| [W m^{-2}]");
-  
-  return grSMag;
+
+  if (!kUseRetardedTime) {
+    return grSMag;
+  }
+  else {
+    TGraph* grSMagRet = MakeRetardedTimeGraph(grSMag);
+    delete grSMag;
+    return grSMagRet;
+  }
 }
 
-/*
-  Frequency domain functions
-*/
+/////////////// Frequency domain functions /////////////////
 
-TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord) {
+TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime) {
   TGraph* grFFT = 0;
   if (coord == kX) {
     grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[0]);
@@ -266,7 +326,7 @@ TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord) {
   return grFFT;
 }
  
-TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram() {
+TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram(const bool kUseRetardedTime) {
   TGraph *grTotal = new TGraph();
   TGraph *grX = GetEFieldPeriodogram(kX);
   TGraph *grY = GetEFieldPeriodogram(kY);
@@ -282,7 +342,7 @@ TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram() {
   return grTotal;
 }
 
-TGraph* rad::FieldPoint::GetDipolePowerTimeDomain() {
+TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
   TGraph *grPower = new TGraph();
   TGraph *grSMag = GetPoyntingMagTimeDomain();
   TVector3 dipoleDir(0.0, 1.0, 0.0);
