@@ -70,3 +70,9 @@ double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleD
   Ae *= pow(TMath::Sin(psi), 2);
   return Ae;
 }
+
+double CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition, const double labTime)
+{
+  double time = labTime - ((ePosition - fieldPoint).Mag() / TMath::C());
+  return time;
+}
