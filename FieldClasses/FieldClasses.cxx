@@ -147,6 +147,8 @@ void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime
     acc[0]->SetPoint(acc[0]->GetN(), time, xAcc);
     acc[1]->SetPoint(acc[1]->GetN(), time, yAcc);
     acc[2]->SetPoint(acc[2]->GetN(), time, zAcc);
+
+    tPrime->SetPoint(tPrime->GetN(), time, CalcRetardedTime(antennaPoint, ePos, time));
   }
 
   fin->Close();
