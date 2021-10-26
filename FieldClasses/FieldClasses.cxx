@@ -307,30 +307,30 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
 /////////////// Frequency domain functions /////////////////
 
 TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime) {
-  TGraph* grFFT = 0;
+  TGraph* grIn = GetEFieldTimeDomain(coord, kUseRetardedTime);
+  TGraph* grFFT = FFTtools::makePowerSpectrumPeriodogram(grIn);
+  
   if (coord == kX) {
-    grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[0]);
     grFFT->GetYaxis()->SetTitle("E_{x}^{2} [V^{2} m^{-2}]");
   }
   else if (coord == kY) {
-    grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[1]);
     grFFT->GetYaxis()->SetTitle("E_{y}^{2} [V^{2} m^{-2}]");
   }
   else if (coord == kZ) {
-    grFFT = FFTtools::makePowerSpectrumPeriodogram(EField[2]);
     grFFT->GetYaxis()->SetTitle("E_{z}^{2} [V^{2} m^{-2}]");
   }
   setGraphAttr(grFFT);
   grFFT->GetXaxis()->SetTitle("Frequency [Hz]");
-  
+
+  delete grIn;
   return grFFT;
 }
  
 TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram(const bool kUseRetardedTime) {
   TGraph *grTotal = new TGraph();
-  TGraph *grX = GetEFieldPeriodogram(kX);
-  TGraph *grY = GetEFieldPeriodogram(kY);
-  TGraph *grZ = GetEFieldPeriodogram(kZ);
+  TGraph *grX = GetEFieldPeriodogram(kX, kUseRetardedTime);
+  TGraph *grY = GetEFieldPeriodogram(kY, kUseRetardedTime);
+  TGraph *grZ = GetEFieldPeriodogram(kZ, kUseRetardedTime);
 
   for (int n = 0; n < grX->GetN(); n++) {
     double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
