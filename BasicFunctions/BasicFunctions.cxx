@@ -7,6 +7,9 @@
 #include "TVector3.h"
 #include "TMath.h"
 
+#include "FFTtools.h"
+#include "FFTWComplex.h"
+
 // Electric field at the field point, calculated from Lienard-Wiechert potentials
 TVector3 rad::CalcEField(const TVector3 fieldPoint, const TVector3 ePosition,
 			 const TVector3 eVelocity, const TVector3 eAcceleration)
@@ -75,4 +78,39 @@ double rad::CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition
 {
   double time = labTime - ((ePosition - fieldPoint).Mag() / TMath::C());
   return time;
+}
+
+// Very similar to the FFTtools implementation but without the scaling of the x axis the MHz
+TGraph* rad::MakePowerSpectrumCorrectNorm(const TGraph* grWave)
+{
+  double *oldY = grWave->GetY();
+  double *oldX = grWave->GetX();
+  double deltaT = oldX[1] - oldX[0];
+  int length = grWave->GetN();
+  FFTWComplex *theFFT = FFTtools::doFFT(length, oldY);
+
+  int newLength = (length/2) + 1;
+  double *newY = new double[newLength];
+  double *newX = new double[newLength];
+
+  double deltaF = 1/(deltaT*length);
+
+  double tempF = 0;
+  for(int i=0;i<newLength;i++) {
+    float power=pow(FFTtools::getAbs(theFFT[i]),2);
+    if(i>0 && i<newLength-1) power*=2; //account for symmetry                                  
+    power*=deltaT/(length); //For time-integral squared amplitude                               
+    power/=deltaF;//Just to normalise bin-widths                                                   
+    //Ends up the same as dt^2, need to integrate the power (multiply by df)                      
+    //to get a meaningful number out.                                                            
+    newX[i]=tempF;
+    newY[i]=power;
+    tempF+=deltaF;
+  }
+
+  TGraph *grPower = new TGraph(newLength,newX,newY);
+  delete [] theFFT;
+  delete [] newY;
+  delete [] newX;
+  return grPower;
 }

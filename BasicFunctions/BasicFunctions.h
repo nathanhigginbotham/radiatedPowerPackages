@@ -4,6 +4,7 @@
 
 #include "TVector3.h"
 #include "TGraph.h"
+#include "FFTtools.h"
 
 namespace rad
 {
@@ -25,7 +26,10 @@ namespace rad
 			      const TVector3 ePosition, const TVector3 position);
 
   double CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition, const double labTime);
- 
+
+  // Produces power spectrum with the desired normalisation
+  TGraph* MakePowerSpectrumCorrectNorm(const TGraph* grWave);  
+  
 }
  
 #endif
