@@ -114,3 +114,12 @@ TGraph* rad::MakePowerSpectrumCorrectNorm(const TGraph* grWave)
   delete [] newX;
   return grPower;
 }
+
+double rad::IntegratePowerCorrectNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBin)
+{
+  double integral = FFTtools::integratePower(grFFT, firstBin, lastBin);
+  // Multiply by frequency bin width
+  double deltaF = grFFT->GetPointX(1) - grFFT->GetPointX(0);
+  integral /= deltaF;
+  return integral;
+}

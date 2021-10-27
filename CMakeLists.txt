@@ -28,6 +28,12 @@ list(APPEND EXTRA_LIBS FieldClasses)
 list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/FieldClasses")
 
 # Add any executables
+add_executable(sineTest sineTest.cxx)
+target_link_libraries(sineTest PUBLIC BasicFunctions FieldClasses ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
+
 add_executable(dipoleRadiationPattern dipoleRadiationPattern.cxx)
 target_link_libraries(dipoleRadiationPattern PUBLIC BasicFunctions FieldClasses ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
+
+add_executable(normTest normTest.cxx)
+target_link_libraries(normTest PUBLIC BasicFunctions FieldClasses ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 

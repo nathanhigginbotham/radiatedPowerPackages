@@ -28,7 +28,10 @@ namespace rad
   double CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition, const double labTime);
 
   // Produces power spectrum with the desired normalisation
-  TGraph* MakePowerSpectrumCorrectNorm(const TGraph* grWave);  
+  TGraph* MakePowerSpectrumCorrectNorm(const TGraph* grWave);
+
+  // Integrate the power spectrum
+  double IntegratePowerCorrectNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBin);
   
 }
  
