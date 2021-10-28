@@ -48,6 +48,10 @@ namespace rad
     TGraph* GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetTotalEFieldPeriodogram(const bool kUseRetardedTime=false);
 
+    // These have a normalisation such that they shouldn't be changed
+    TGraph* GetEFieldPowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
+    TGraph* GetTotalEFieldPowerSpectrumNorm(const bool kUseRetardedTime=false);
+    
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
   };
 

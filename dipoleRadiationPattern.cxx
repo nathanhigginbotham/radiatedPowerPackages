@@ -55,18 +55,18 @@ int main()
   grByRet->Write("grByRet");
   grBzRet->Write("grBzRet");
 
-  TGraph *grExPower = FFTtools::makePowerSpectrumPeriodogram(grEx);//fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kX);
-  TGraph *grEyPower = FFTtools::makePowerSpectrumPeriodogram(grEy);//fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kY);
-  TGraph *grEzPower = fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kZ);  
-  TGraph *grTotalEFieldPower = fp.GetTotalEFieldPeriodogram();
+  TGraph *grExPower = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kX, false);
+  TGraph *grEyPower = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kY, false);
+  TGraph *grEzPower = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kY, false);
+  TGraph *grTotalEFieldPower = fp.GetTotalEFieldPowerSpectrumNorm(false);
   grExPower->Write("grExPower");
   grEyPower->Write("grEyPower");
   grEzPower->Write("grEzPower");
   grTotalEFieldPower->Write("grTotalEFieldPower");
-  TGraph *grExPowerRet = FFTtools::makePowerSpectrumPeriodogram(grExRet);//fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kX, true);
-  TGraph *grEyPowerRet = FFTtools::makePowerSpectrumPeriodogram(grEyRet);//fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kY, true);
-  TGraph *grEzPowerRet = fp.GetEFieldPeriodogram(FieldPoint::Coord_t::kZ, true);  
-  TGraph *grTotalEFieldPowerRet = fp.GetTotalEFieldPeriodogram(true);
+  TGraph *grExPowerRet = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kX, true);
+  TGraph *grEyPowerRet = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kY, true);
+  TGraph *grEzPowerRet = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kX, true);
+  TGraph *grTotalEFieldPowerRet = fp.GetTotalEFieldPowerSpectrumNorm(true);
   grExPowerRet->Write("grExPowerRet");
   grEyPowerRet->Write("grEyPowerRet");
   grEzPowerRet->Write("grEzPowerRet");

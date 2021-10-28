@@ -44,8 +44,8 @@ int main()
 
   TGraph* gr1FFT = FFTtools::makePowerSpectrumPeriodogram(gr1);
   TGraph* gr2FFT = FFTtools::makePowerSpectrumPeriodogram(gr2);
-  TGraph* gr1FFTVs = rad::MakePowerSpectrumCorrectNorm(gr1);
-  TGraph* gr2FFTVs = rad::MakePowerSpectrumCorrectNorm(gr2);
+  TGraph* gr1FFTVs = rad::MakePowerSpectrumNorm(gr1);
+  TGraph* gr2FFTVs = rad::MakePowerSpectrumNorm(gr2);
   gr1FFT->SetLineWidth(2);
   gr2FFT->SetLineWidth(2);
   gr1FFTVs->SetLineWidth(2);

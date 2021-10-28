@@ -349,7 +349,28 @@ TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord, const bool kUseReta
   delete grIn;
   return grFFT;
 }
- 
+
+TGraph* rad::FieldPoint::GetEFieldPowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime) {
+  TGraph* grIn = GetEFieldTimeDomain(coord, kUseRetardedTime);
+  TGraph* grFFT = MakePowerSpectrumNorm(grIn);
+  
+  if (coord == kX) {
+    grFFT->GetYaxis()->SetTitle("E_{x}^{2} [V^{2} m^{-2}]");
+  }
+  else if (coord == kY) {
+    grFFT->GetYaxis()->SetTitle("E_{y}^{2} [V^{2} m^{-2}]");
+  }
+  else if (coord == kZ) {
+    grFFT->GetYaxis()->SetTitle("E_{z}^{2} [V^{2} m^{-2}]");
+  }
+  setGraphAttr(grFFT);
+  grFFT->GetXaxis()->SetTitle("Frequency [Hz]");
+
+  delete grIn;
+  return grFFT;
+}
+
+// Total electric field in the frequency domain
 TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram(const bool kUseRetardedTime) {
   TGraph *grTotal = new TGraph();
   TGraph *grX = GetEFieldPeriodogram(kX, kUseRetardedTime);
@@ -361,6 +382,23 @@ TGraph* rad::FieldPoint::GetTotalEFieldPeriodogram(const bool kUseRetardedTime) 
     grTotal->SetPoint(n, grX->GetPointX(n), tot);
   }
   setGraphAttr(grTotal);
+  grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
+  
+  return grTotal;
+}
+
+TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetardedTime) {
+  TGraph *grTotal = new TGraph();
+  TGraph *grX = GetEFieldPowerSpectrumNorm(kX, kUseRetardedTime);
+  TGraph *grY = GetEFieldPowerSpectrumNorm(kY, kUseRetardedTime);
+  TGraph *grZ = GetEFieldPowerSpectrumNorm(kZ, kUseRetardedTime);
+
+  for (int n = 0; n < grX->GetN(); n++) {
+    double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
+    grTotal->SetPoint(n, grX->GetPointX(n), tot);
+  }
+  setGraphAttr(grTotal);
+  grTotal->GetYaxis()->SetTitle("E^{2} [V^{2} m^{-2}]");
   grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
   
   return grTotal;

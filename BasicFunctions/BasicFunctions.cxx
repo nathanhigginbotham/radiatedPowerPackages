@@ -81,7 +81,7 @@ double rad::CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition
 }
 
 // Very similar to the FFTtools implementation but without the scaling of the x axis the MHz
-TGraph* rad::MakePowerSpectrumCorrectNorm(const TGraph* grWave)
+TGraph* rad::MakePowerSpectrumNorm(const TGraph* grWave)
 {
   double *oldY = grWave->GetY();
   double *oldX = grWave->GetX();
@@ -115,7 +115,7 @@ TGraph* rad::MakePowerSpectrumCorrectNorm(const TGraph* grWave)
   return grPower;
 }
 
-double rad::IntegratePowerCorrectNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBin)
+double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin=-1, Int_t lastBin=-1)
 {
   double integral = FFTtools::integratePower(grFFT, firstBin, lastBin);
   // Multiply by frequency bin width
