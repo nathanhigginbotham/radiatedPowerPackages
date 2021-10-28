@@ -328,7 +328,36 @@ TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
   }
 }
 
+TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime)
+{
+  TGraph* gr = new TGraph();
+  TGraph* grE = GetEFieldTimeDomain(coord, false);
+  gr->GetXaxis()->SetTitle("Time [s]");
+  gr->GetYaxis()->SetTitle(grE->GetYaxis()->GetTitle());
+  
+  TVector3 dipoleDir(0.0, 1.0, 0.0);
+  for (int i = 0; i < grE->GetN(); i++) {
+    TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
+    double Al = CalcAlHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
+    gr->SetPoint(gr->GetN(), grE->GetPointX(i), grE->GetPointY(i) * Al);
+  }
+  setGraphAttr(gr);
+
+  delete grE;
+  
+  if (!kUseRetardedTime) {
+    return gr;
+  }
+  else {
+    TGraph* grRet = MakeRetardedTimeGraph(gr);
+    delete gr;
+    return grRet;
+  }
+} 
+
+////////////////////////////////////////////////////////////
 /////////////// Frequency domain functions /////////////////
+////////////////////////////////////////////////////////////
 
 TGraph* rad::FieldPoint::GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime) {
   TGraph* grIn = GetEFieldTimeDomain(coord, kUseRetardedTime);
@@ -400,6 +429,48 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
   setGraphAttr(grTotal);
   grTotal->GetYaxis()->SetTitle("E^{2} (#Deltat)^{2} [V^{2} m^{-2} s^{2}]");
   grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
+
+  delete grX;
+  delete grY;
+  delete grZ;
+  return grTotal;
+}
+
+TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime) {
+  TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime);
+  TGraph* grPower = MakePowerSpectrumNorm(grVTime);
   
+  if (coord == kX) {
+    grPower->GetYaxis()->SetTitle("V_{x}^{2} (#Deltat)^{2} [V^{2} s^{2}]");
+  }
+  else if (coord == kY) {
+    grPower->GetYaxis()->SetTitle("V_{y}^{2} (#Deltat)^{2} [V^{2} s^{2}]");
+  }
+  else if (coord == kZ) {
+    grPower->GetYaxis()->SetTitle("V_{z}^{2} (#Deltat)^{2} [V^{2} s^{2}]");
+  }
+  setGraphAttr(grPower);
+  grPower->GetXaxis()->SetTitle("Frequency [Hz]");
+  
+  delete grVTime;
+  return grPower;
+}
+
+TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime) {
+  TGraph* grTotal = new TGraph();
+  TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime);
+  TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime);
+  TGraph *grZ = GetDipoleComponentVoltagePowerSpectrumNorm(kZ, kUseRetardedTime);
+  for (int n = 0; n < grX->GetN(); n++) {
+    double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
+    grTotal->SetPoint(n, grX->GetPointX(n), tot);
+  }
+  setGraphAttr(grTotal);
+  grTotal->GetYaxis()->SetTitle("V^{2} (#Deltat)^{2} [V^{2} s^{2}]");
+  grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
+
+  delete grX;
+  delete grY;
+  delete grZ;
   return grTotal;
 }

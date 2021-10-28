@@ -44,15 +44,20 @@ namespace rad
     TGraph* GetEFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetBFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetPoyntingMagTimeDomain(const bool kUseRetardedTime=false);
+
+    TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
+    TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
     
     TGraph* GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetTotalEFieldPeriodogram(const bool kUseRetardedTime=false);
 
-    // These have a normalisation such that they shouldn't be changed
+    // These have a normalisation such that they shouldn't be altered by varying
+    // things such as zero padding and the sample rate
     TGraph* GetEFieldPowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetTotalEFieldPowerSpectrumNorm(const bool kUseRetardedTime=false);
-    
-    TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
+
+    TGraph* GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
+    TGraph* GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime=false);
   };
 
 }
