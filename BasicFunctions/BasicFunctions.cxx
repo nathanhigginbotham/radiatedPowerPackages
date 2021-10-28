@@ -115,7 +115,7 @@ TGraph* rad::MakePowerSpectrumNorm(const TGraph* grWave)
   return grPower;
 }
 
-double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin=-1, Int_t lastBin=-1)
+double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBin)
 {
   double integral = FFTtools::integratePower(grFFT, firstBin, lastBin);
   // Multiply by frequency bin width

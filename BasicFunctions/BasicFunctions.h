@@ -31,7 +31,7 @@ namespace rad
   TGraph* MakePowerSpectrumNorm(const TGraph* grWave);
 
   // Integrate the power spectrum
-  double IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBin);
+  double IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin=-1, Int_t lastBin=-1);
   
 }
  
