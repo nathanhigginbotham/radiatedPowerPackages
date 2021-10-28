@@ -120,6 +120,6 @@ double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBi
   double integral = FFTtools::integratePower(grFFT, firstBin, lastBin);
   // Multiply by frequency bin width
   double deltaF = grFFT->GetPointX(1) - grFFT->GetPointX(0);
-  integral /= deltaF;
+  integral *= deltaF;
   return integral;
 }
