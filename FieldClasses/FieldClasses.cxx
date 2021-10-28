@@ -355,13 +355,13 @@ TGraph* rad::FieldPoint::GetEFieldPowerSpectrumNorm(Coord_t coord, const bool kU
   TGraph* grFFT = MakePowerSpectrumNorm(grIn);
   
   if (coord == kX) {
-    grFFT->GetYaxis()->SetTitle("E_{x}^{2} [V^{2} m^{-2}]");
+    grFFT->GetYaxis()->SetTitle("E_{x}^{2} (#Deltat)^{2} [V^{2} m^{-2} s^{2}]");
   }
   else if (coord == kY) {
-    grFFT->GetYaxis()->SetTitle("E_{y}^{2} [V^{2} m^{-2}]");
+    grFFT->GetYaxis()->SetTitle("E_{y}^{2} (#Deltat)^{2} [V^{2} m^{-2} s^{2}]");
   }
   else if (coord == kZ) {
-    grFFT->GetYaxis()->SetTitle("E_{z}^{2} [V^{2} m^{-2}]");
+    grFFT->GetYaxis()->SetTitle("E_{z}^{2} (#Deltat)^{2} [V^{2} m^{-2} s^{2}]");
   }
   setGraphAttr(grFFT);
   grFFT->GetXaxis()->SetTitle("Frequency [Hz]");
@@ -398,7 +398,7 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
     grTotal->SetPoint(n, grX->GetPointX(n), tot);
   }
   setGraphAttr(grTotal);
-  grTotal->GetYaxis()->SetTitle("E^{2} [V^{2} m^{-2}]");
+  grTotal->GetYaxis()->SetTitle("E^{2} (#Deltat)^{2} [V^{2} m^{-2} s^{2}]");
   grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
   
   return grTotal;
