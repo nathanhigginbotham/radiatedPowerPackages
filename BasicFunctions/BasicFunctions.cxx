@@ -74,6 +74,15 @@ double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleD
   return Ae;
 }
 
+double rad::CalcAlHertzianDipole(const double wavelength, const TVector3 dipoleDir,
+				 const TVector3 ePosition, const TVector3 position)
+{
+  double Al = wavelength * TMath::Sqrt(3 / (8*TMath::Pi()));
+  const double psi = ((ePosition - position).Unit()).Angle(dipoleDir);
+  Al *= TMath::Sin(psi);
+  return Al;
+}
+
 double rad::CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition, const double labTime)
 {
   double time = labTime - ((ePosition - fieldPoint).Mag() / TMath::C());

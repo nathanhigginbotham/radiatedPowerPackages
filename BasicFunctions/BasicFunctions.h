@@ -24,6 +24,9 @@ namespace rad
 
   double CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,
 			      const TVector3 ePosition, const TVector3 position);
+  
+  double CalcAlHertzianDipole(const double wavelength, const TVector3 dipoleDir,
+			      const TVector3 ePosition, const TVector3 position);
 
   double CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition, const double labTime);
 
