@@ -69,7 +69,7 @@ double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleD
 				 const TVector3 ePosition, const TVector3 antennaPoint)
 {
   double Ae = 3 * pow(wavelength, 2) / (8*TMath::Pi());
-  const double psi = ((ePosition - position).Unit()).Angle(dipoleDir);
+  const double psi = ((ePosition - antennaPoint).Unit()).Angle(dipoleDir);
   Ae *= pow(TMath::Sin(psi), 2);
   return Ae;
 }
@@ -78,7 +78,7 @@ double rad::CalcAlHertzianDipole(const double wavelength, const TVector3 dipoleD
 				 const TVector3 ePosition, const TVector3 antennaPoint)
 {
   double Al = wavelength * TMath::Sqrt(3 / (8*TMath::Pi()));
-  const double psi = ((ePosition - position).Unit()).Angle(dipoleDir);
+  const double psi = ((ePosition - antennaPoint).Unit()).Angle(dipoleDir);
   Al *= TMath::Sin(psi);
   return Al;
 }
