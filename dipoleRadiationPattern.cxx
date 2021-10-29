@@ -42,18 +42,6 @@ int main()
   grBx->Write("grBx");
   grBy->Write("grBy");
   grBz->Write("grBz");
-  TGraph *grExRet = fp.GetEFieldTimeDomain(FieldPoint::Coord_t::kX, true);
-  TGraph *grEyRet = fp.GetEFieldTimeDomain(FieldPoint::Coord_t::kY, true);
-  TGraph *grEzRet = fp.GetEFieldTimeDomain(FieldPoint::Coord_t::kZ, true);
-  TGraph *grBxRet = fp.GetBFieldTimeDomain(FieldPoint::Coord_t::kX, true);
-  TGraph *grByRet = fp.GetBFieldTimeDomain(FieldPoint::Coord_t::kY, true);
-  TGraph *grBzRet = fp.GetBFieldTimeDomain(FieldPoint::Coord_t::kZ, true);
-  grExRet->Write("grExRet");
-  grEyRet->Write("grEyRet");
-  grEzRet->Write("grEzRet");
-  grBxRet->Write("grBxRet");
-  grByRet->Write("grByRet");
-  grBzRet->Write("grBzRet");
 
   TGraph *grExPower = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kX, false);
   TGraph *grEyPower = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kY, false);
@@ -63,19 +51,23 @@ int main()
   grEyPower->Write("grEyPower");
   grEzPower->Write("grEzPower");
   grTotalEFieldPower->Write("grTotalEFieldPower");
-  TGraph *grExPowerRet = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kX, true);
-  TGraph *grEyPowerRet = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kY, true);
-  TGraph *grEzPowerRet = fp.GetEFieldPowerSpectrumNorm(FieldPoint::Coord_t::kX, true);
-  TGraph *grTotalEFieldPowerRet = fp.GetTotalEFieldPowerSpectrumNorm(true);
-  grExPowerRet->Write("grExPowerRet");
-  grEyPowerRet->Write("grEyPowerRet");
-  grEzPowerRet->Write("grEzPowerRet");
-  grTotalEFieldPowerRet->Write("grTotalEFieldPowerRet");
 
+  TGraph *grSx = fp.GetPoyntingVecTimeDomain(FieldPoint::Coord_t::kX, false);
+  TGraph *grSy = fp.GetPoyntingVecTimeDomain(FieldPoint::Coord_t::kY, false);
+  TGraph *grSz = fp.GetPoyntingVecTimeDomain(FieldPoint::Coord_t::kZ, false);
+  grSx->Write("grSx");
+  grSy->Write("grSy");
+  grSz->Write("grSz");
+  TGraph* grSxFFT = MakePowerSpectrumNorm(grSx);
+  TGraph* grSyFFT = MakePowerSpectrumNorm(grSy);
+  TGraph* grSzFFT = MakePowerSpectrumNorm(grSz);
+  grSxFFT->Write("grSxFFT");
+  grSyFFT->Write("grSyFFT");
+  grSzFFT->Write("grSzFFT");
+  
   std::cout<<std::setprecision(10);
   double totalPowerIntegral    = IntegratePowerNorm(grTotalEFieldPower);
-  double totalPowerIntegralRet = IntegratePowerNorm(grTotalEFieldPowerRet);
-  std::cout<<"Total power integral, total power integral ret = "<<totalPowerIntegral<<" V^2 m^-2, "<<totalPowerIntegralRet<<" V^2 m^-2"<<std::endl;
+  std::cout<<"Total power integral, total power integral ret = "<<totalPowerIntegral<<" V^2 m^-2"<<std::endl;
 
   // Now get the component voltages
   TGraph* grDipoleVoltagePower    = fp.GetDipoleTotalVoltagePowerSpectrumNorm(false);
@@ -88,34 +80,9 @@ int main()
   TGraph *grSMagRet = fp.GetPoyntingMagTimeDomain(true);
   grSMagRet->Write("grSMagRet");
 
-  // Do the transform of the time domain distribution of the power
-  TGraph *grDipolePower = fp.GetDipolePowerTimeDomain(true);
-  grDipolePower->Write("grDipolePower");
-  int retLength = grDipolePower->GetN()/2 + 1;
-  double *dipolePowerX = grDipolePower->GetX();
-  double *dipolePowerY = grDipolePower->GetY();
-  double deltaT = dipolePowerX[1] - dipolePowerX[0];
-  double deltaF = 1/(deltaT*grDipolePower->GetN());
-  FFTWComplex *dipolePowerFFT = FFTtools::doFFT(grDipolePower->GetN(), dipolePowerY);  
-  double *newX = new double[retLength];
-  double *newY = new double[retLength];
-  double tempF = 0;
-  for (int i = 0; i < retLength; i++) {
-    float fft = FFTtools::getAbs(dipolePowerFFT[i]);
-    if (i > 0 && i < retLength - 1) fft *= 2;
-    fft /= grDipolePower->GetN();
-    newX[i] = tempF;
-    newY[i] = fft;
-    tempF += deltaF;
-  }
-  TGraph* grDipolePowerFFT = new TGraph(retLength, newX, newY);
-  delete [] dipolePowerFFT;
-  delete [] newX;
-  delete [] newY;
-  setGraphAttr(grDipolePowerFFT);
-  grDipolePowerFFT->GetXaxis()->SetTitle("Frequency [Hz]");
-  grDipolePowerFFT->GetYaxis()->SetTitle("Power [W]");
-  grDipolePowerFFT->Write("grDipolePowerFFT");
+  TGraph* grDipolePowerSpectrumNorm = fp.GetDipolePowerSpectrumNorm(false);
+  grDipolePowerSpectrumNorm->Write("grDipolePowerSpectrumNorm");
+  std::cout<<"Power integral with proper normalisation = "<<IntegratePowerNorm(grDipolePowerSpectrumNorm)*1e15<<" fW"<<std::endl;
   
   fout->Close();
   delete fout;
