@@ -280,6 +280,30 @@ TGraph* rad::FieldPoint::GetBFieldMagTimeDomain(const bool kUseRetardedTime) {
   }
 }
 
+TGraph* rad::FieldPoint::GetPoyntingVecTimeDomain(Coord_t coord, const bool kUseRetardedTime) {
+  TGraph* grS = new TGraph();
+  for (int i = 0; i < EField[0]->GetN(); i++) {
+    double comp = 0;
+    if (coord == kX) comp = EField[1]->GetPointY(i)*BField[2]->GetPointY(i) - EField[2]->GetPointY(i)*BField[1]->GetPointY(i);
+    else if (coord == kY) comp = EField[2]->GetPointY(i)*BField[0]->GetPointY(i) - EField[0]->GetPointY(i)*BField[2]->GetPointY(i);
+    else if (coord == kZ) comp = EField[0]->GetPointY(i)*BField[1]->GetPointY(i) - EField[1]->GetPointY(i)*BField[0]->GetPointY(i);
+    comp /= MU0;
+    grS->SetPoint(i, EField[0]->GetPointX(i), comp);
+  }
+  setGraphAttr(grS);
+  grS->GetXaxis()->SetTitle("Time [s]");
+  grS->GetXaxis()->SetTitle("S_{i} [W m^{-2}]");
+
+  if (!kUseRetardedTime) {
+    return grS;
+  }
+  else {
+    TGraph* grSRet = MakeRetardedTimeGraph(grS);
+    delete grS;
+    return grSRet;
+  }
+}
+
 TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
   TGraph* grSMag = new TGraph();
   TGraph* grEMag = GetEFieldMagTimeDomain();
