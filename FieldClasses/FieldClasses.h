@@ -59,6 +59,9 @@ namespace rad
 
     TGraph* GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime=false);
+
+    // Calculate the power collected by a Hertzian dipole in the frequency domain
+    TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false);
   };
 
 }

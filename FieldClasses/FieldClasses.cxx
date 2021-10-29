@@ -474,3 +474,19 @@ TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseR
   delete grZ;
   return grTotal;
 }
+
+TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime) {
+  TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime);
+  TGraph* grDipolePower = new TGraph();
+
+  for (int i = 0; i < grVoltagePower->GetN(); i++) {
+    double powerWatts = grVoltagePower->GetPointY(i) * TMath::C() * EPSILON0;
+    grDipolePower->SetPoint(i, grVoltagePower->GetPointX(i), powerWatts);
+  }
+  setGraphAttr(grDipolePower);
+  grDipolePower->GetXaxis()->SetTitle("Frequency [Hz]");
+  grDipolePower->GetYaxis()->SetTitle("Power [W]");
+  
+  delete grVoltagePower;
+  return grDipolePower;
+}
