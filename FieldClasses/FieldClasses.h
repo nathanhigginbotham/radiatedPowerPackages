@@ -47,7 +47,8 @@ namespace rad
 
     TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
-    
+
+    // Frequency domain functions
     TGraph* GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetTotalEFieldPeriodogram(const bool kUseRetardedTime=false);
 
