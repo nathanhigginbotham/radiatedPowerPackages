@@ -66,7 +66,7 @@ void rad::setGraphAttr(TGraph *gr)
 }
 
 double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,
-				 const TVector3 ePosition, const TVector3 position)
+				 const TVector3 ePosition, const TVector3 antennaPoint)
 {
   double Ae = 3 * pow(wavelength, 2) / (8*TMath::Pi());
   const double psi = ((ePosition - position).Unit()).Angle(dipoleDir);
@@ -75,7 +75,7 @@ double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleD
 }
 
 double rad::CalcAlHertzianDipole(const double wavelength, const TVector3 dipoleDir,
-				 const TVector3 ePosition, const TVector3 position)
+				 const TVector3 ePosition, const TVector3 antennaPoint)
 {
   double Al = wavelength * TMath::Sqrt(3 / (8*TMath::Pi()));
   const double psi = ((ePosition - position).Unit()).Angle(dipoleDir);
