@@ -75,13 +75,20 @@ int main()
   std::cout<<std::setprecision(10);
   double totalPowerIntegral    = IntegratePowerNorm(grTotalEFieldPower);
   double totalPowerIntegralRet = IntegratePowerNorm(grTotalEFieldPowerRet);
-  std::cout<<"Total power integral, total power integral ret = "<<totalPowerIntegral<<", "<<totalPowerIntegralRet<<std::endl;
+  std::cout<<"Total power integral, total power integral ret = "<<totalPowerIntegral<<" V^2 m^-2, "<<totalPowerIntegralRet<<" V^2 m^-2"<<std::endl;
+
+  // Now get the component voltages
+  TGraph* grDipoleVoltagePower    = fp.GetDipoleTotalVoltagePowerSpectrumNorm(false);
+  TGraph* grDipoleVoltagePowerRet = fp.GetDipoleTotalVoltagePowerSpectrumNorm(true);
+  grDipoleVoltagePower->Write("grDipoleVoltagePower");
+  grDipoleVoltagePowerRet->Write("grDipoleVoltagePowerRet");
   
   TGraph *grSMag = fp.GetPoyntingMagTimeDomain();
   grSMag->Write("grSMag");
   TGraph *grSMagRet = fp.GetPoyntingMagTimeDomain(true);
   grSMagRet->Write("grSMagRet");
-    
+
+  // Do the transform of the time domain distribution of the power
   TGraph *grDipolePower = fp.GetDipolePowerTimeDomain(true);
   grDipolePower->Write("grDipolePower");
   int retLength = grDipolePower->GetN()/2 + 1;
