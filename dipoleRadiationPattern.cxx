@@ -73,38 +73,15 @@ int main()
   grTotalEFieldPowerRet->Write("grTotalEFieldPowerRet");
 
   std::cout<<std::setprecision(10);
-  double sumPower1 = FFTtools::sumVoltageSquared(grEy, -1, -1)/grEy->GetN();
-  double sumPower2 = FFTtools::sumVoltageSquared(grEyRet, -1, -1)/grEyRet->GetN();
-  std::cout<<"Sum vsquared, sum vsquared (ret) = "<<sumPower1<<", "<<sumPower2<<std::endl;
-  std::cout<<"Sum FFT power, sum FFT power (ret) = "<<FFTtools::sumPower(grEyPower)<<", "<<FFTtools::sumPower(grEyPowerRet)<<std::endl;
+  double totalPowerIntegral    = IntegratePowerNorm(grTotalEFieldPower);
+  double totalPowerIntegralRet = IntegratePowerNorm(grTotalEFieldPowerRet);
+  std::cout<<"Total power integral, total power integral ret = "<<totalPowerIntegral<<", "<<totalPowerIntegralRet<<std::endl;
   
-  TGraph *grEMag = fp.GetEFieldMagTimeDomain();
-  TGraph *grBMag = fp.GetBFieldMagTimeDomain();
   TGraph *grSMag = fp.GetPoyntingMagTimeDomain();
-  grEMag->Write("grEMag");
-  grBMag->Write("grBMag");
   grSMag->Write("grSMag");
-  TGraph *grEMagRet = fp.GetEFieldMagTimeDomain(true);
-  TGraph *grBMagRet = fp.GetBFieldMagTimeDomain(true);
   TGraph *grSMagRet = fp.GetPoyntingMagTimeDomain(true);
-  grEMagRet->Write("grEMagRet");
-  grBMagRet->Write("grBMagRet");
   grSMagRet->Write("grSMagRet");
-
-  // Transform E field magnitude
-  TGraph *grEMagPower = FFTtools::makePowerSpectrumPeriodogram(grEMag);
-  setGraphAttr(grEMagPower);
-  grEMagPower->GetYaxis()->SetTitle("|E|^{2}");
-  grEMagPower->GetXaxis()->SetTitle("Frequency [Hz]");
-  grEMagPower->Write("grEMagPower");
-  TGraph *grEMagPowerRet = FFTtools::makePowerSpectrumPeriodogram(grEMagRet);
-  setGraphAttr(grEMagPowerRet);
-  grEMagPowerRet->GetYaxis()->SetTitle("|E|^{2}");
-  grEMagPowerRet->GetXaxis()->SetTitle("Frequency [Hz]");
-  grEMagPowerRet->Write("grEMagPowerRet");
-
-  std::cout<<"Power magnitude, power sum = "<<FFTtools::sumPower(grEMagPower, -1, -1)<<", "<<FFTtools::sumPower(grTotalEFieldPower, -1, -1)<<std::endl;
-  
+    
   TGraph *grDipolePower = fp.GetDipolePowerTimeDomain(true);
   grDipolePower->Write("grDipolePower");
   int retLength = grDipolePower->GetN()/2 + 1;
