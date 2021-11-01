@@ -35,7 +35,6 @@ namespace rad
     enum Coord_t{
       kX, kY, kZ
     };
-    FieldPoint();
     FieldPoint(TVector3 inputAntenna, TString trajectoryFilePath);
     ~FieldPoint();
     
@@ -66,6 +65,10 @@ namespace rad
 
     // Calculate the power collected by a Hertzian dipole in the frequency domain
     TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false);
+
+    // Functions for various useful things such as the final time in a file
+    double GetFinalTime();
+    double GetSampleRate();
   };
 
 }

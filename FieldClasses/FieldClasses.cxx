@@ -16,26 +16,6 @@
 
 #include "FFTtools.h"
 
-rad::FieldPoint::FieldPoint() {
-  EField[0] = new TGraph();
-  EField[1] = new TGraph();
-  EField[2] = new TGraph();
-  BField[0] = new TGraph();
-  BField[1] = new TGraph();
-  BField[2] = new TGraph();
-  antennaPoint = TVector3(0.0, 0.0, 0.0);
-  pos[0] = new TGraph();
-  pos[1] = new TGraph();
-  pos[2] = new TGraph();
-  vel[0] = new TGraph();
-  vel[1] = new TGraph();
-  vel[2] = new TGraph();
-  acc[0] = new TGraph();
-  acc[1] = new TGraph();
-  acc[2] = new TGraph();
-  tPrime = new TGraph();
-}
-
 rad::FieldPoint::~FieldPoint() {
   delete EField[0];
   delete EField[1];
@@ -527,4 +507,35 @@ TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime)
   
   delete grVoltagePower;
   return grDipolePower;
+}
+
+double rad::FieldPoint::GetFinalTime() {
+  TFile *fin = new TFile(inputFile, "READ");
+  assert(fin);
+  TTree* tree = (TTree*)fin->Get("tree");
+  double lastTime;
+  tree->SetBranchAddress("time", &lastTime);
+  tree->GetEntry(tree->GetEntries()-1);
+  fin->Close();
+  delete tree;
+  delete fin;
+  return lastTime;
+}
+
+double rad::FieldPoint::GetSampleRate() {
+  TFile *fin = new TFile(inputFile, "READ");
+  assert(fin);
+  TTree* tree = (TTree*)fin->Get("tree");
+  double time;
+  tree->SetBranchAddress("time", &time);
+  double time0, time1;
+  tree->GetEntry(0);
+  time0 = time;
+  tree->GetEntry(1);
+  time1 = time;
+  double fs = 1.0 / (time1 - time0);
+  fin->Close();
+  delete tree;
+  delete fin;
+  return fs;
 }
