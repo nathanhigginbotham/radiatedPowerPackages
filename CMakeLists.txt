@@ -27,6 +27,10 @@ add_subdirectory(FieldClasses)
 list(APPEND EXTRA_LIBS FieldClasses)
 list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/FieldClasses")
 
+add_subdirectory(SignalProcessing)
+list(APPEND EXTRA_LIBS SignalProcessing)
+list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/SignalProcessing")
+
 # Add any executables
 add_executable(sineTest sineTest.cxx)
 target_link_libraries(sineTest PUBLIC BasicFunctions FieldClasses ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
