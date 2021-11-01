@@ -25,8 +25,8 @@ int main()
 {
   TVector3 antennaPoint(0.02, 0.0, 0.0);
   // Declare the field point
-  FieldPoint fp(antennaPoint);
-  fp.GenerateFields("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", 1e-7);  
+  FieldPoint fp(antennaPoint, "/home/sjones/work/qtnm/trajectories/90DegOnAxis.root");
+  fp.GenerateFields(1e-7);  
 
   TFile *fout = new TFile("outputFile.root", "RECREATE");
   fout->cd();
@@ -65,7 +65,6 @@ int main()
   grSyFFT->Write("grSyFFT");
   grSzFFT->Write("grSzFFT");
   
-  std::cout<<std::setprecision(10);
   double totalPowerIntegral    = IntegratePowerNorm(grTotalEFieldPower);
   std::cout<<"Total power integral, total power integral ret = "<<totalPowerIntegral<<" V^2 m^-2"<<std::endl;
 

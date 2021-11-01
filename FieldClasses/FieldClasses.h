@@ -5,6 +5,7 @@
 #include "TFile.h"
 #include "TGraph.h"
 #include "TVector3.h"
+#include "TString.h"
 
 #include "BasicFunctions/BasicFunctions.h"
 
@@ -13,6 +14,8 @@ namespace rad
   class FieldPoint
   {
   private:
+    TString inputFile;
+    
     TVector3 antennaPoint;
     // Time series for field components
     TGraph* EField[3];
@@ -33,10 +36,10 @@ namespace rad
       kX, kY, kZ
     };
     FieldPoint();
-    FieldPoint(const TVector3 inputAntenna);
+    FieldPoint(TVector3 inputAntenna, TString trajectoryFilePath);
     ~FieldPoint();
     
-    void GenerateFields(const char* inputFile, const double maxTime);
+    void GenerateFields(const double maxTime);
 
     TGraph* GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetBFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);

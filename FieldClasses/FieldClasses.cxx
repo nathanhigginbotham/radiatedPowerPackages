@@ -58,7 +58,7 @@ rad::FieldPoint::~FieldPoint() {
 }
 
 // Parametrised constructor
-rad::FieldPoint::FieldPoint(TVector3 inputAntenna) {
+rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, TString trajectoryFilePath) {
   EField[0] = new TGraph();
   EField[1] = new TGraph();
   EField[2] = new TGraph();
@@ -76,6 +76,13 @@ rad::FieldPoint::FieldPoint(TVector3 inputAntenna) {
   acc[2] = new TGraph();
   tPrime = new TGraph();
   antennaPoint = inputAntenna;
+
+  // Now check that the input file exists
+  TFile* f = new TFile(trajectoryFilePath, "read");
+  assert(f);
+  f->Close();
+  delete f;
+  inputFile = trajectoryFilePath;
 }
 
 void rad::FieldPoint::ResetFields() {
@@ -122,9 +129,8 @@ TGraph* rad::FieldPoint::MakeRetardedTimeGraph(const TGraph* grOriginal) {
 }
 
 // From an input TFile generate the E and B fields for a given time
-// inputFile is the input file which should have the relevant branches
 // maxTime is the final time in seconds (if less than the time in the file)
-void rad::FieldPoint::GenerateFields(const char* inputFile, const double maxTime) {
+void rad::FieldPoint::GenerateFields(const double maxTime) {
   ResetFields();
   
   TFile *fin = new TFile(inputFile, "READ");
