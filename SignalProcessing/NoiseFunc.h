@@ -20,18 +20,17 @@ namespace rad
     double resistance;
     double sigma;
     
-    void SetSampleFreq(const double fs);
     void SetResistance(const double r);
-
-    void SetSigma();
-
-    double GetNoiseVoltage();
     
   public:
     /// \param T is the noise temperature in kelvin
     /// \param setSeed is the seed for the random number generator
     GaussianNoise(const double T, const double R, const int setSeed=1234); 
     ~GaussianNoise();
+
+    void SetSampleFreq(const double fs);
+    void SetSigma();
+    double GetNoiseVoltage();
   };
 }
 

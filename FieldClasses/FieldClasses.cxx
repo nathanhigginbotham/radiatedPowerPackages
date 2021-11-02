@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <vector>
 
 #include "BasicFunctions/Constants.h"
 #include "BasicFunctions/BasicFunctions.h"
@@ -357,18 +358,30 @@ TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
 }
 
 TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime,
-							     int firstPoint, int lastPoint)
+							     int firstPoint, int lastPoint,
+							     std::vector<GaussianNoise> noiseTerms)
 {
   TGraph* gr = new TGraph();
   TGraph* grE = GetEFieldTimeDomain(coord, false, firstPoint, lastPoint);
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle(grE->GetYaxis()->GetTitle());
   
+  double fs = 1.0 / (grE->GetPointX(1) - grE->GetPointX(0));
+  for (int term = 0; term < noiseTerms.size(); term++) {
+    (noiseTerms.at(term)).SetSampleFreq(fs);
+    (noiseTerms.at(term)).SetSigma();
+  }
+  
   TVector3 dipoleDir(0.0, 1.0, 0.0);
   for (int i = 0; i < grE->GetN(); i++) {
     TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
     double Al = CalcAlHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
-    gr->SetPoint(gr->GetN(), grE->GetPointX(i), grE->GetPointY(i) * Al);
+    double voltage = grE->GetPointY(i) * Al;
+    // Now add the noise
+    for (int term = 0; term < noiseTerms.size(); term++) {
+      voltage += (noiseTerms.at(term)).GetNoiseVoltage();
+    }
+    gr->SetPoint(gr->GetN(), grE->GetPointX(i), voltage);
   }
   setGraphAttr(gr);
 
@@ -465,8 +478,8 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
   return grTotal;
 }
 
-TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime, int firstPoint, int lastPoint) {
-  TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime, firstPoint, lastPoint);
+TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime, int firstPoint, int lastPoint, std::vector<GaussianNoise> noiseTerms) {
+  TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
   TGraph* grPower = MakePowerSpectrumNorm(grVTime);
   
   if (coord == kX) {
@@ -486,11 +499,12 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coor
 }
 
 TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime,
-								int firstPoint, int lastPoint) {
+								int firstPoint, int lastPoint,
+								std::vector<GaussianNoise> noiseTerms) {
   TGraph* grTotal = new TGraph();
-  TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime, firstPoint, lastPoint);
-  TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime, firstPoint, lastPoint);
-  TGraph *grZ = GetDipoleComponentVoltagePowerSpectrumNorm(kZ, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
+  TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
+  TGraph *grZ = GetDipoleComponentVoltagePowerSpectrumNorm(kZ, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
   for (int n = 0; n < grX->GetN(); n++) {
     double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
     grTotal->SetPoint(n, grX->GetPointX(n), tot);
@@ -506,8 +520,9 @@ TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseR
 }
 
 TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime,
-						    int firstPoint, int lastPoint) {
-  TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime, firstPoint, lastPoint);
+						    int firstPoint, int lastPoint,
+						    std::vector<GaussianNoise> noiseTerms) {
+  TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
   TGraph* grDipolePower = new TGraph();
 
   for (int i = 0; i < grVoltagePower->GetN(); i++) {

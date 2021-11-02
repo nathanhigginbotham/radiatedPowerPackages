@@ -28,7 +28,7 @@ TH2D* rad::Spectrogram::MakeSpectrogram(const int NSamplesPerTimeBin, const bool
   TH2D* h2 = new TH2D("h2", "Spectrogram; Time [s]; Frequency [Hz]; Power [W]", nTimeBins, firstTime, lastTime, nFreqBins, 0.0, lastFreq);
   // Loop through time bins and generate a power spectrum at each point
   for (int t = 1; t <= nTimeBins; t++) {
-    TGraph* grPower = fieldPoint.GetDipolePowerSpectrumNorm(kUseRetardedTime, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin - 1);
+    TGraph* grPower = fieldPoint.GetDipolePowerSpectrumNorm(kUseRetardedTime, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin - 1, fNoise);
     // Now add data from the TGraph to the histogram
     for (int i = 0; i < grPower->GetN(); i++) {
       h2->SetBinContent(t, i+1, grPower->GetPointY(i));
