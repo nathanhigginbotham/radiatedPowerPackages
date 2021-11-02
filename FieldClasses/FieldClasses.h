@@ -40,12 +40,11 @@ namespace rad
     
     void GenerateFields(const double maxTime);
 
-    TGraph* GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
+
+    TGraph* GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
+				int firstPoint=-1, int lastPoint=-1);
     TGraph* GetBFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetPoyntingVecTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
-
-    TGraph* GetEFieldTimeDomain(Coord_t coord, const int firstPoint, const int lastPoint,
-				const bool kUseRetardedTime=false);
     
     TGraph* GetEFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetBFieldMagTimeDomain(const bool kUseRetardedTime=false);

@@ -167,48 +167,26 @@ void rad::FieldPoint::GenerateFields(const double maxTime) {
   delete fin;
 }
 
-TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime) {
+TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime,
+					     int firstPoint, int lastPoint) {
   TGraph* gr = 0;
-  if (coord == kX) {
-    gr = (TGraph*)EField[0]->Clone("grEx");
-    gr->GetYaxis()->SetTitle("E_{x} [V m^{-1}]");
-  }
-  else if (coord == kY) {
-    gr = (TGraph*)EField[1]->Clone("grEy");
-    gr->GetYaxis()->SetTitle("E_{y} [V m^{-1}]");
-  }
-  else if (coord = kZ) {
-    gr = (TGraph*)EField[2]->Clone("grEz");
-    gr->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
-  }
-  setGraphAttr(gr);
-  
-  gr->GetXaxis()->SetTitle("Time [s]");
-
-  if (!kUseRetardedTime) {
-    return gr;
-  }
-  else {
-    TGraph* grRet = MakeRetardedTimeGraph(gr);
-    delete gr;    
-    return grRet;
-  }
-}
-
-TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const int firstPoint, const int lastPoint,
-					     const bool kUseRetardedTime) {
-  TGraph* gr = 0;
-  if (coord == kX) {
-    gr = (TGraph*)EField[0]->Clone("grEx");
-  }
-  else if (coord == kY) {
-    gr = (TGraph*)EField[1]->Clone("grEy");
-  }
-  else if (coord = kZ) {
-    gr = (TGraph*)EField[2]->Clone("grEz");
-  }
-
   TGraph* grOut = new TGraph();
+  if (coord == kX) {
+    gr = (TGraph*)EField[0]->Clone("grEx");
+    grOut->GetYaxis()->SetTitle("E_{x} [V m^{-1}]");
+  }
+  else if (coord == kY) {
+    gr = (TGraph*)EField[1]->Clone("grEy");
+    grOut->GetYaxis()->SetTitle("E_{y} [V m^{-1}]");
+  }
+  else if (coord = kZ) {
+    gr = (TGraph*)EField[2]->Clone("grEz");
+    grOut->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
+  }
+
+  if (firstPoint < 0) firstPoint = 0;
+  if (lastPoint < 0) lastPoint = gr->GetN() - 1;
+  
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Time [s]");
   if (!kUseRetardedTime) {
