@@ -26,7 +26,7 @@ namespace rad
     Spectrogram(FieldPoint fp, std::vector<GaussianNoise> noiseTerms = {}) : fieldPoint(fp), fNoise(noiseTerms) {}
     ~Spectrogram();
 
-    TH2D* MakeSpectrogram(const double NSamplesPerTimeBin, const bool kUseRetardedTime=false);
+    TH2D* MakeSpectrogram(const int NSamplesPerTimeBin, const bool kUseRetardedTime=false);
   };
 }
 
