@@ -50,7 +50,8 @@ namespace rad
     TGraph* GetBFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetPoyntingMagTimeDomain(const bool kUseRetardedTime=false);
 
-    TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
+    TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
+						int firstPoint=-1, int lastPoint=-1);
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
 
     // Frequency domain functions
@@ -62,11 +63,13 @@ namespace rad
     TGraph* GetEFieldPowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetTotalEFieldPowerSpectrumNorm(const bool kUseRetardedTime=false);
 
-    TGraph* GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
-    TGraph* GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime=false);
+    TGraph* GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false, int firstPoint=-1, int lastPoint=-1);
+    TGraph* GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime=false,
+						   int firstPoint=-1, int lastPoint=-1);
 
     // Calculate the power collected by a Hertzian dipole in the frequency domain
-    TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false);
+    TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false,
+				       int firstPoint=-1, int lastPoint=-1);
 
     // Functions for various useful things such as the final time in a file
     double GetFinalTime();

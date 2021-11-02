@@ -356,10 +356,11 @@ TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
   }
 }
 
-TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime)
+TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime,
+							     int firstPoint, int lastPoint)
 {
   TGraph* gr = new TGraph();
-  TGraph* grE = GetEFieldTimeDomain(coord, false);
+  TGraph* grE = GetEFieldTimeDomain(coord, false, firstPoint, lastPoint);
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle(grE->GetYaxis()->GetTitle());
   
@@ -464,8 +465,8 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
   return grTotal;
 }
 
-TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime) {
-  TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime);
+TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime, int firstPoint, int lastPoint) {
+  TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grPower = MakePowerSpectrumNorm(grVTime);
   
   if (coord == kX) {
@@ -484,11 +485,12 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coor
   return grPower;
 }
 
-TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime) {
+TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime,
+								int firstPoint, int lastPoint) {
   TGraph* grTotal = new TGraph();
-  TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime);
-  TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime);
-  TGraph *grZ = GetDipoleComponentVoltagePowerSpectrumNorm(kZ, kUseRetardedTime);
+  TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph *grZ = GetDipoleComponentVoltagePowerSpectrumNorm(kZ, kUseRetardedTime, firstPoint, lastPoint);
   for (int n = 0; n < grX->GetN(); n++) {
     double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
     grTotal->SetPoint(n, grX->GetPointX(n), tot);
@@ -503,8 +505,9 @@ TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseR
   return grTotal;
 }
 
-TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime) {
-  TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime);
+TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime,
+						    int firstPoint, int lastPoint) {
+  TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grDipolePower = new TGraph();
 
   for (int i = 0; i < grVoltagePower->GetN(); i++) {
