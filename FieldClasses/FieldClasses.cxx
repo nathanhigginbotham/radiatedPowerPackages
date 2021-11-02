@@ -195,6 +195,38 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetar
   }
 }
 
+TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const int firstPoint, const int lastPoint,
+					     const bool kUseRetardedTime) {
+  TGraph* gr = 0;
+  if (coord == kX) {
+    gr = (TGraph*)EField[0]->Clone("grEx");
+  }
+  else if (coord == kY) {
+    gr = (TGraph*)EField[1]->Clone("grEy");
+  }
+  else if (coord = kZ) {
+    gr = (TGraph*)EField[2]->Clone("grEz");
+  }
+
+  TGraph* grOut = new TGraph();
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Time [s]");
+  if (!kUseRetardedTime) {
+    for (int i = firstPoint; i <= lastPoint; i++) {
+      grOut->SetPoint(grOut->GetN(), gr->GetPointX(i), gr->GetPointY(i));
+    }
+  }
+  else {
+    TGraph* grRet = MakeRetardedTimeGraph(gr);
+    for (int i = firstPoint; i <= lastPoint; i++) {
+      grOut->SetPoint(grOut->GetN(), grRet->GetPointX(i), grRet->GetPointY(i));
+    }
+    delete grRet;
+  }
+  delete gr;
+  return grOut;
+}
+
 TGraph* rad::FieldPoint::GetEFieldMagTimeDomain(const bool kUseRetardedTime) {
   TGraph* grMag = new TGraph();
   assert((EField[0]->GetN() == EField[1]->GetN()) && (EField[1]->GetN() == EField[2]->GetN()));

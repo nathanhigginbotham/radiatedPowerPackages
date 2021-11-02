@@ -43,6 +43,9 @@ namespace rad
     TGraph* GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetBFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetPoyntingVecTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);
+
+    TGraph* GetEFieldTimeDomain(Coord_t coord, const int firstPoint, const int lastPoint,
+				const bool kUseRetardedTime=false);
     
     TGraph* GetEFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetBFieldMagTimeDomain(const bool kUseRetardedTime=false);
