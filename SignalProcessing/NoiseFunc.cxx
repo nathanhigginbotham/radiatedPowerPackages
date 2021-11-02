@@ -8,8 +8,9 @@
 
 #include "SignalProcessing/NoiseFunc.h"
 
-rad::GaussianNoise::GaussianNoise(const double T, const int setSeed) {
+rad::GaussianNoise::GaussianNoise(const double T, const double R, const int setSeed) {
   noiseTemp = T;
+  resistance = R;
   numGen = (setSeed == 1234) ? new TRandom3(setSeed) : new TRandom3(time(NULL));
 }
 

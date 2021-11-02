@@ -30,7 +30,7 @@ namespace rad
   public:
     /// \param T is the noise temperature in kelvin
     /// \param setSeed is the seed for the random number generator
-    GaussianNoise(const double T, const int setSeed=1234); 
+    GaussianNoise(const double T, const double R, const int setSeed=1234); 
     ~GaussianNoise();
   };
 }
