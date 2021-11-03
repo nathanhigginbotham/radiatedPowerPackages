@@ -57,12 +57,14 @@ rad::FieldPoint::FieldPoint() {
   acc[2] = new TGraph();
   tPrime = new TGraph();
   antennaPoint = TVector3(0, 0, 0);
-
+  dipolePolarisation = TVector3(0, 0, 0);
+  
   inputFile = "";
 }
 
 // Parametrised constructor
-rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, TString trajectoryFilePath) {
+rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, const TVector3 dipoleDir,
+			    TString trajectoryFilePath) {
   EField[0] = new TGraph();
   EField[1] = new TGraph();
   EField[2] = new TGraph();
@@ -80,7 +82,8 @@ rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, TString trajectoryFileP
   acc[2] = new TGraph();
   tPrime = new TGraph();
   antennaPoint = inputAntenna;
-
+  dipolePolarisation = dipoleDir;
+  
   // Now check that the input file exists
   TFile* f = new TFile(trajectoryFilePath, "read");
   assert(f);
@@ -419,6 +422,41 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, cons
     return grRet;
   }
 } 
+
+TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime,
+							int firstPoint, int lastPoint,
+							std::vector<GaussianNoise*> noiseTerms) {
+  TGraph* grEx = GetEFieldTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph* grEy = GetEFieldTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph* grEz = GetEFieldTimeDomain(kZ, kUseRetardedTime, firstPoint, lastPoint);
+
+  TGraph* gr = new TGraph();
+  gr->GetXaxis()->SetTitle("Time [s]");
+  gr->GetYaxis()->SetTitle("Voltage [V]");
+  setGraphAttr(gr);
+  
+  double fs = 1.0 / (grEx->GetPointX(1) - grEx->GetPointX(0));
+  for (int term = 0; term < noiseTerms.size(); term++) {
+    (noiseTerms.at(term))->SetSampleFreq(fs);
+    (noiseTerms.at(term))->SetSigma();
+  }
+
+  for (int i = 0; i < grEx->GetN(); i++) {
+    TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
+    double voltage = EField.Dot(dipolePolarisation) * 0.0111 / TMath::Pi();
+    voltage /= 2.0; // Account for re-radiated power
+    // Now add noise
+    for (int term = 0; term < noiseTerms.size(); term++) {
+      voltage += (noiseTerms.at(term))->GetNoiseVoltage();
+    }
+    gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
+  }
+
+  delete grEx;
+  delete grEy;
+  delete grEz;
+  return gr;
+}
 
 ////////////////////////////////////////////////////////////
 /////////////// Frequency domain functions /////////////////

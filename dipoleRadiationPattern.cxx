@@ -24,8 +24,9 @@ using namespace rad;
 int main()
 {
   TVector3 antennaPoint(0.02, 0.0, 0.0);
+  TVector3 dipoleDir(0.0, 1.0, 0.0);
   // Declare the field point
-  FieldPoint fp(antennaPoint, "/home/sjones/work/qtnm/trajectories/90DegOnAxis.root");
+  FieldPoint fp(antennaPoint, dipoleDir, "/home/sjones/work/qtnm/trajectories/90DegOnAxis.root");
   fp.GenerateFields(1e-7);  
 
   TFile *fout = new TFile("outputFile.root", "RECREATE");

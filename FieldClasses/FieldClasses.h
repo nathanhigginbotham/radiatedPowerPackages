@@ -20,6 +20,7 @@ namespace rad
     TString inputFile;
     
     TVector3 antennaPoint;
+    TVector3 dipolePolarisation;
     // Time series for field components
     TGraph* EField[3];
     TGraph* BField[3];
@@ -39,7 +40,7 @@ namespace rad
       kX, kY, kZ
     };
     FieldPoint();
-    FieldPoint(TVector3 inputAntenna, TString trajectoryFilePath);
+    FieldPoint(const TVector3 inputAntenna, const TVector3 dipoleDir, TString trajectoryFilePath);
     ~FieldPoint();
     
     void GenerateFields(const double maxTime);
@@ -56,6 +57,9 @@ namespace rad
     TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
 						int firstPoint=-1, int lastPoint=-1,
 						std::vector<GaussianNoise*> noiseTerms={});
+    TGraph* GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
+					   int firstPoint=-1, int lastPoint=-1,
+					   std::vector<GaussianNoise*> noiseTerms={});
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
 
     // Frequency domain functions
