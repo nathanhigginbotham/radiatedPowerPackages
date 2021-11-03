@@ -6,6 +6,8 @@
 #include "TAxis.h"
 #include "TVector3.h"
 #include "TMath.h"
+#include "TH1.h"
+#include "TH2.h"
 
 #include "FFTtools.h"
 #include "FFTWComplex.h"
@@ -63,6 +65,24 @@ void rad::setGraphAttr(TGraph *gr)
   gr->GetXaxis()->SetLabelSize(0.05);
   gr->GetYaxis()->SetLabelSize(0.05);
   gr->SetLineWidth(2);
+}
+
+void rad::SetHistAttr(TH1 *h)
+{
+  h->GetXaxis()->SetTitleSize(0.05);
+  h->GetYaxis()->SetTitleSize(0.05);
+  h->GetXaxis()->SetLabelSize(0.05);
+  h->GetYaxis()->SetLabelSize(0.05);
+}
+
+void rad::SetHistAttr(TH2 *h)
+{
+  h->GetXaxis()->SetTitleSize(0.05);
+  h->GetYaxis()->SetTitleSize(0.05);
+  h->GetZaxis()->SetTitleSize(0.05);
+  h->GetXaxis()->SetLabelSize(0.05);
+  h->GetYaxis()->SetLabelSize(0.05);
+  h->GetZaxis()->SetLabelSize(0.05);
 }
 
 double rad::CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,

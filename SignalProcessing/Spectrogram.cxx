@@ -34,6 +34,7 @@ TH2D* rad::Spectrogram::MakeSpectrogram(const int NSamplesPerTimeBin, const bool
   std::cout<<"nTimeBins, nFreqBins = "<<nTimeBins<<", "<<nFreqBins<<std::endl;
   
   TH2D* h2 = new TH2D("h2", "Spectrogram; Time [s]; Frequency [Hz]; Power [W]", nTimeBins, firstTime, lastTime, nFreqBins, 0.0, lastFreq);
+  SetHistAttr(h2);
   // Loop through time bins and generate a power spectrum at each point
   for (int t = 1; t <= nTimeBins; t++) {
     TGraph* grPower = fieldPoint->GetDipolePowerSpectrumNorm(kUseRetardedTime, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin - 1, fNoise);

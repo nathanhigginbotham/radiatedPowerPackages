@@ -5,6 +5,8 @@
 #include "TVector3.h"
 #include "TGraph.h"
 #include "FFTtools.h"
+#include "TH1.h"
+#include "TH2.h"
 
 namespace rad
 {
@@ -21,6 +23,10 @@ namespace rad
   TVector3 CalcPoyntingVec(const TVector3 EField, const TVector3 BField);
 
   void setGraphAttr(TGraph *gr);
+  
+  void SetHistAttr(TH1 *h);
+  
+  void SetHistAttr(TH2 *h);
 
   double CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,
 			      const TVector3 ePosition, const TVector3 antennaPoint);
