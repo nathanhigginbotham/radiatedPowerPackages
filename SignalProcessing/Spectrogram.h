@@ -19,11 +19,11 @@ namespace rad
   class Spectrogram
   {
   private:
-    FieldPoint fieldPoint;
-    std::vector<GaussianNoise> fNoise;
+    FieldPoint *fieldPoint;
+    std::vector<GaussianNoise*> fNoise;
     
   public:
-    Spectrogram(FieldPoint fp, std::vector<GaussianNoise> noiseTerms = {}) : fieldPoint(fp), fNoise(noiseTerms) {}
+    Spectrogram(FieldPoint *fp, std::vector<GaussianNoise*> noiseTerms={}); 
     ~Spectrogram();
 
     TH2D* MakeSpectrogram(const int NSamplesPerTimeBin, const bool kUseRetardedTime=false);

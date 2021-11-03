@@ -14,23 +14,27 @@ namespace rad
   class GaussianNoise
   {
   private:
-    TRandom3 *numGen; 
+    TRandom3 *numGen = 0; 
     double noiseTemp;
     double sampleFreq;
     double resistance;
     double sigma;
     
-    void SetResistance(const double r);
+    void SetResistance(double r);
     
   public:
     /// \param T is the noise temperature in kelvin
     /// \param setSeed is the seed for the random number generator
-    GaussianNoise(const double T, const double R, const int setSeed=1234); 
+    GaussianNoise(double T, double R, int setSeed=1234); 
     ~GaussianNoise();
 
-    void SetSampleFreq(const double fs);
+    void SetSampleFreq(double fs);
     void SetSigma();
     double GetNoiseVoltage();
+    double GetSigma() { return sigma; }
+    double GetNoiseTemp() { return noiseTemp; }
+    double GetFs() { return sampleFreq; }
+    double GetResistance() { return resistance; }
   };
 }
 

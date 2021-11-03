@@ -38,6 +38,7 @@ namespace rad
     enum Coord_t{
       kX, kY, kZ
     };
+    FieldPoint();
     FieldPoint(TVector3 inputAntenna, TString trajectoryFilePath);
     ~FieldPoint();
     
@@ -54,7 +55,7 @@ namespace rad
 
     TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
 						int firstPoint=-1, int lastPoint=-1,
-						std::vector<GaussianNoise> noiseTerms={});
+						std::vector<GaussianNoise*> noiseTerms={});
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
 
     // Frequency domain functions
@@ -68,15 +69,15 @@ namespace rad
 
     TGraph* GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false,
 						       int firstPoint=-1, int lastPoint=-1,
-						       std::vector<GaussianNoise> noiseTerms={});
+						       std::vector<GaussianNoise*> noiseTerms={});
     TGraph* GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime=false,
 						   int firstPoint=-1, int lastPoint=-1,
-						   std::vector<GaussianNoise> noiseTerms={});
+						   std::vector<GaussianNoise*> noiseTerms={});
 
     // Calculate the power collected by a Hertzian dipole in the frequency domain
     TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false,
 				       int firstPoint=-1, int lastPoint=-1,
-				       std::vector<GaussianNoise> noiseTerms={});
+				       std::vector<GaussianNoise*> noiseTerms={});
 
     // Functions for various useful things such as the final time in a file
     double GetFinalTime();

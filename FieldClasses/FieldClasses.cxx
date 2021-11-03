@@ -38,6 +38,29 @@ rad::FieldPoint::~FieldPoint() {
   delete tPrime;
 }
 
+// Default constructor
+rad::FieldPoint::FieldPoint() {
+  EField[0] = new TGraph();
+  EField[1] = new TGraph();
+  EField[2] = new TGraph();
+  BField[0] = new TGraph();
+  BField[1] = new TGraph();
+  BField[2] = new TGraph();
+  pos[0] = new TGraph();
+  pos[1] = new TGraph();
+  pos[2] = new TGraph();
+  vel[0] = new TGraph();
+  vel[1] = new TGraph();
+  vel[2] = new TGraph();
+  acc[0] = new TGraph();
+  acc[1] = new TGraph();
+  acc[2] = new TGraph();
+  tPrime = new TGraph();
+  antennaPoint = TVector3(0, 0, 0);
+
+  inputFile = "";
+}
+
 // Parametrised constructor
 rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, TString trajectoryFilePath) {
   EField[0] = new TGraph();
@@ -359,7 +382,7 @@ TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
 
 TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime,
 							     int firstPoint, int lastPoint,
-							     std::vector<GaussianNoise> noiseTerms)
+							     std::vector<GaussianNoise*> noiseTerms)
 {
   TGraph* gr = new TGraph();
   TGraph* grE = GetEFieldTimeDomain(coord, false, firstPoint, lastPoint);
@@ -368,8 +391,8 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, cons
   
   double fs = 1.0 / (grE->GetPointX(1) - grE->GetPointX(0));
   for (int term = 0; term < noiseTerms.size(); term++) {
-    (noiseTerms.at(term)).SetSampleFreq(fs);
-    (noiseTerms.at(term)).SetSigma();
+    (noiseTerms.at(term))->SetSampleFreq(fs);
+    (noiseTerms.at(term))->SetSigma();
   }
   
   TVector3 dipoleDir(0.0, 1.0, 0.0);
@@ -379,7 +402,7 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, cons
     double voltage = grE->GetPointY(i) * Al;
     // Now add the noise
     for (int term = 0; term < noiseTerms.size(); term++) {
-      voltage += (noiseTerms.at(term)).GetNoiseVoltage();
+      voltage += (noiseTerms.at(term))->GetNoiseVoltage();
     }
     gr->SetPoint(gr->GetN(), grE->GetPointX(i), voltage);
   }
@@ -478,7 +501,7 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
   return grTotal;
 }
 
-TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime, int firstPoint, int lastPoint, std::vector<GaussianNoise> noiseTerms) {
+TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime, int firstPoint, int lastPoint, std::vector<GaussianNoise*> noiseTerms) {
   TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
   TGraph* grPower = MakePowerSpectrumNorm(grVTime);
   
@@ -500,7 +523,7 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coor
 
 TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime,
 								int firstPoint, int lastPoint,
-								std::vector<GaussianNoise> noiseTerms) {
+								std::vector<GaussianNoise*> noiseTerms) {
   TGraph* grTotal = new TGraph();
   TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
   TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
@@ -521,7 +544,7 @@ TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseR
 
 TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime,
 						    int firstPoint, int lastPoint,
-						    std::vector<GaussianNoise> noiseTerms) {
+						    std::vector<GaussianNoise*> noiseTerms) {
   TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
   TGraph* grDipolePower = new TGraph();
 
@@ -562,8 +585,8 @@ double rad::FieldPoint::GetSampleRate() {
   tree->GetEntry(1);
   time1 = time;
   double fs = 1.0 / (time1 - time0);
-  fin->Close();
   delete tree;
+  fin->Close();
   delete fin;
   return fs;
 }
