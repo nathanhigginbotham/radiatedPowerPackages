@@ -41,3 +41,5 @@ target_link_libraries(dipoleRadiationPattern PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARI
 add_executable(normTest normTest.cxx)
 target_link_libraries(normTest PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 
+add_executable(spectrogramTest spectrogramTest.cxx)
+target_link_libraries(spectrogramTest PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
