@@ -14,8 +14,24 @@ rad::GaussianNoise::GaussianNoise(double T, double R, int setSeed) {
   numGen = new TRandom3(1234);//(setSeed == 1234) ? new TRandom3(setSeed) : new TRandom3(time(NULL));
 }
 
+rad::GaussianNoise::GaussianNoise() {
+  noiseTemp = 0;
+  resistance = 0;
+  sampleFreq = 0;
+  sigma = 0;
+  numGen = new TRandom3(1234);
+}
+
 rad::GaussianNoise::~GaussianNoise() {
   delete numGen;
+}
+
+rad::GaussianNoise::GaussianNoise(const GaussianNoise &g1) {
+  noiseTemp = g1.noiseTemp;
+  sampleFreq = g1.sampleFreq;
+  resistance = g1.resistance;
+  sigma = g1.sigma;
+  numGen = new TRandom3(g1.numGen->GetSeed());
 }
 
 void rad::GaussianNoise::SetSampleFreq(double fs) {

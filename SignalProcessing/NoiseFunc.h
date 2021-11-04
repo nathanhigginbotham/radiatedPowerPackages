@@ -25,8 +25,10 @@ namespace rad
   public:
     /// \param T is the noise temperature in kelvin
     /// \param setSeed is the seed for the random number generator
+    GaussianNoise();
     GaussianNoise(double T, double R, int setSeed=1234); 
     ~GaussianNoise();
+    GaussianNoise(const GaussianNoise &g1);
 
     void SetSampleFreq(double fs);
     void SetSigma();
