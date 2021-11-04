@@ -598,6 +598,26 @@ TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime,
   return grDipolePower;
 }
 
+TGraph* rad::FieldPoint::GetDipoleLoadPowerSpectrumNorm(const double resistance,
+							const bool kUseRetardedTime,
+							int firstPoint, int lastPoint,
+							std::vector<GaussianNoise*> noiseTerms) {
+  TGraph* grVoltage = GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
+  TGraph* grPower = MakePowerSpectrumNorm(grVoltage);
+
+  for (int i = 0; i < grPower->GetN(); i++) {
+    double powerWatts = grPower->GetPointY(i) / resistance;
+    grPower->SetPoint(i, grPower->GetPointX(i), powerWatts);
+  }
+  setGraphAttr(grPower);
+  grPower->GetXaxis()->SetTitle("Frequency [Hz]");
+  grPower->GetYaxis()->SetTitle("Power #times (#Delta t)^{2} [W s^{2}]");
+  
+  delete grVoltage;
+  return grPower;
+}
+
+// Assorted useful functions
 double rad::FieldPoint::GetFinalTime() {
   TFile *fin = new TFile(inputFile, "READ");
   assert(fin);

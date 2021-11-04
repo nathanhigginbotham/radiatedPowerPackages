@@ -82,7 +82,12 @@ namespace rad
     TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false,
 				       int firstPoint=-1, int lastPoint=-1,
 				       std::vector<GaussianNoise*> noiseTerms={});
-
+    
+    TGraph* GetDipoleLoadPowerSpectrumNorm(const double resistance,
+					   const bool kUseRetardedTime=false,
+					   int firstPoint=-1, int lastPoint=-1,
+					   std::vector<GaussianNoise*> noiseTerms={});
+    
     // Functions for various useful things such as the final time in a file
     double GetFinalTime();
     double GetSampleRate();
