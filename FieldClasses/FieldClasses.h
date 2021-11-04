@@ -42,6 +42,7 @@ namespace rad
     FieldPoint();
     FieldPoint(const TVector3 inputAntenna, const TVector3 dipoleDir, TString trajectoryFilePath);
     ~FieldPoint();
+    FieldPoint(const FieldPoint &fp);
     
     void GenerateFields(const double maxTime);
 

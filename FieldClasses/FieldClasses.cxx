@@ -92,6 +92,22 @@ rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, const TVector3 dipoleDi
   inputFile = trajectoryFilePath;
 }
 
+// Copy constructor
+rad::FieldPoint::FieldPoint(const FieldPoint &fp) {
+  inputFile = fp.inputFile;
+  antennaPoint = fp.antennaPoint;
+  dipolePolarisation = fp.dipolePolarisation;
+  // Clone the field graphs
+  for (int coord = 0; coord < 3; coord++) {
+    EField[coord] = (TGraph*)fp.EField[coord]->Clone();
+    BField[coord] = (TGraph*)fp.BField[coord]->Clone();
+    pos[coord] = (TGraph*)fp.pos[coord]->Clone();
+    vel[coord] = (TGraph*)fp.vel[coord]->Clone();
+    acc[coord] = (TGraph*)fp.acc[coord]->Clone();
+  }
+  tPrime = (TGraph*)fp.tPrime->Clone();
+}
+
 void rad::FieldPoint::ResetFields() {
   EField[0]->Clear();
   EField[1]->Clear();
