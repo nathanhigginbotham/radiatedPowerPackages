@@ -23,9 +23,10 @@ namespace rad
     void SetResistance(double r);
     
   public:
-    /// \param T is the noise temperature in kelvin
-    /// \param setSeed is the seed for the random number generator
     GaussianNoise();
+    /// \param T is the noise temperature in kelvin
+    /// \param R is resistance of the load circuit
+    /// \param setSeed is the seed for the random number generator
     GaussianNoise(double T, double R, int setSeed=1234); 
     ~GaussianNoise();
     GaussianNoise(const GaussianNoise &g1);
