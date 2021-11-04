@@ -20,7 +20,8 @@ namespace rad
     double GetAngularFrequency() { return angularFreq; }
     void SetAngularFrequency(double newFreq) { angularFreq = newFreq; }
 
-    
+    double GetInPhaseComponent(const double time);
+    double GetQuadratureComponent(const double time);
   };
 }
 
