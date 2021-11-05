@@ -36,7 +36,12 @@ namespace rad
     /// \param noiseTerms A vector of noise terms to be added to the signal
     /// \param kUseRetardedTime Boolean on whether or not to use the retarded time
     Signal(FieldPoint fp, LocalOscillator lo, double srate, std::vector<GaussianNoise> noiseTerms={}, const bool kUseRetardedTime=false);
+
+    /// Copy constructor
     Signal(const Signal &s1);
+
+    TGraph* GetVITimeDomain();
+    TGraph* GetVQTimeDomain();
   };
 }
 
