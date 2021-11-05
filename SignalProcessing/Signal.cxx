@@ -6,7 +6,7 @@
 #include "BasicFunctions/BasicFunctions.h"
 
 #include <vector>
-#include <stdio>
+#include <iostream>
 
 #include "TGraph.h"
 
@@ -26,6 +26,12 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
 		    std::vector<GaussianNoise> noiseTerms, const bool kUseRetardedTime) {
   sampleRate = srate;
 
+  // Make sure the noise terms are all set up correctly
+  for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
+    (noiseTerms.at(iNoise)).SetSampleFreq(sampleRate);
+    (noiseTerms.at(iNoise)).SetSigma();
+  }
+  
   // Create the signal tgraph in the time domain
   TGraph* grVITimeUnfiltered = new TGraph();
   TGraph* grVQTimeUnfiltered = new TGraph();
@@ -55,14 +61,24 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
     double time = grVITimeUnsampled->GetPointX(i);
     if (time < sampleTime) continue;
     else if (i == 0) {
-      grVITime->SetPoint(grVITime->GetN(), sampleTime, grVITimeUnsampled->GetPointY(0));
-      grVQTime->SetPoint(grVQTime->GetN(), sampleTime, grVQTimeUnsampled->GetPointY(0));
+      double calcVI = grVITimeUnsampled->GetPointY(0);
+      double calcVQ = grVQTimeUnsampled->GetPointY(0);
+      for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
+	calcVI += (noiseTerms.at(iNoise)).GetNoiseVoltage();
+	calcVQ += (noiseTerms.at(iNoise)).GetNoiseVoltage();
+      }
+      grVITime->SetPoint(grVITime->GetN(), sampleTime, calcVI);
+      grVQTime->SetPoint(grVQTime->GetN(), sampleTime, calcVQ);
       sampleTime += sampleSpacing;
     }
     else {
       // Sample the distribution
       double calcVI = grVITimeUnsampled->GetPointY(i-1) + (sampleTime - grVITimeUnsampled->GetPointX(i-1)) * (grVITimeUnsampled->GetPointY(i) - grVITimeUnsampled->GetPointY(i-1)) / (time - grVITimeUnsampled->GetPointX(i-1));
       double calcVQ = grVQTimeUnsampled->GetPointY(i-1) + (sampleTime - grVQTimeUnsampled->GetPointX(i-1)) * (grVQTimeUnsampled->GetPointY(i) - grVQTimeUnsampled->GetPointY(i-1)) / (time - grVQTimeUnsampled->GetPointX(i-1));
+      for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
+	calcVI += (noiseTerms.at(iNoise)).GetNoiseVoltage();
+	calcVQ += (noiseTerms.at(iNoise)).GetNoiseVoltage();
+      }
       grVITime->SetPoint(grVITime->GetN(), sampleTime, calcVI);
       grVQTime->SetPoint(grVQTime->GetN(), sampleTime, calcVQ);
       sampleTime += sampleSpacing;      
