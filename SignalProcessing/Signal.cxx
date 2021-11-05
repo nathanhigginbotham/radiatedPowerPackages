@@ -93,7 +93,7 @@ rad::Signal::Signal(const Signal &s1) {
   grVQTime = (TGraph*)s1.grVQTime->Clone();
 }
 
-TGraph* rad::Signal:GetVITimeDomain() {
+TGraph* rad::Signal::GetVITimeDomain() {
   TGraph* gr = (TGraph*)grVITime->Clone();
   setGraphAttr(gr);
   gr->GetXaxis()->SetTitle("Time [s]");
@@ -101,7 +101,7 @@ TGraph* rad::Signal:GetVITimeDomain() {
   return gr;
 }
 
-TGraph* rad::Signal:GetVQTimeDomain() {
+TGraph* rad::Signal::GetVQTimeDomain() {
   TGraph* gr = (TGraph*)grVQTime->Clone();
   setGraphAttr(gr);
   gr->GetXaxis()->SetTitle("Time [s]");
