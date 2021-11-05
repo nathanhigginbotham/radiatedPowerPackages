@@ -12,11 +12,6 @@
 
 #include "FFTtools.h"
 
-rad::Signal::Signal() {
-  grVITime = new TGraph();
-  grVQTime = new TGraph();
-}
-
 rad::Signal::~Signal() {
   delete grVITime;
   delete grVQTime;
@@ -90,4 +85,10 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   delete grVQTimeUnfiltered;
   delete grVITimeUnsampled;
   delete grVQTimeUnsampled;
+}
+
+rad::Signal::Signal(const Signal &s1) {
+  sampleRate = s1.sampleRate;
+  grVITime = (TGraph*)s1.grVITime->Clone();
+  grVQTime = (TGraph*)s1.grVQTime->Clone();
 }

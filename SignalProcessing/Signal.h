@@ -19,7 +19,6 @@ namespace rad
 {
   /// Signal base class
   /// Class members are a voltage signal in the time domain and an out of phase component 
-
   
   class Signal
   {
@@ -29,7 +28,6 @@ namespace rad
     double sampleRate;
     
   public:
-    Signal();
     ~Signal();
 
     /// \param fp The field point where the antenna is located
@@ -38,6 +36,7 @@ namespace rad
     /// \param noiseTerms A vector of noise terms to be added to the signal
     /// \param kUseRetardedTime Boolean on whether or not to use the retarded time
     Signal(FieldPoint fp, LocalOscillator lo, double srate, std::vector<GaussianNoise> noiseTerms={}, const bool kUseRetardedTime=false);
+    Signal(const Signal &s1);
   };
 }
 
