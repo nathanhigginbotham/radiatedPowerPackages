@@ -43,3 +43,6 @@ target_link_libraries(normTest PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW
 
 add_executable(spectrogramTest spectrogramTest.cxx)
 target_link_libraries(spectrogramTest PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
+
+add_executable(noiseTests noiseTests.cxx)
+target_link_libraries(noiseTests PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
