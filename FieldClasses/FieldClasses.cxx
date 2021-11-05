@@ -440,8 +440,7 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, cons
 } 
 
 TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime,
-							int firstPoint, int lastPoint,
-							std::vector<GaussianNoise*> noiseTerms) {
+							int firstPoint, int lastPoint) {
   TGraph* grEx = GetEFieldTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grEy = GetEFieldTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grEz = GetEFieldTimeDomain(kZ, kUseRetardedTime, firstPoint, lastPoint);
@@ -451,20 +450,10 @@ TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedT
   gr->GetYaxis()->SetTitle("Voltage [V]");
   setGraphAttr(gr);
   
-  double fs = 1.0 / (grEx->GetPointX(1) - grEx->GetPointX(0));
-  for (int term = 0; term < noiseTerms.size(); term++) {
-    (noiseTerms.at(term))->SetSampleFreq(fs);
-    (noiseTerms.at(term))->SetSigma();
-  }
-
   for (int i = 0; i < grEx->GetN(); i++) {
     TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
     double voltage = EField.Dot(dipolePolarisation) * 0.0111 / TMath::Pi();
     voltage /= 2.0; // Account for re-radiated power
-    // Now add noise
-    for (int term = 0; term < noiseTerms.size(); term++) {
-      voltage += (noiseTerms.at(term))->GetNoiseVoltage();
-    }
     gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
   }
 
@@ -618,7 +607,7 @@ TGraph* rad::FieldPoint::GetDipoleLoadPowerSpectrumNorm(const double resistance,
 							const bool kUseRetardedTime,
 							int firstPoint, int lastPoint,
 							std::vector<GaussianNoise*> noiseTerms) {
-  TGraph* grVoltage = GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
+  TGraph* grVoltage = GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grPower = MakePowerSpectrumNorm(grVoltage);
 
   for (int i = 0; i < grPower->GetN(); i++) {

@@ -58,9 +58,10 @@ namespace rad
     TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
 						int firstPoint=-1, int lastPoint=-1,
 						std::vector<GaussianNoise*> noiseTerms={});
+    
     TGraph* GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
-					   int firstPoint=-1, int lastPoint=-1,
-					   std::vector<GaussianNoise*> noiseTerms={});
+					   int firstPoint=-1, int lastPoint=-1);
+					   
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
 
     // Frequency domain functions
