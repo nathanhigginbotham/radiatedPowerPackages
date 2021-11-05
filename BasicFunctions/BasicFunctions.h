@@ -41,6 +41,9 @@ namespace rad
 
   // Integrate the power spectrum
   double IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin=-1, Int_t lastBin=-1);
+
+  // Implements a simple band pass filter
+  TGraph* BandPassFilter(const TGraph* grWave, const double minFreq, const double maxFreq);
   
 }
  

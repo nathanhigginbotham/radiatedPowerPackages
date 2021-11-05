@@ -23,6 +23,7 @@ namespace rad
   class Signal
   {
   private:
+    TGraph* grInputVoltage; 
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
     double sampleRate;
@@ -40,6 +41,11 @@ namespace rad
     /// Copy constructor
     Signal(const Signal &s1);
 
+    TGraph* GetVIUnfilteredTimeDomain(LocalOscillator lo);
+    TGraph* GetVQUnfilteredTimeDomain(LocalOscillator lo);
+    TGraph* GetVIUnsampledTimeDomain(LocalOscillator lo);
+    TGraph* GetVQUnsampledTimeDomain(LocalOscillator lo);
+    
     TGraph* GetVITimeDomain();
     TGraph* GetVQTimeDomain();
   };

@@ -152,3 +152,31 @@ double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBi
   integral *= deltaF;
   return integral;
 }
+
+// Re-implementation of the filter from FFTtools but without and converstion factors
+TGraph* rad::BandPassFilter(const TGraph* grWave, const double minFreq, const double maxFreq) {
+    double *oldY = grWave->GetY();
+    double *oldX = grWave->GetX();
+    double deltaT=oldX[1]-oldX[0];
+    int length=grWave->GetN();
+    FFTWComplex *theFFT = FFTtools::doFFT(length,oldY);
+
+    int newLength=(length/2)+1;
+    double deltaF=1/(deltaT*length); //Hz
+
+    double tempF=0;
+    for(int i=0;i<newLength;i++) {
+      if(tempF<minFreq || tempF>maxFreq) {
+	theFFT[i].re=0;
+	theFFT[i].im=0;
+      }      
+      tempF+=deltaF;
+    }
+
+    double *filteredVals = FFTtools::doInvFFT(length,theFFT);
+
+    TGraph *grFiltered = new TGraph(length,oldX,filteredVals);
+    delete [] theFFT;
+    delete [] filteredVals;
+    return grFiltered;
+}

@@ -13,6 +13,7 @@
 #include "FFTtools.h"
 
 rad::Signal::~Signal() {
+  delete grInputVoltage;
   delete grVITime;
   delete grVQTime;
 }
@@ -30,7 +31,7 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   // Create the signal tgraph in the time domain
   TGraph* grVITimeUnfiltered = new TGraph();
   TGraph* grVQTimeUnfiltered = new TGraph();
-  TGraph* grInputVoltage = fp.GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
+  grInputVoltage = fp.GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
   std::cout<<"Performing the downmixing..."<<std::endl;
   for (int i = 0; i < grInputVoltage->GetN(); i++) {
     grVITimeUnfiltered->SetPoint(i, grInputVoltage->GetPointX(i), grInputVoltage->GetPointY(i)*lo.GetInPhaseComponent(grInputVoltage->GetPointX(i)));
@@ -39,8 +40,8 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
 
   // Now we need to filter and then sample these signals
   std::cout<<"Filtering.."<<std::endl;
-  TGraph* grVITimeUnsampled = FFTtools::simplePassBandFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
-  TGraph* grVQTimeUnsampled = FFTtools::simplePassBandFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
+  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
 
   // Now do sampling
   // Use simple linear interpolation for the job
@@ -80,7 +81,6 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
     }
   }
   
-  delete grInputVoltage;
   delete grVITimeUnfiltered;
   delete grVQTimeUnfiltered;
   delete grVITimeUnsampled;
@@ -107,4 +107,48 @@ TGraph* rad::Signal::GetVQTimeDomain() {
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle("V_{Q} [V]");
   return gr;
+}
+
+TGraph* rad::Signal::GetVIUnfilteredTimeDomain(LocalOscillator lo) {
+  // Create the signal tgraph in the time domain
+  TGraph* grVITimeUnfiltered = new TGraph();
+  std::cout<<"Performing the downmixing..."<<std::endl;
+  for (int i = 0; i < grInputVoltage->GetN(); i++) {
+    grVITimeUnfiltered->SetPoint(i, grInputVoltage->GetPointX(i), grInputVoltage->GetPointY(i)*lo.GetInPhaseComponent(grInputVoltage->GetPointX(i)));
+  }
+  return grVITimeUnfiltered;
+}
+
+TGraph* rad::Signal::GetVQUnfilteredTimeDomain(LocalOscillator lo) {
+  // Create the signal tgraph in the time domain
+  TGraph* grVQTimeUnfiltered = new TGraph();
+  std::cout<<"Performing the downmixing..."<<std::endl;
+  for (int i = 0; i < grInputVoltage->GetN(); i++) {
+    grVQTimeUnfiltered->SetPoint(i, grInputVoltage->GetPointX(i), grInputVoltage->GetPointY(i)*lo.GetQuadratureComponent(grInputVoltage->GetPointX(i)));
+  }
+  return grVQTimeUnfiltered;
+}
+
+TGraph* rad::Signal::GetVIUnsampledTimeDomain(LocalOscillator lo) {
+  // Create the signal tgraph in the time domain
+  TGraph* grVITimeUnfiltered = new TGraph();
+  std::cout<<"Performing the downmixing..."<<std::endl;
+  for (int i = 0; i < grInputVoltage->GetN(); i++) {
+    grVITimeUnfiltered->SetPoint(i, grInputVoltage->GetPointX(i), grInputVoltage->GetPointY(i)*lo.GetInPhaseComponent(grInputVoltage->GetPointX(i)));
+  }
+  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
+  delete grVITimeUnfiltered;
+  return grVITimeUnsampled;
+}
+
+TGraph* rad::Signal::GetVQUnsampledTimeDomain(LocalOscillator lo) {
+  // Create the signal tgraph in the time domain
+  TGraph* grVQTimeUnfiltered = new TGraph();
+  std::cout<<"Performing the downmixing..."<<std::endl;
+  for (int i = 0; i < grInputVoltage->GetN(); i++) {
+    grVQTimeUnfiltered->SetPoint(i, grInputVoltage->GetPointX(i), grInputVoltage->GetPointY(i)*lo.GetQuadratureComponent(grInputVoltage->GetPointX(i)));
+  }
+  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+  delete grVQTimeUnfiltered;
+  return grVQTimeUnsampled;
 }
