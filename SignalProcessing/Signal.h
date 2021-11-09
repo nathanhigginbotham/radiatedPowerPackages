@@ -31,6 +31,9 @@ namespace rad
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
     double sampleRate;
+
+    TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
+    TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
     
   public:
     ~Signal();
@@ -45,6 +48,8 @@ namespace rad
     /// Copy constructor
     Signal(const Signal &s1);
 
+    TGraph* GetInputVoltage(const unsigned int field=0);
+    
     TGraph* GetVIUnfilteredTimeDomain(LocalOscillator lo, const unsigned int field=0);
     TGraph* GetVQUnfilteredTimeDomain(LocalOscillator lo, const unsigned int field=0);
     TGraph* GetVIUnsampledTimeDomain(LocalOscillator lo, const unsigned int field=0);
