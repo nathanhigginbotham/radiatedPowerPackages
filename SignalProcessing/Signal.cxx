@@ -46,11 +46,13 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
   
   // For each antenna point generate the field and do the signal processing
   for (int point = 0; point < fp.size(); point++) {
+    TGraph* grInputVoltageTemp = fp[point].GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
+    grInputVoltage.push_back(grInputVoltageTemp);
+    
     std::cout<<"Performing the downmixing..."<<std::endl;
-
-    TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltage[point], lo);
-    TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltage[point], lo);
-
+    TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
+    TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
+ 
     // Now we need to filter and then sample these signals
     std::cout<<"Filtering.."<<std::endl;
     TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
@@ -58,43 +60,17 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
 
     // Now do sampling
     // Use simple linear interpolation for the job
-    TGraph* grVITimeTemp = new TGraph();
-    TGraph* grVQTimeTemp = new TGraph();  
     std::cout<<"Sampling..."<<std::endl;
-    double sampleSpacing = 1.0 / sampleRate;
-    double sampleTime = grVITimeUnsampled->GetPointX(0);
-    for (int i = 0; i < grVITimeUnsampled->GetN(); i++) {
-      double time = grVITimeUnsampled->GetPointX(i);
-      if (time < sampleTime) continue;
-      else if (i == 0) {
-	double calcVI = grVITimeUnsampled->GetPointY(0);
-	double calcVQ = grVQTimeUnsampled->GetPointY(0);
-	for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
-	  calcVI += (noiseTerms.at(iNoise)).GetNoiseVoltage();
-	  calcVQ += (noiseTerms.at(iNoise)).GetNoiseVoltage();
-	}
-	grVITimeTemp->SetPoint(grVITimeTemp->GetN(), sampleTime, calcVI);
-	grVQTimeTemp->SetPoint(grVQTimeTemp->GetN(), sampleTime, calcVQ);
-	sampleTime += sampleSpacing;
-      }
-      else {
-	// Sample the distribution
-	double calcVI = grVITimeUnsampled->GetPointY(i-1) + (sampleTime - grVITimeUnsampled->GetPointX(i-1)) * (grVITimeUnsampled->GetPointY(i) - grVITimeUnsampled->GetPointY(i-1)) / (time - grVITimeUnsampled->GetPointX(i-1));
-	double calcVQ = grVQTimeUnsampled->GetPointY(i-1) + (sampleTime - grVQTimeUnsampled->GetPointX(i-1)) * (grVQTimeUnsampled->GetPointY(i) - grVQTimeUnsampled->GetPointY(i-1)) / (time - grVQTimeUnsampled->GetPointX(i-1));
-	for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
-	  calcVI += (noiseTerms.at(iNoise)).GetNoiseVoltage();
-	  calcVQ += (noiseTerms.at(iNoise)).GetNoiseVoltage();
-	}
-	grVITimeTemp->SetPoint(grVITimeTemp->GetN(), sampleTime, calcVI);
-	grVQTimeTemp->SetPoint(grVQTimeTemp->GetN(), sampleTime, calcVQ);
-	sampleTime += sampleSpacing;      
-      }
+    TGraph* grVITimeTemp = SampleWaveform(grVITimeUnsampled);
+    TGraph* grVQTimeTemp = SampleWaveform(grVQTimeUnsampled);
 
-      // Add the temporary graphs to the vector
-      vecVITime.push_back(grVITimeTemp);
-      vecVQTime.push_back(grVQTimeTemp);
-    }
-  
+    std::cout<<"Adding noise..."<<std::endl;
+    AddGaussianNoise(grVITimeTemp, noiseTerms);
+    AddGaussianNoise(grVQTimeTemp, noiseTerms);
+
+    vecVITime.push_back(grVITimeTemp);
+    vecVQTime.push_back(grVQTimeTemp);
+    
     delete grVITimeUnfiltered;
     delete grVQTimeUnfiltered;
     delete grVITimeUnsampled;
@@ -176,6 +152,40 @@ TGraph* rad::Signal::DownmixQuadrature(TGraph* grInput, LocalOscillator lo) {
     grOut->SetPoint(i, grInput->GetPointX(i), grInput->GetPointY(i)*lo.GetQuadratureComponent(grInput->GetPointX(i)));
   }
   return grOut;
+}
+
+TGraph* rad::Signal::SampleWaveform(TGraph* grInput) {
+  TGraph* grOut = new TGraph();
+  double sampleSpacing = 1.0 / sampleRate;
+  double sampleTime = grInput->GetPointX(0);
+
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double time = grInput->GetPointX(i);
+    if (time < sampleTime) continue;
+    else if (i == 0) {
+      double calcV = grInput->GetPointY(0);
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;
+    }
+    else {
+      // Sample the distribution using linear interpolation
+      double calcV = grInput->GetPointY(i-1) + (sampleTime - grInput->GetPointX(i-1)) * (grInput->GetPointY(i) - grInput->GetPointY(i-1)) / (time - grInput->GetPointX(i-1));
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;      
+    }
+  }
+  
+  return grOut;
+}
+
+void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms) {
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double voltage = grInput->GetPointY(i);
+    for (int noise = 0; noise < noiseTerms.size(); noise++) {
+      voltage += (noiseTerms.at(noise)).GetNoiseVoltage();  
+    }
+    grInput->SetPointY(i, voltage);
+  }
 }
 
 TGraph* rad::Signal::GetVIUnfilteredTimeDomain(LocalOscillator lo,

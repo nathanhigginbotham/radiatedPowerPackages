@@ -34,6 +34,8 @@ namespace rad
 
     TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
     TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
+    TGraph* SampleWaveform(TGraph* grInput);
+    void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms);
     
   public:
     ~Signal();
