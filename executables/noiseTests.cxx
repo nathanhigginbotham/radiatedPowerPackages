@@ -30,7 +30,7 @@ int main() {
 
   TFile *fout = new TFile("noiseTestOutput.root", "RECREATE");
   TGraph* grInputVoltage = fp.GetDipoleLoadVoltageTimeDomain();
-  Signal mySignal(fp, myLO, sampleRate, noiseTerms);
+  Signal mySignal({fp}, myLO, sampleRate, noiseTerms);
   
   fout->cd();
   grInputVoltage->Write("grInputVoltage");
