@@ -106,6 +106,52 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
   
 }
 
+rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
+		    std::vector<GaussianNoise> noiseTerms, const bool kUseRetardedTime) {
+  sampleRate = srate;
+  
+  // Make sure the noise terms are all set up correctly
+  for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
+    (noiseTerms.at(iNoise)).SetSampleFreq(sampleRate);
+    (noiseTerms.at(iNoise)).SetSigma();
+  }
+
+  // The actual output graphs
+  grVITime = new TGraph();
+  grVQTime = new TGraph();  
+  setGraphAttr(grVITime);
+  setGraphAttr(grVQTime);
+  grVITime->GetXaxis()->SetTitle("Time [s]");
+  grVQTime->GetXaxis()->SetTitle("Time [s]");
+
+  TGraph* grInputVoltageTemp = fp.GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
+  grInputVoltage.push_back(grInputVoltageTemp);
+    
+  std::cout<<"Performing the downmixing..."<<std::endl;
+  TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
+  TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
+ 
+  // Now we need to filter and then sample these signals
+  std::cout<<"Filtering.."<<std::endl;
+  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
+  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+
+  // Now do sampling
+  // Use simple linear interpolation for the job
+  std::cout<<"Sampling..."<<std::endl;
+  grVITime = SampleWaveform(grVITimeUnsampled);
+  grVQTime = SampleWaveform(grVQTimeUnsampled);
+
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grVITime, noiseTerms);
+  AddGaussianNoise(grVQTime, noiseTerms);
+
+  delete grVITimeUnfiltered;
+  delete grVQTimeUnfiltered;
+  delete grVITimeUnsampled;
+  delete grVQTimeUnsampled;  
+}
+  
 rad::Signal::Signal(const Signal &s1) {
   sampleRate = s1.sampleRate;
   grVITime = (TGraph*)s1.grVITime->Clone();
