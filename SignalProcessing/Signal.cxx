@@ -19,6 +19,7 @@ rad::Signal::~Signal() {
   }
   delete grVITime;
   delete grVQTime;
+  grInputVoltage.clear();
 }
 
 rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate,
@@ -58,23 +59,24 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
     TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
     TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
 
+    delete grVITimeUnfiltered;
+    delete grVQTimeUnfiltered;
+    
     // Now do sampling
     // Use simple linear interpolation for the job
     std::cout<<"Sampling..."<<std::endl;
     TGraph* grVITimeTemp = SampleWaveform(grVITimeUnsampled);
     TGraph* grVQTimeTemp = SampleWaveform(grVQTimeUnsampled);
 
+    delete grVITimeUnsampled;
+    delete grVQTimeUnsampled;
+    
     std::cout<<"Adding noise..."<<std::endl;
     AddGaussianNoise(grVITimeTemp, noiseTerms);
     AddGaussianNoise(grVQTimeTemp, noiseTerms);
 
     vecVITime.push_back(grVITimeTemp);
     vecVQTime.push_back(grVQTimeTemp);
-    
-    delete grVITimeUnfiltered;
-    delete grVQTimeUnfiltered;
-    delete grVITimeUnsampled;
-    delete grVQTimeUnsampled;
   } // Generate individual waveforms
 
   std::cout<<"Summing fields"<<std::endl;
@@ -136,20 +138,21 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
   TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
 
+  delete grVITimeUnfiltered;
+  delete grVQTimeUnfiltered;
+  
   // Now do sampling
   // Use simple linear interpolation for the job
   std::cout<<"Sampling..."<<std::endl;
   grVITime = SampleWaveform(grVITimeUnsampled);
   grVQTime = SampleWaveform(grVQTimeUnsampled);
 
+  delete grVITimeUnsampled;
+  delete grVQTimeUnsampled; 
+  
   std::cout<<"Adding noise..."<<std::endl;
   AddGaussianNoise(grVITime, noiseTerms);
-  AddGaussianNoise(grVQTime, noiseTerms);
-
-  delete grVITimeUnfiltered;
-  delete grVQTimeUnfiltered;
-  delete grVITimeUnsampled;
-  delete grVQTimeUnsampled;  
+  AddGaussianNoise(grVQTime, noiseTerms); 
 }
   
 rad::Signal::Signal(const Signal &s1) {
