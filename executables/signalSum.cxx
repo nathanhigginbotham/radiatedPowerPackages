@@ -15,16 +15,16 @@ using namespace rad;
 
 int main()
 {
-  TVector3 antennaPoint1(0.05, 0.0, 0.0);
-  TVector3 dipoleDir1(0.0, 1.0, 0.0);
+  ROOT::Math::XYZPoint antennaPoint1(0.05, 0.0, 0.0);
+  ROOT::Math::XYZVector dipoleDir1(0.0, 1.0, 0.0);
   
   const double antennaAngle2 = 10.0 * TMath::Pi()/180;
-  TVector3 antennaPoint2(0.05*TMath::Cos(antennaAngle2), 0.05*TMath::Sin(antennaAngle2), 0.0);
-  TVector3 dipoleDir2(TMath::Sin(antennaAngle2), TMath::Cos(antennaAngle2), 0.0);
+  ROOT::Math::XYZPoint antennaPoint2(0.05*TMath::Cos(antennaAngle2), 0.05*TMath::Sin(antennaAngle2), 0.0);
+  ROOT::Math::XYZVector dipoleDir2(TMath::Sin(antennaAngle2), TMath::Cos(antennaAngle2), 0.0);
   
   const double antennaAngle3 = -10.0 * TMath::Pi()/180;
-  TVector3 dipoleDir3(TMath::Sin(antennaAngle3), TMath::Cos(antennaAngle3), 0.0); 
-  TVector3 antennaPoint3(0.05*TMath::Cos(antennaAngle3), 0.05*TMath::Sin(antennaAngle3), 0.0);
+  ROOT::Math::XYZPoint antennaPoint3(0.05*TMath::Cos(antennaAngle3), 0.05*TMath::Sin(antennaAngle3), 0.0);
+  ROOT::Math::XYZVector dipoleDir3(TMath::Sin(antennaAngle3), TMath::Cos(antennaAngle3), 0.0); 
   
   const double loadResistance = 70.0;
   const double noiseTemp = 0.0005;

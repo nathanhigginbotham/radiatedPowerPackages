@@ -14,6 +14,8 @@
 #include "TAxis.h"
 #include "TVector3.h"
 #include "TSpline.h"
+#include "Math/Vector3D.h"
+#include "Math/Point3D.h"
 
 #include "FFTtools.h"
 
@@ -56,14 +58,15 @@ rad::FieldPoint::FieldPoint() {
   acc[1] = new TGraph();
   acc[2] = new TGraph();
   tPrime = new TGraph();
-  antennaPoint = TVector3(0, 0, 0);
-  dipolePolarisation = TVector3(0, 0, 0);
+  antennaPoint = ROOT::Math::XYZPoint(0, 0, 0);
+  dipolePolarisation = ROOT::Math::XYZVector(0, 0, 0);
   
   inputFile = "";
 }
 
 // Parametrised constructor
-rad::FieldPoint::FieldPoint(const TVector3 inputAntenna, const TVector3 dipoleDir,
+rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
+			    const ROOT::Math::XYZVector dipoleDir,
 			    TString trajectoryFilePath) {
   EField[0] = new TGraph();
   EField[1] = new TGraph();
@@ -180,11 +183,11 @@ void rad::FieldPoint::GenerateFields(const double maxTime) {
   for (int e = 0; e < tree->GetEntries(); e++) {
     tree->GetEntry(e);
     if (time > maxTime) break;
-    TVector3 ePos(xPos, yPos, zPos);
-    TVector3 eVel(xVel, yVel, zVel);
-    TVector3 eAcc(xAcc, yAcc, zAcc);
-    TVector3 EFieldCalc = CalcEField(antennaPoint, ePos, eVel, eAcc);
-    TVector3 BFieldCalc = CalcBField(antennaPoint, ePos, eVel, eAcc);
+    ROOT::Math::XYZPoint ePos(xPos, yPos, zPos);
+    ROOT::Math::XYZVector eVel(xVel, yVel, zVel);
+    ROOT::Math::XYZVector eAcc(xAcc, yAcc, zAcc);
+    ROOT::Math::XYZVector EFieldCalc = CalcEField(antennaPoint, ePos, eVel, eAcc);
+    ROOT::Math::XYZVector BFieldCalc = CalcBField(antennaPoint, ePos, eVel, eAcc);
 
     EField[0]->SetPoint(EField[0]->GetN(), time, EFieldCalc.X());
     EField[1]->SetPoint(EField[1]->GetN(), time, EFieldCalc.Y());
@@ -378,10 +381,10 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
 TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
   TGraph *grPower = new TGraph();
   TGraph *grSMag = GetPoyntingMagTimeDomain();
-  TVector3 dipoleDir(0.0, 1.0, 0.0);
+  ROOT::Math::XYZVector dipoleDir(0.0, 1.0, 0.0);
   
   for (int i = 0; i < grSMag->GetN(); i++) {
-    TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
+    ROOT::Math::XYZPoint ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
     double Ae = CalcAeHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
     grPower->SetPoint(grPower->GetN(), grSMag->GetPointX(i), grSMag->GetPointY(i) * Ae);
   }
@@ -414,9 +417,9 @@ TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, cons
     (noiseTerms.at(term))->SetSigma();
   }
   
-  TVector3 dipoleDir(0.0, 1.0, 0.0);
+  ROOT::Math::XYZVector dipoleDir(0.0, 1.0, 0.0);
   for (int i = 0; i < grE->GetN(); i++) {
-    TVector3 ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
+    ROOT::Math::XYZPoint ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
     double Al = CalcAlHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
     double voltage = grE->GetPointY(i) * Al;
     // Now add the noise
@@ -451,7 +454,7 @@ TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedT
   setGraphAttr(gr);
   
   for (int i = 0; i < grEx->GetN(); i++) {
-    TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
+    ROOT::Math::XYZVector EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
     double voltage = EField.Dot(dipolePolarisation) * 0.0111 / TMath::Pi();
     voltage /= 2.0; // Account for re-radiated power
     gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
@@ -460,6 +463,16 @@ TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedT
   delete grEx;
   delete grEy;
   delete grEz;
+  return gr;
+}
+
+TGraph* rad::FieldPoint::GetDipoleLoadPowerTimeDomain(const double loadResistance,
+						      const bool kUseRetardedTime,
+						      int firstPoint, int lastPoint) {
+  TGraph* gr = GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
+  for (int i = 0; i < gr->GetN(); i++) {
+    gr->SetPointY(i, gr->GetPointY(i)*gr->GetPointY(i)/loadResistance);
+  }
   return gr;
 }
 

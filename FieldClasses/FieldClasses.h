@@ -8,6 +8,8 @@
 #include "TGraph.h"
 #include "TVector3.h"
 #include "TString.h"
+#include "Math/Vector3D.h"
+#include "Math/Point3D.h"
 
 #include "BasicFunctions/BasicFunctions.h"
 #include "SignalProcessing/NoiseFunc.h"
@@ -19,8 +21,8 @@ namespace rad
   private:
     TString inputFile;
     
-    TVector3 antennaPoint;
-    TVector3 dipolePolarisation;
+    ROOT::Math::XYZPoint antennaPoint;
+    ROOT::Math::XYZVector dipolePolarisation;
     // Time series for field components
     TGraph* EField[3];
     TGraph* BField[3];
@@ -40,7 +42,7 @@ namespace rad
       kX, kY, kZ
     };
     FieldPoint();
-    FieldPoint(const TVector3 inputAntenna, const TVector3 dipoleDir, TString trajectoryFilePath);
+    FieldPoint(const ROOT::Math::XYZPoint inputAntenna, const ROOT::Math::XYZVector dipoleDir, TString trajectoryFilePath);
     ~FieldPoint();
     FieldPoint(const FieldPoint &fp);
     
@@ -61,7 +63,11 @@ namespace rad
     
     TGraph* GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
 					   int firstPoint=-1, int lastPoint=-1);
-					   
+
+    TGraph* GetDipoleLoadPowerTimeDomain(const double loadResistance,
+					 const bool kUseRetardedTime=false,
+					 int firstPoint=-1, int lastPoint=-1);
+    
     TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
 
     // Frequency domain functions

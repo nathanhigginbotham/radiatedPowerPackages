@@ -2,7 +2,6 @@
 
 #include "TFile.h"
 #include "TGraph.h"
-#include "TVector3.h"
 
 #include "FieldClasses/FieldClasses.h"
 #include "SignalProcessing/Spectrogram.h"
@@ -11,8 +10,8 @@
 using namespace rad;
 
 int main() {
-  TVector3 antennaPoint(0.02, 0.0, 0.0);
-  TVector3 dipoleDir(0.0, 1.0, 0.0);
+  ROOT::Math::XYZPoint antennaPoint(0.02, 0.0, 0.0);
+  ROOT::Math::XYZVector dipoleDir(0.0, 1.0, 0.0);
   GaussianNoise* noise1 = new GaussianNoise(0.01, 70.0);
   
   FieldPoint *fp = new FieldPoint(antennaPoint, dipoleDir, "/home/sjones/work/qtnm/trajectories/electronTraj600us_89deg.root");

@@ -7,7 +7,6 @@
 // ROOT includes
 #include "TFile.h"
 #include "TTree.h"
-#include "TVector3.h"
 #include "TGraph.h"
 #include "TAxis.h"
 #include "TMath.h"
@@ -43,17 +42,17 @@ int main()
   const double maxTime = 1e-6;
   TGraph *grEy = new TGraph();
 
-  TVector3 antennaPoint(0.02, 0, 0);
+  ROOT::Math::XYZPoint antennaPoint(0.02, 0, 0);
   
   // Loop through the entries and get the fields at each point
   for (int e = 0; e < tree->GetEntries(); e++) {
     tree->GetEntry(e);
     if (time > maxTime) break;
-    TVector3 ePos(xPos, yPos, zPos);
-    TVector3 eVel(xVel, yVel, zVel);
-    TVector3 eAcc(xAcc, yAcc, zAcc);
-    TVector3 EFieldCalc = CalcEField(antennaPoint, ePos, eVel, eAcc);
-    TVector3 BFieldCalc = CalcBField(antennaPoint, ePos, eVel, eAcc);
+    ROOT::Math::XYZPoint ePos(xPos, yPos, zPos);
+    ROOT::Math::XYZVector eVel(xVel, yVel, zVel);
+    ROOT::Math::XYZVector eAcc(xAcc, yAcc, zAcc);
+    ROOT::Math::XYZVector EFieldCalc = CalcEField(antennaPoint, ePos, eVel, eAcc);
+    ROOT::Math::XYZVector BFieldCalc = CalcBField(antennaPoint, ePos, eVel, eAcc);
     grEy->SetPoint(grEy->GetN(), time, EFieldCalc.Y());
   }
   TGraph* grEyPower = FFTtools::makePowerSpectrumPeriodogram(grEy);

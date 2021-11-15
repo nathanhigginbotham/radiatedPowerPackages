@@ -5,7 +5,6 @@
 #include "TFile.h"
 #include "TH2.h"
 #include "TEllipse.h"
-#include "TVector3.h"
 #include "TTree.h"
 
 using namespace rad;
@@ -39,9 +38,9 @@ int main()
   tree->SetBranchAddress("zAcc", &zAcc);
 
   tree->GetEntry(1);
-  TVector3 pos(xPos, yPos, zPos);
-  TVector3 vel(xVel, yVel, zVel);
-  TVector3 acc(xAcc, yAcc, zAcc);
+  ROOT::Math::XYZPoint pos(xPos, yPos, zPos);
+  ROOT::Math::XYZVector vel(xVel, yVel, zVel);
+  ROOT::Math::XYZVector acc(xAcc, yAcc, zAcc);
 
   std::cout<<"x, y, z = "<<xPos<<", "<<yPos<<", "<<zPos<<std::endl;
   std::cout<<"xVel, yVel, zVel = "<<xVel<<", "<<yVel<<", "<<zVel<<std::endl;
@@ -49,17 +48,17 @@ int main()
   
   for (int x = 1; x <= nBinsX; x++) {
     for (int y = 1; y <= nBinsY; y++) {
-      TVector3 detPos(h2FieldXY->GetXaxis()->GetBinCenter(x),
+      ROOT::Math::XYZPoint detPos(h2FieldXY->GetXaxis()->GetBinCenter(x),
 		      h2FieldXY->GetYaxis()->GetBinCenter(y), 0.0);
-      TVector3 poyntingVec = CalcPoyntingVec(detPos, pos, vel, acc);
-      h2FieldXY->SetBinContent(x, y, poyntingVec.Mag());
+      ROOT::Math::XYZVector poyntingVec = CalcPoyntingVec(detPos, pos, vel, acc);
+      h2FieldXY->SetBinContent(x, y, sqrt(poyntingVec.Mag2()));
     }
     
     for (int z = 1; z <= nBinsZ; z++) {
-      TVector3 detPos(h2FieldXZ->GetXaxis()->GetBinCenter(x), 0.0,
+      ROOT::Math::XYZPoint detPos(h2FieldXZ->GetXaxis()->GetBinCenter(x), 0.0,
 		      h2FieldXZ->GetYaxis()->GetBinCenter(z));
-      TVector3 poyntingVec = CalcPoyntingVec(detPos, pos, vel, acc);
-      h2FieldXZ->SetBinContent(x, z, poyntingVec.Mag());
+      ROOT::Math::XYZVector poyntingVec = CalcPoyntingVec(detPos, pos, vel, acc);
+      h2FieldXZ->SetBinContent(x, z, sqrt(poyntingVec.Mag2()));
     }
   }
 

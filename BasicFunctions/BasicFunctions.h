@@ -3,6 +3,8 @@
 #define BASIC_FUNCTIONS_H
 
 #include "TVector3.h"
+#include "Math/Vector3D.h"
+#include "Math/Point3D.h"
 #include "TGraph.h"
 #include "FFTtools.h"
 #include "TH1.h"
@@ -11,16 +13,13 @@
 namespace rad
 {
 
-  TVector3 CalcEField(const TVector3 fieldPoint, const TVector3 ePosition,
-		      const TVector3 eVelocity, const TVector3 eAcceleration);
+  ROOT::Math::XYZVector CalcEField(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const ROOT::Math::XYZVector eVelocity, const ROOT::Math::XYZVector eAcceleration);
 
-  TVector3 CalcBField(const TVector3 fieldPoint, const TVector3 ePosition,
-		      const TVector3 eVelocity, const TVector3 eAcceleration);
+  ROOT::Math::XYZVector CalcBField(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const ROOT::Math::XYZVector eVelocity, const ROOT::Math::XYZVector eAcceleration);
+ 
+  ROOT::Math::XYZVector CalcPoyntingVec(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const ROOT::Math::XYZVector eVelocity, const ROOT::Math::XYZVector eAcceleration);
 
-  TVector3 CalcPoyntingVec(const TVector3 fieldPoint, const TVector3 ePosition,
-			   const TVector3 eVelocity, const TVector3 eAcceleration);
-
-  TVector3 CalcPoyntingVec(const TVector3 EField, const TVector3 BField);
+  ROOT::Math::XYZVector CalcPoyntingVec(const ROOT::Math::XYZVector EField, const ROOT::Math::XYZVector BField);
 
   void setGraphAttr(TGraph *gr);
   
@@ -28,13 +27,15 @@ namespace rad
   
   void SetHistAttr(TH2 *h);
 
-  double CalcAeHertzianDipole(const double wavelength, const TVector3 dipoleDir,
-			      const TVector3 ePosition, const TVector3 antennaPoint);
+  double CalcAeHertzianDipole(const double wavelength, const ROOT::Math::XYZVector dipoleDir,
+			      const ROOT::Math::XYZPoint ePosition,
+			      const ROOT::Math::XYZPoint antennaPoint);
   
-  double CalcAlHertzianDipole(const double wavelength, const TVector3 dipoleDir,
-			      const TVector3 ePosition, const TVector3 antennaPoint);
-
-  double CalcRetardedTime(const TVector3 fieldPoint, const TVector3 ePosition, const double labTime);
+  double CalcAlHertzianDipole(const double wavelength, const ROOT::Math::XYZVector dipoleDir,
+			      const ROOT::Math::XYZPoint ePosition,
+			      const ROOT::Math::XYZPoint antennaPoint);
+  
+  double CalcRetardedTime(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const double labTime);
 
   // Produces power spectrum with the desired normalisation
   TGraph* MakePowerSpectrumNorm(const TGraph* grWave);
