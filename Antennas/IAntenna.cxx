@@ -38,3 +38,15 @@ TVector3 rad::IAntenna::GetPhiHat(const TVector3 electronPosition) {
   vec.RotateUz(antennaZAxis);
   return vec;
 }
+
+double rad::IAntenna::GetTheta(const TVector3 electronPosition) {
+  const TVector3 rHat = (antennaPosition - electronPosition).Unit();
+  double theta = TMath::ACos(antennaZAxis.Dot(rHat));
+  return theta;
+}
+
+double rad::IAntenna::GetPhi(const TVector3 electronPosition) {
+  const TVector3 rHat = (antennaPosition - electronPosition).Unit();
+  double phi = TMath::ATan2(antennaYAxis.Dot(rHat), antennaXAxis.Dot(rHat));
+  return phi;
+}

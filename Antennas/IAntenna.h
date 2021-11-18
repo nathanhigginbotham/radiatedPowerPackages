@@ -31,7 +31,7 @@ namespace rad {
     // Overidden in each antenna derived class
     virtual TVector3 GetETheta();
     virtual TVector3 GetEPhi();
-
+    
   protected:
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The unit vector in the theta direction (relative to antenna axis) in global coords
@@ -40,6 +40,14 @@ namespace rad {
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The unit vector in the phi direction (relative to antenna axis) in global coords
     TVector3 GetPhiHat(const TVector3 electronPosition);
+
+    /// \param electronPosition The position of the electron in global coordinates
+    /// \returns The polar angle theta w.r.t. the antenna axis
+    double GetTheta(const TVector3 electronPosition);
+
+    /// \param electronPosition The position of the electron in global coordinates
+    /// \returns The azimuthal angle phi w.r.t. the antenna axis
+    double GetPhi(const TVector3 electronPosition);
     
   };
 
