@@ -50,6 +50,9 @@ namespace rad
     
     void GenerateFields(const double maxTime);
 
+    TGraph* GetPositionTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
+				  int firstPoint=-1, int lastPoint=-1);
+    
     TGraph* GetEFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
 				int firstPoint=-1, int lastPoint=-1);
     TGraph* GetBFieldTimeDomain(Coord_t coord, const bool kUseRetardedTime=false);

@@ -17,11 +17,11 @@ namespace rad {
     
     // Get the radiation patterns
     // Overidden in each antenna derived class
-    virtual TVector3 GetETheta();
-    virtual TVector3 GetEPhi();
+    virtual TVector3 GetETheta(const TVector3 electronPosition) = 0;
+    virtual TVector3 GetEPhi(const TVector3 electronPosition) = 0;
 
     // Returns the effective antenna height/length  
-    virtual double GetHEff();
+    virtual double GetHEff() = 0;
     
     double GetCentralFrequency(){ return centralFreq; }
     

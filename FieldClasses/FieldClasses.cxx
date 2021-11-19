@@ -253,6 +253,45 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetar
   return grOut;
 }
 
+TGraph* rad::FieldPoint::GetPositionTimeDomain(Coord_t coord, const bool kUseRetardedTime,
+					       int firstPoint, int lastPoint) {
+  TGraph* gr = 0;
+  TGraph* grOut = new TGraph();
+  if (coord == kX) {
+    gr = (TGraph*)pos[0]->Clone("grPosx");
+    grOut->GetYaxis()->SetTitle("x [V m^{-1}]");
+  }
+  else if (coord == kY) {
+    gr = (TGraph*)pos[1]->Clone("grPosy");
+    grOut->GetYaxis()->SetTitle("y [V m^{-1}]");
+  }
+  else if (coord = kZ) {
+    gr = (TGraph*)pos[2]->Clone("grPosz");
+    grOut->GetYaxis()->SetTitle("z [V m^{-1}]");
+  }
+
+  if (firstPoint < 0) firstPoint = 0;
+  if (lastPoint < 0) lastPoint = gr->GetN() - 1;
+
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Time [s]");
+  if (!kUseRetardedTime) {
+    for (int i = firstPoint; i <= lastPoint; i++) {
+      grOut->SetPoint(grOut->GetN(), gr->GetPointX(i), gr->GetPointY(i));
+    }
+  }
+  else {
+    TGraph* grRet = MakeRetardedTimeGraph(gr);
+    for (int i = firstPoint; i <= lastPoint; i++) {
+      grOut->SetPoint(grOut->GetN(), grRet->GetPointX(i), grRet->GetPointY(i));
+    }
+    delete grRet;
+  }
+  delete gr;
+  return grOut;
+}
+
+
 TGraph* rad::FieldPoint::GetEFieldMagTimeDomain(const bool kUseRetardedTime) {
   TGraph* grMag = new TGraph();
   assert((EField[0]->GetN() == EField[1]->GetN()) && (EField[1]->GetN() == EField[2]->GetN()));
@@ -475,6 +514,10 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
   TGraph* grEy = GetEFieldTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grEz = GetEFieldTimeDomain(kZ, kUseRetardedTime, firstPoint, lastPoint);
 
+  TGraph* grPosx = GetPositionTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph* grPosy = GetPositionTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph* grPosz = GetPositionTimeDomain(kZ, kUseRetardedTime, firstPoint, lastPoint);
+
   TGraph* gr = new TGraph();
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle("Voltage [V]");
@@ -482,7 +525,8 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
 
   for (int i = 0; i < grEx->GetN(); i++) {
     TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
-    double voltage = (EField.Dot(theAntenna->GetETheta()) + EField.Dot(theAntenna->GetEPhi())) * theAntenna->GetHEff();
+    TVector3 ePos(grPosx->GetPointY(i), grPosy->GetPointY(i), grPosz->GetPointY(i));
+    double voltage = (EField.Dot(theAntenna->GetETheta(ePos)) + EField.Dot(theAntenna->GetEPhi(ePos))) * theAntenna->GetHEff();
     voltage /= 2.0; // Account for re-radiated power
     gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
   }
@@ -490,6 +534,10 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
   delete grEx;
   delete grEy;
   delete grEz;
+  delete grPosx;
+  delete grPosy;
+  delete grPosz;
+  
   return gr;
 }
 
