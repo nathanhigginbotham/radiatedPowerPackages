@@ -42,33 +42,33 @@ rad::FieldPoint::~FieldPoint() {
 }
 
 // Default constructor
-rad::FieldPoint::FieldPoint() {
-  EField[0] = new TGraph();
-  EField[1] = new TGraph();
-  EField[2] = new TGraph();
-  BField[0] = new TGraph();
-  BField[1] = new TGraph();
-  BField[2] = new TGraph();
-  pos[0] = new TGraph();
-  pos[1] = new TGraph();
-  pos[2] = new TGraph();
-  vel[0] = new TGraph();
-  vel[1] = new TGraph();
-  vel[2] = new TGraph();
-  acc[0] = new TGraph();
-  acc[1] = new TGraph();
-  acc[2] = new TGraph();
-  tPrime = new TGraph();
-  antennaPoint = ROOT::Math::XYZPoint(0, 0, 0);
-  dipolePolarisation = ROOT::Math::XYZVector(0, 0, 0);
+// rad::FieldPoint::FieldPoint() {
+//   EField[0] = new TGraph();
+//   EField[1] = new TGraph();
+//   EField[2] = new TGraph();
+//   BField[0] = new TGraph();
+//   BField[1] = new TGraph();
+//   BField[2] = new TGraph();
+//   pos[0] = new TGraph();
+//   pos[1] = new TGraph();
+//   pos[2] = new TGraph();
+//   vel[0] = new TGraph();
+//   vel[1] = new TGraph();
+//   vel[2] = new TGraph();
+//   acc[0] = new TGraph();
+//   acc[1] = new TGraph();
+//   acc[2] = new TGraph();
+//   tPrime = new TGraph();
+//   antennaPoint = ROOT::Math::XYZPoint(0, 0, 0);
+//   dipolePolarisation = ROOT::Math::XYZVector(0, 0, 0);
   
-  inputFile = "";
-}
+//   inputFile = "";
+// }
 
 // Parametrised constructor
 rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
 			    const ROOT::Math::XYZVector dipoleDir,
-			    TString trajectoryFilePath, IAntenna* myAntenna) {
+			    TString trajectoryFilePath, IAntenna* myAnt) {
   EField[0] = new TGraph();
   EField[1] = new TGraph();
   EField[2] = new TGraph();
@@ -94,6 +94,8 @@ rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
   f->Close();
   delete f;
   inputFile = trajectoryFilePath;
+
+  myAntenna = myAnt;
 }
 
 // Copy constructor
@@ -111,6 +113,8 @@ rad::FieldPoint::FieldPoint(const FieldPoint &fp) {
     acc[coord] = (TGraph*)fp.acc[coord]->Clone();
   }
   tPrime = (TGraph*)fp.tPrime->Clone();
+
+  myAntenna = fp.myAntenna;
 }
 
 void rad::FieldPoint::ResetFields() {
@@ -507,8 +511,7 @@ TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedT
   return gr;
 }
 
-TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
-							 const bool kUseRetardedTime,
+TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(const bool kUseRetardedTime,
 							 int firstPoint, int lastPoint) {
   TGraph* grEx = GetEFieldTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grEy = GetEFieldTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
@@ -526,7 +529,7 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
   for (int i = 0; i < grEx->GetN(); i++) {
     TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
     TVector3 ePos(grPosx->GetPointY(i), grPosy->GetPointY(i), grPosz->GetPointY(i));
-    double voltage = (EField.Dot(theAntenna->GetETheta(ePos)) + EField.Dot(theAntenna->GetEPhi(ePos))) * theAntenna->GetHEff();
+    double voltage = (EField.Dot(myAntenna->GetETheta(ePos)) + EField.Dot(myAntenna->GetEPhi(ePos))) * myAntenna->GetHEff();
     voltage /= 2.0; // Account for re-radiated power
     gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
   }

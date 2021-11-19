@@ -37,12 +37,14 @@ namespace rad
     void ResetFields();
 
     TGraph* MakeRetardedTimeGraph(const TGraph* grOriginal);
+
+    IAntenna* myAntenna;
     
   public:
     enum Coord_t{
       kX, kY, kZ
     };
-    FieldPoint();
+    //FieldPoint();
     FieldPoint(const ROOT::Math::XYZPoint inputAntenna, const ROOT::Math::XYZVector dipoleDir,
 	       TString trajectoryFilePath, IAntenna* myAntenna = 0);
     ~FieldPoint();
@@ -69,8 +71,7 @@ namespace rad
     TGraph* GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
 					   int firstPoint=-1, int lastPoint=-1);
 
-    TGraph* GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
-					    const bool kUseRetardedTime=false,
+    TGraph* GetAntennaLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
 					    int firstPoint=-1, int lastPoint=-1);
 
     TGraph* GetDipoleLoadPowerTimeDomain(const double loadResistance,
