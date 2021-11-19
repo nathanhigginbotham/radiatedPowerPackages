@@ -41,30 +41,6 @@ rad::FieldPoint::~FieldPoint() {
   delete tPrime;
 }
 
-// Default constructor
-// rad::FieldPoint::FieldPoint() {
-//   EField[0] = new TGraph();
-//   EField[1] = new TGraph();
-//   EField[2] = new TGraph();
-//   BField[0] = new TGraph();
-//   BField[1] = new TGraph();
-//   BField[2] = new TGraph();
-//   pos[0] = new TGraph();
-//   pos[1] = new TGraph();
-//   pos[2] = new TGraph();
-//   vel[0] = new TGraph();
-//   vel[1] = new TGraph();
-//   vel[2] = new TGraph();
-//   acc[0] = new TGraph();
-//   acc[1] = new TGraph();
-//   acc[2] = new TGraph();
-//   tPrime = new TGraph();
-//   antennaPoint = ROOT::Math::XYZPoint(0, 0, 0);
-//   dipolePolarisation = ROOT::Math::XYZVector(0, 0, 0);
-  
-//   inputFile = "";
-// }
-
 // Parametrised constructor
 rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
 			    const ROOT::Math::XYZVector dipoleDir,

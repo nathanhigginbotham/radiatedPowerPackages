@@ -44,7 +44,7 @@ namespace rad
     enum Coord_t{
       kX, kY, kZ
     };
-    //FieldPoint();
+
     FieldPoint(const ROOT::Math::XYZPoint inputAntenna, const ROOT::Math::XYZVector dipoleDir,
 	       TString trajectoryFilePath, IAntenna* myAntenna = 0);
     ~FieldPoint();
