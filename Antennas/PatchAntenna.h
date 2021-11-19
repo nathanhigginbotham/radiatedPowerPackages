@@ -17,7 +17,6 @@ namespace rad {
     double L;
     double W;
     double relativePerm;
-    double centralFreq;
     
   public:
     PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antZAx,

@@ -25,6 +25,9 @@ namespace rad {
     TVector3 antennaXAxis;
     TVector3 antennaYAxis;
     TVector3 antennaZAxis;
+
+    /// Central frequency of the antenna bandwidth
+    double centralFreq;
     
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The unit vector in the theta direction (relative to antenna axis) in global coords
