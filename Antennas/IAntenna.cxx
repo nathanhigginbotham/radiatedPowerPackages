@@ -7,6 +7,12 @@
 #include "TVector3.h"
 #include "TMath.h"
 
+double rad::IAntenna::GetCentralWavelength() {
+  double freq = GetCentralFrequency();
+  double lambda = TMath::C() / freq;
+  return lambda;
+}
+
 TVector3 rad::IAntenna::GetThetaHat(const TVector3 electronPosition) {
   const TVector3 rHat = (antennaPosition - electronPosition).Unit();
   const double theta = TMath::ACos(antennaZAxis.Dot(rHat));
@@ -35,3 +41,4 @@ double rad::IAntenna::GetPhi(const TVector3 electronPosition) {
   double phi = TMath::ATan2(antennaYAxis.Dot(rHat), antennaXAxis.Dot(rHat));
   return phi;
 }
+

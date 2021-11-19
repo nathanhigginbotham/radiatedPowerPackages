@@ -24,6 +24,8 @@ namespace rad {
     
     TVector3 GetETheta(const TVector3 electronPosition);
     TVector3 GetEPhi(const TVector3 electronPosition);
+
+    double GetHEff();
   };
 }
 

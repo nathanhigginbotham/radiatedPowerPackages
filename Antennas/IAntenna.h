@@ -19,6 +19,13 @@ namespace rad {
     // Overidden in each antenna derived class
     virtual TVector3 GetETheta();
     virtual TVector3 GetEPhi();
+
+    // Returns the effective antenna height/length  
+    virtual double GetHEff();
+    
+    double GetCentralFrequency(){ return centralFreq; }
+    
+    double GetCentralWavelength();
     
   protected:
     TVector3 antennaPosition;

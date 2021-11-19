@@ -50,4 +50,6 @@ TVector3 rad::PatchAntenna::GetEPhi(const TVector3 electronPosition) {
   return phiHat;
 }
 
-
+double rad::PatchAntenna::GetHEff() {
+  return (GetCentralWavelength());
+}

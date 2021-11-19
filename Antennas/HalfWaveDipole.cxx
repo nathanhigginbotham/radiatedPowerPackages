@@ -35,3 +35,8 @@ TVector3 rad::HalfWaveDipole::GetEPhi(const TVector3 electronPosition) {
   // No radiation in the phi direction for a hertzian dipole
   return TVector3(0, 0, 0);
 }
+
+double rad::HalfWaveDipole::GetHEff() {
+  double heff = GetCentralWavelength() / TMath::Pi();
+  return heff;
+}

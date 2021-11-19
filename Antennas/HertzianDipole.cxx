@@ -4,6 +4,7 @@
 
 #include "Antennas/HertzianDipole.h"
 
+#include "TMath.h"
 #include "TVector3.h"
 
 rad::HertzianDipole::HertzianDipole(TVector3 antPos, TVector3 antXAx, TVector3 antZAx,
@@ -36,4 +37,7 @@ TVector3 rad::HertzianDipole::GetEPhi(const TVector3 electronPosition) {
   return TVector3(0, 0, 0);
 }
 
-
+double rad::HertzianDipole::GetHEff() {
+  double heff = GetCentralWavelength() * TMath::Sqrt( 3 / (8*TMath::Pi()) );
+  return heff;
+}
