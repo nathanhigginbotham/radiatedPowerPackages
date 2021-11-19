@@ -1,8 +1,24 @@
 // HertzianDipole.cxx
 
+#include <cassert>
+
 #include "Antennas/HertzianDipole.h"
 
 #include "TVector3.h"
+
+rad::HertzianDipole::HertzianDipole(TVector3 antPos, TVector3 antXAx, TVector3 antZAx) {
+  // Make sure all axes are unit vectors initially
+  antXAx = antXAx.Unit();
+  antZAx = antZAx.Unit();
+
+  // Make sure that axes are perpendicular to one another
+  assert(antXAx.Dot(antZAx) == 0);
+  
+  antennaPosition = antPos;
+  antennaXAxis = antXAx;
+  antennaYAxis = antZAx.Cross(antXAx);
+  antennaZAxis = antZAx;
+}
 
 // Calculate the radiation pattern in the theta hat direction
 TVector3 rad::HertzianDipole::GetETheta(const TVector3 electronPosition) {

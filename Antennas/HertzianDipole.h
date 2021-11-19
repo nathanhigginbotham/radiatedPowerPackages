@@ -15,6 +15,12 @@ namespace rad {
   class HertzianDipole : public IAntenna {
     
   public:
+    
+    /// \param antPos The position of the antenna
+    /// \param antXAx Antenna defined X axis
+    /// \param antZAx Antenna defined Z axis
+    HertzianDipole(TVector3 antPos, TVector3 antXAx, TVector3 antZAx);
+    
     TVector3 GetETheta(const TVector3 electronPosition);
     TVector3 GetEPhi(const TVector3 electronPosition);
   };

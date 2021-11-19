@@ -7,21 +7,6 @@
 #include "TVector3.h"
 #include "TMath.h"
 
-rad::IAntenna::IAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antYAx, TVector3 antZAx) {
-  // Make sure all axes are unit vectors initially
-  antXAx = antXAx.Unit();
-  antYAx = antYAx.Unit();
-  antZAx = antZAx.Unit();
-
-  // Make sure that axes are all perpendicular to one another
-  assert(antXAx.Dot(antYAx) == 0 && antYAx.Dot(antZAx) == 0 && antXAx.Dot(antZAx) == 0);
-  
-  antennaPosition = antPos;
-  antennaXAxis = antXAx;
-  antennaYAxis = antYAx;
-  antennaZAxis = antZAx;
-}
-
 TVector3 rad::IAntenna::GetThetaHat(const TVector3 electronPosition) {
   const TVector3 rHat = (antennaPosition - electronPosition).Unit();
   const double theta = TMath::ACos(antennaZAxis.Dot(rHat));
