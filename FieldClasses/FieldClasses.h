@@ -13,6 +13,7 @@
 
 #include "BasicFunctions/BasicFunctions.h"
 #include "SignalProcessing/NoiseFunc.h"
+#include "Antennas/IAntenna.h"
 
 namespace rad
 {
@@ -42,7 +43,8 @@ namespace rad
       kX, kY, kZ
     };
     FieldPoint();
-    FieldPoint(const ROOT::Math::XYZPoint inputAntenna, const ROOT::Math::XYZVector dipoleDir, TString trajectoryFilePath);
+    FieldPoint(const ROOT::Math::XYZPoint inputAntenna, const ROOT::Math::XYZVector dipoleDir,
+	       TString trajectoryFilePath, IAntenna* myAntenna = 0);
     ~FieldPoint();
     FieldPoint(const FieldPoint &fp);
     
@@ -63,6 +65,10 @@ namespace rad
     
     TGraph* GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
 					   int firstPoint=-1, int lastPoint=-1);
+
+    TGraph* GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
+					    const bool kUseRetardedTime=false,
+					    int firstPoint=-1, int lastPoint=-1);
 
     TGraph* GetDipoleLoadPowerTimeDomain(const double loadResistance,
 					 const bool kUseRetardedTime=false,

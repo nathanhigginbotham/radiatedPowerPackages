@@ -7,6 +7,7 @@
 #include "BasicFunctions/Constants.h"
 #include "BasicFunctions/BasicFunctions.h"
 #include "FieldClasses/FieldClasses.h"
+#include "Antennas/IAntenna.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -67,7 +68,7 @@ rad::FieldPoint::FieldPoint() {
 // Parametrised constructor
 rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
 			    const ROOT::Math::XYZVector dipoleDir,
-			    TString trajectoryFilePath) {
+			    TString trajectoryFilePath, IAntenna* myAntenna) {
   EField[0] = new TGraph();
   EField[1] = new TGraph();
   EField[2] = new TGraph();
@@ -100,6 +101,7 @@ rad::FieldPoint::FieldPoint(const FieldPoint &fp) {
   inputFile = fp.inputFile;
   antennaPoint = fp.antennaPoint;
   dipolePolarisation = fp.dipolePolarisation;
+  // theAntenna = fp.theAntenna;
   // Clone the field graphs
   for (int coord = 0; coord < 3; coord++) {
     EField[coord] = (TGraph*)fp.EField[coord]->Clone();
@@ -460,6 +462,31 @@ TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedT
     gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
   }
 
+  delete grEx;
+  delete grEy;
+  delete grEz;
+  return gr;
+}
+
+TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(IAntenna* theAntenna,
+							 const bool kUseRetardedTime,
+							 int firstPoint, int lastPoint) {
+  TGraph* grEx = GetEFieldTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph* grEy = GetEFieldTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
+  TGraph* grEz = GetEFieldTimeDomain(kZ, kUseRetardedTime, firstPoint, lastPoint);
+
+  TGraph* gr = new TGraph();
+  gr->GetXaxis()->SetTitle("Time [s]");
+  gr->GetYaxis()->SetTitle("Voltage [V]");
+  setGraphAttr(gr);
+
+  for (int i = 0; i < grEx->GetN(); i++) {
+    TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
+    double voltage = (EField.Dot(theAntenna->GetETheta()) + EField.Dot(theAntenna->GetEPhi())) * theAntenna->GetHEff();
+    voltage /= 2.0; // Account for re-radiated power
+    gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
+  }
+  
   delete grEx;
   delete grEy;
   delete grEz;
