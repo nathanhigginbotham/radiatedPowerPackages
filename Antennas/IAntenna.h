@@ -26,6 +26,8 @@ namespace rad {
     double GetCentralFrequency(){ return centralFreq; }
     
     double GetCentralWavelength();
+
+    TVector3 GetAntennaPosition(){ return antennaPosition; }
     
   protected:
     TVector3 antennaPosition;
