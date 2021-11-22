@@ -6,15 +6,19 @@
 #include "FieldClasses/FieldClasses.h"
 #include "SignalProcessing/Spectrogram.h"
 #include "SignalProcessing/NoiseFunc.h"
+#include "Antennas/HertzianDipole.h"
 
 using namespace rad;
 
 int main() {
-  ROOT::Math::XYZPoint antennaPoint(0.02, 0.0, 0.0);
-  ROOT::Math::XYZVector dipoleDir(0.0, 1.0, 0.0);
+  TVector3 antennaPoint(0.02, 0.0, 0.0);
+  TVector3 dipoleDirZ(0.0, 1.0, 0.0);
+  TVector3 dipoleDirX(1.0, 0.0, 0.0);
+  HertzianDipole* myAntenna = new HertzianDipole(antennaPoint, dipoleDirX, dipoleDirZ, 27.01e9);
+  
   GaussianNoise* noise1 = new GaussianNoise(0.01, 70.0);
   
-  FieldPoint *fp = new FieldPoint(antennaPoint, dipoleDir, "/home/sjones/work/qtnm/trajectories/electronTraj600us_89deg.root");
+  FieldPoint *fp = new FieldPoint("/home/sjones/work/qtnm/trajectories/electronTraj600us_89deg.root", myAntenna);
   fp->GenerateFields(50e-6);
   std::cout<<"Generated the fields for the field point"<<std::endl;
   
