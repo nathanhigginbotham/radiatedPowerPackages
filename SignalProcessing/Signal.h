@@ -67,6 +67,10 @@ namespace rad
     
     TGraph* GetVITimeDomain();
     TGraph* GetVQTimeDomain();
+
+    TGraph* GetVIPowerNorm(const double loadResistance);
+    TGraph* GetVQPowerNorm(const double loadResistance);
+    
   };
 }
 

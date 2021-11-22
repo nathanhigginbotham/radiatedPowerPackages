@@ -262,3 +262,25 @@ TGraph* rad::Signal::GetVQUnsampledTimeDomain(LocalOscillator lo,
   delete grVQTimeUnfiltered;
   return grVQTimeUnsampled;
 }
+
+TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance) {
+  TGraph* grOut = MakePowerSpectrumNorm(grVITime);
+  for (int i = 0; i < grOut->GetN(); i++) {
+    grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
+  }
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Frequency [Hz]");
+  grOut->GetYaxis()->SetTitle("#frac{V_{I}^{2}}{R} #time (#Deltat)^{2} [W s^{2}]");
+  return grOut;
+}
+
+TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance) {
+  TGraph* grOut = MakePowerSpectrumNorm(grVQTime);
+  for (int i = 0; i < grOut->GetN(); i++) {
+    grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
+  }
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Frequency [Hz]");
+  grOut->GetYaxis()->SetTitle("#frac{V_{Q}^{2}}{R} #time (#Deltat)^{2} [W s^{2}]");
+  return grOut;
+}
