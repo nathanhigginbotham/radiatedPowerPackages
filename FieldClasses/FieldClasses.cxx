@@ -42,9 +42,7 @@ rad::FieldPoint::~FieldPoint() {
 }
 
 // Parametrised constructor
-rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
-			    const ROOT::Math::XYZVector dipoleDir,
-			    TString trajectoryFilePath, IAntenna* myAnt) {
+rad::FieldPoint::FieldPoint(TString trajectoryFilePath, IAntenna* myAnt) {
   EField[0] = new TGraph();
   EField[1] = new TGraph();
   EField[2] = new TGraph();
@@ -61,8 +59,6 @@ rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
   acc[1] = new TGraph();
   acc[2] = new TGraph();
   tPrime = new TGraph();
-  antennaPoint = inputAntenna;
-  dipolePolarisation = dipoleDir;
   
   // Now check that the input file exists
   TFile* f = new TFile(trajectoryFilePath, "read");
@@ -77,9 +73,7 @@ rad::FieldPoint::FieldPoint(const ROOT::Math::XYZPoint inputAntenna,
 // Copy constructor
 rad::FieldPoint::FieldPoint(const FieldPoint &fp) {
   inputFile = fp.inputFile;
-  antennaPoint = fp.antennaPoint;
-  dipolePolarisation = fp.dipolePolarisation;
-  // theAntenna = fp.theAntenna;
+
   // Clone the field graphs
   for (int coord = 0; coord < 3; coord++) {
     EField[coord] = (TGraph*)fp.EField[coord]->Clone();
@@ -160,6 +154,8 @@ void rad::FieldPoint::GenerateFields(const double maxTime) {
   tree->SetBranchAddress("xAcc", &xAcc);
   tree->SetBranchAddress("yAcc", &yAcc);
   tree->SetBranchAddress("zAcc", &zAcc);
+
+  ROOT::Math::XYZPoint antennaPoint((myAntenna->GetAntennaPosition()).X(), (myAntenna->GetAntennaPosition()).Y(), (myAntenna->GetAntennaPosition()).Z());
   
   // Loop through the entries and get the fields at each point
   for (int e = 0; e < tree->GetEntries(); e++) {
@@ -239,15 +235,15 @@ TGraph* rad::FieldPoint::GetPositionTimeDomain(Coord_t coord, const bool kUseRet
   TGraph* grOut = new TGraph();
   if (coord == kX) {
     gr = (TGraph*)pos[0]->Clone("grPosx");
-    grOut->GetYaxis()->SetTitle("x [V m^{-1}]");
+    grOut->GetYaxis()->SetTitle("x [m]");
   }
   else if (coord == kY) {
     gr = (TGraph*)pos[1]->Clone("grPosy");
-    grOut->GetYaxis()->SetTitle("y [V m^{-1}]");
+    grOut->GetYaxis()->SetTitle("y [m]");
   }
   else if (coord = kZ) {
     gr = (TGraph*)pos[2]->Clone("grPosz");
-    grOut->GetYaxis()->SetTitle("z [V m^{-1}]");
+    grOut->GetYaxis()->SetTitle("z [m]");
   }
 
   if (firstPoint < 0) firstPoint = 0;
@@ -399,94 +395,6 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
   }
 }
 
-TGraph* rad::FieldPoint::GetDipolePowerTimeDomain(const bool kUseRetardedTime) {
-  TGraph *grPower = new TGraph();
-  TGraph *grSMag = GetPoyntingMagTimeDomain();
-  ROOT::Math::XYZVector dipoleDir(0.0, 1.0, 0.0);
-  
-  for (int i = 0; i < grSMag->GetN(); i++) {
-    ROOT::Math::XYZPoint ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
-    double Ae = CalcAeHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
-    grPower->SetPoint(grPower->GetN(), grSMag->GetPointX(i), grSMag->GetPointY(i) * Ae);
-  }
-  setGraphAttr(grPower);
-
-  if (!kUseRetardedTime) {
-    delete grSMag;
-    return grPower;
-  }
-  else {
-    TGraph* grPowerRet = MakeRetardedTimeGraph(grPower);
-    delete grPower;
-    delete grSMag;
-    return grPowerRet;
-  }
-}
-
-TGraph* rad::FieldPoint::GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime,
-							     int firstPoint, int lastPoint,
-							     std::vector<GaussianNoise*> noiseTerms)
-{
-  TGraph* gr = new TGraph();
-  TGraph* grE = GetEFieldTimeDomain(coord, false, firstPoint, lastPoint);
-  gr->GetXaxis()->SetTitle("Time [s]");
-  gr->GetYaxis()->SetTitle(grE->GetYaxis()->GetTitle());
-  
-  double fs = 1.0 / (grE->GetPointX(1) - grE->GetPointX(0));
-  for (int term = 0; term < noiseTerms.size(); term++) {
-    (noiseTerms.at(term))->SetSampleFreq(fs);
-    (noiseTerms.at(term))->SetSigma();
-  }
-  
-  ROOT::Math::XYZVector dipoleDir(0.0, 1.0, 0.0);
-  for (int i = 0; i < grE->GetN(); i++) {
-    ROOT::Math::XYZPoint ePos(pos[0]->GetPointY(i), pos[1]->GetPointY(i), pos[2]->GetPointY(i));
-    double Al = CalcAlHertzianDipole(0.0111, dipoleDir, ePos, antennaPoint);
-    double voltage = grE->GetPointY(i) * Al;
-    // Now add the noise
-    for (int term = 0; term < noiseTerms.size(); term++) {
-      voltage += (noiseTerms.at(term))->GetNoiseVoltage();
-    }
-    gr->SetPoint(gr->GetN(), grE->GetPointX(i), voltage);
-  }
-  setGraphAttr(gr);
-
-  delete grE;
-  
-  if (!kUseRetardedTime) {
-    return gr;
-  }
-  else {
-    TGraph* grRet = MakeRetardedTimeGraph(gr);
-    delete gr;
-    return grRet;
-  }
-} 
-
-TGraph* rad::FieldPoint::GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime,
-							int firstPoint, int lastPoint) {
-  TGraph* grEx = GetEFieldTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
-  TGraph* grEy = GetEFieldTimeDomain(kY, kUseRetardedTime, firstPoint, lastPoint);
-  TGraph* grEz = GetEFieldTimeDomain(kZ, kUseRetardedTime, firstPoint, lastPoint);
-
-  TGraph* gr = new TGraph();
-  gr->GetXaxis()->SetTitle("Time [s]");
-  gr->GetYaxis()->SetTitle("Voltage [V]");
-  setGraphAttr(gr);
-  
-  for (int i = 0; i < grEx->GetN(); i++) {
-    ROOT::Math::XYZVector EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
-    double voltage = EField.Dot(dipolePolarisation) * 0.0111 / TMath::Pi();
-    voltage /= 2.0; // Account for re-radiated power
-    gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
-  }
-
-  delete grEx;
-  delete grEy;
-  delete grEz;
-  return gr;
-}
-
 TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(const bool kUseRetardedTime,
 							 int firstPoint, int lastPoint) {
   TGraph* grEx = GetEFieldTimeDomain(kX, kUseRetardedTime, firstPoint, lastPoint);
@@ -520,10 +428,10 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(const bool kUseRetarded
   return gr;
 }
 
-TGraph* rad::FieldPoint::GetDipoleLoadPowerTimeDomain(const double loadResistance,
-						      const bool kUseRetardedTime,
-						      int firstPoint, int lastPoint) {
-  TGraph* gr = GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
+TGraph* rad::FieldPoint::GetAntennaLoadPowerTimeDomain(const double loadResistance,
+						       const bool kUseRetardedTime,
+						       int firstPoint, int lastPoint) {
+  TGraph* gr = GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
   for (int i = 0; i < gr->GetN(); i++) {
     gr->SetPointY(i, gr->GetPointY(i)*gr->GetPointY(i)/loadResistance);
   }
@@ -611,70 +519,11 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
   return grTotal;
 }
 
-TGraph* rad::FieldPoint::GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime, int firstPoint, int lastPoint, std::vector<GaussianNoise*> noiseTerms) {
-  TGraph* grVTime = GetDipoleComponentVoltageTimeDomain(coord, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
-  TGraph* grPower = MakePowerSpectrumNorm(grVTime);
-  
-  if (coord == kX) {
-    grPower->GetYaxis()->SetTitle("V_{x}^{2} (#Deltat)^{2} [V^{2} s^{2}]");
-  }
-  else if (coord == kY) {
-    grPower->GetYaxis()->SetTitle("V_{y}^{2} (#Deltat)^{2} [V^{2} s^{2}]");
-  }
-  else if (coord == kZ) {
-    grPower->GetYaxis()->SetTitle("V_{z}^{2} (#Deltat)^{2} [V^{2} s^{2}]");
-  }
-  setGraphAttr(grPower);
-  grPower->GetXaxis()->SetTitle("Frequency [Hz]");
-  
-  delete grVTime;
-  return grPower;
-}
-
-TGraph* rad::FieldPoint::GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime,
-								int firstPoint, int lastPoint,
-								std::vector<GaussianNoise*> noiseTerms) {
-  TGraph* grTotal = new TGraph();
-  TGraph *grX = GetDipoleComponentVoltagePowerSpectrumNorm(kX, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
-  TGraph *grY = GetDipoleComponentVoltagePowerSpectrumNorm(kY, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
-  TGraph *grZ = GetDipoleComponentVoltagePowerSpectrumNorm(kZ, kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
-  for (int n = 0; n < grX->GetN(); n++) {
-    double tot = grX->GetPointY(n) + grY->GetPointY(n) + grZ->GetPointY(n);
-    grTotal->SetPoint(n, grX->GetPointX(n), tot);
-  }
-  setGraphAttr(grTotal);
-  grTotal->GetYaxis()->SetTitle("V^{2} (#Deltat)^{2} [V^{2} s^{2}]");
-  grTotal->GetXaxis()->SetTitle("Frequency [Hz]");
-
-  delete grX;
-  delete grY;
-  delete grZ;
-  return grTotal;
-}
-
-TGraph* rad::FieldPoint::GetDipolePowerSpectrumNorm(const bool kUseRetardedTime,
-						    int firstPoint, int lastPoint,
-						    std::vector<GaussianNoise*> noiseTerms) {
-  TGraph* grVoltagePower = GetDipoleTotalVoltagePowerSpectrumNorm(kUseRetardedTime, firstPoint, lastPoint, noiseTerms);
-  TGraph* grDipolePower = new TGraph();
-
-  for (int i = 0; i < grVoltagePower->GetN(); i++) {
-    double powerWatts = grVoltagePower->GetPointY(i) * TMath::C() * EPSILON0;
-    grDipolePower->SetPoint(i, grVoltagePower->GetPointX(i), powerWatts);
-  }
-  setGraphAttr(grDipolePower);
-  grDipolePower->GetXaxis()->SetTitle("Frequency [Hz]");
-  grDipolePower->GetYaxis()->SetTitle("Power [W]");
-  
-  delete grVoltagePower;
-  return grDipolePower;
-}
-
-TGraph* rad::FieldPoint::GetDipoleLoadPowerSpectrumNorm(const double resistance,
-							const bool kUseRetardedTime,
-							int firstPoint, int lastPoint,
-							std::vector<GaussianNoise*> noiseTerms) {
-  TGraph* grVoltage = GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
+TGraph* rad::FieldPoint::GetAntennaLoadPowerSpectrumNorm(const double resistance,
+							 const bool kUseRetardedTime,
+							 int firstPoint, int lastPoint,
+							 std::vector<GaussianNoise*> noiseTerms) {
+  TGraph* grVoltage = GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grPower = MakePowerSpectrumNorm(grVoltage);
 
   for (int i = 0; i < grPower->GetN(); i++) {

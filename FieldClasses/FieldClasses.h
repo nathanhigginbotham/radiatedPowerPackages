@@ -22,12 +22,11 @@ namespace rad
   private:
     TString inputFile;
     
-    ROOT::Math::XYZPoint antennaPoint;
-    ROOT::Math::XYZVector dipolePolarisation;
     // Time series for field components
     TGraph* EField[3];
     TGraph* BField[3];
 
+    // Time series of electron dynamics
     TGraph* pos[3];
     TGraph* vel[3];
     TGraph* acc[3];
@@ -38,16 +37,17 @@ namespace rad
 
     TGraph* MakeRetardedTimeGraph(const TGraph* grOriginal);
 
-    IAntenna* myAntenna;
+    IAntenna* myAntenna; // The chosen antenna, contains position and direction info
     
   public:
     enum Coord_t{
       kX, kY, kZ
     };
 
-    FieldPoint(const ROOT::Math::XYZPoint inputAntenna, const ROOT::Math::XYZVector dipoleDir,
-	       TString trajectoryFilePath, IAntenna* myAntenna = 0);
+    FieldPoint(TString trajectoryFilePath, IAntenna* myAntenna);
+    
     ~FieldPoint();
+    
     FieldPoint(const FieldPoint &fp);
     
     void GenerateFields(const double maxTime);
@@ -63,22 +63,12 @@ namespace rad
     TGraph* GetEFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetBFieldMagTimeDomain(const bool kUseRetardedTime=false);
     TGraph* GetPoyntingMagTimeDomain(const bool kUseRetardedTime=false);
-
-    TGraph* GetDipoleComponentVoltageTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
-						int firstPoint=-1, int lastPoint=-1,
-						std::vector<GaussianNoise*> noiseTerms={});
     
-    TGraph* GetDipoleLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
-					   int firstPoint=-1, int lastPoint=-1);
-
     TGraph* GetAntennaLoadVoltageTimeDomain(const bool kUseRetardedTime=false,
 					    int firstPoint=-1, int lastPoint=-1);
-
-    TGraph* GetDipoleLoadPowerTimeDomain(const double loadResistance,
-					 const bool kUseRetardedTime=false,
-					 int firstPoint=-1, int lastPoint=-1);
-    
-    TGraph* GetDipolePowerTimeDomain(const bool kUseRetardedTime=false);
+    TGraph* GetAntennaLoadPowerTimeDomain(const double loadResistance,
+					  const bool kUseRetardedTime=false,
+					  int firstPoint=-1, int lastPoint=-1);
 
     // Frequency domain functions
     TGraph* GetEFieldPeriodogram(Coord_t coord, const bool kUseRetardedTime=false);
@@ -88,23 +78,11 @@ namespace rad
     // things such as zero padding and the sample rate
     TGraph* GetEFieldPowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false);
     TGraph* GetTotalEFieldPowerSpectrumNorm(const bool kUseRetardedTime=false);
-
-    TGraph* GetDipoleComponentVoltagePowerSpectrumNorm(Coord_t coord, const bool kUseRetardedTime=false,
-						       int firstPoint=-1, int lastPoint=-1,
-						       std::vector<GaussianNoise*> noiseTerms={});
-    TGraph* GetDipoleTotalVoltagePowerSpectrumNorm(const bool kUseRetardedTime=false,
-						   int firstPoint=-1, int lastPoint=-1,
-						   std::vector<GaussianNoise*> noiseTerms={});
-
-    // Calculate the power collected by a Hertzian dipole in the frequency domain
-    TGraph* GetDipolePowerSpectrumNorm(const bool kUseRetardedTime=false,
-				       int firstPoint=-1, int lastPoint=-1,
-				       std::vector<GaussianNoise*> noiseTerms={});
     
-    TGraph* GetDipoleLoadPowerSpectrumNorm(const double resistance,
-					   const bool kUseRetardedTime=false,
-					   int firstPoint=-1, int lastPoint=-1,
-					   std::vector<GaussianNoise*> noiseTerms={});
+    TGraph* GetAntennaLoadPowerSpectrumNorm(const double resistance,
+					    const bool kUseRetardedTime=false,
+					    int firstPoint=-1, int lastPoint=-1,
+					    std::vector<GaussianNoise*> noiseTerms={});
     
     // Functions for various useful things such as the final time in a file
     double GetFinalTime();

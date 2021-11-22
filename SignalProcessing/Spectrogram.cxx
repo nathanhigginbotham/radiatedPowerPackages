@@ -37,7 +37,7 @@ TH2D* rad::Spectrogram::MakeSpectrogram(const int NSamplesPerTimeBin, const bool
   SetHistAttr(h2);
   // Loop through time bins and generate a power spectrum at each point
   for (int t = 1; t <= nTimeBins; t++) {
-    TGraph* grPower = fieldPoint->GetDipolePowerSpectrumNorm(kUseRetardedTime, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin - 1, fNoise);
+    TGraph* grPower = fieldPoint->GetAntennaLoadPowerSpectrumNorm(70.0, kUseRetardedTime, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin - 1, fNoise);
     // Now add data from the TGraph to the histogram
     for (int i = 0; i < grPower->GetN(); i++) {
       h2->SetBinContent(t, i+1, grPower->GetPointY(i));

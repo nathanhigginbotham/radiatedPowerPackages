@@ -47,7 +47,7 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
   
   // For each antenna point generate the field and do the signal processing
   for (int point = 0; point < fp.size(); point++) {
-    TGraph* grInputVoltageTemp = fp[point].GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
+    TGraph* grInputVoltageTemp = fp[point].GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
     grInputVoltage.push_back(grInputVoltageTemp);
     
     std::cout<<"Performing the downmixing..."<<std::endl;
@@ -126,7 +126,7 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   grVITime->GetXaxis()->SetTitle("Time [s]");
   grVQTime->GetXaxis()->SetTitle("Time [s]");
 
-  TGraph* grInputVoltageTemp = fp.GetDipoleLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
+  TGraph* grInputVoltageTemp = fp.GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
   grInputVoltage.push_back(grInputVoltageTemp);
     
   std::cout<<"Performing the downmixing..."<<std::endl;

@@ -31,7 +31,7 @@ namespace rad
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
     double sampleRate;
-
+    
     TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
     TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
     TGraph* SampleWaveform(TGraph* grInput);
