@@ -270,7 +270,7 @@ TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance) {
   }
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Frequency [Hz]");
-  grOut->GetYaxis()->SetTitle("#frac{V_{I}^{2}}{R} #time (#Deltat)^{2} [W s^{2}]");
+  grOut->GetYaxis()->SetTitle("#frac{V_{I}^{2}}{R} #times (#Deltat)^{2} [W s^{2}]");
   return grOut;
 }
 
@@ -281,6 +281,6 @@ TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance) {
   }
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Frequency [Hz]");
-  grOut->GetYaxis()->SetTitle("#frac{V_{Q}^{2}}{R} #time (#Deltat)^{2} [W s^{2}]");
+  grOut->GetYaxis()->SetTitle("#frac{V_{Q}^{2}}{R} #times (#Deltat)^{2} [W s^{2}]");
   return grOut;
 }
