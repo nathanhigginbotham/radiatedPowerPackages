@@ -42,3 +42,9 @@ double rad::IAntenna::GetPhi(const TVector3 electronPosition) {
   return phi;
 }
 
+void rad::IAntenna::SetBandwidth(const double lowerLimit, const double upperLimit) {
+  assert(lowerLimit < upperLimit);
+  lowerBandwidth = lowerLimit;
+  upperBandwidth = upperLimit;
+}
+

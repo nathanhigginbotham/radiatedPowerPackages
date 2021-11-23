@@ -28,13 +28,23 @@ namespace rad {
     double GetCentralWavelength();
 
     TVector3 GetAntennaPosition(){ return antennaPosition; }
+
+    double GetBandwidthUpperLimit() { return upperBandwidth; }
+
+    double GetBandwidthLowerLimit() { return lowerBandwidth; }
+
+    void SetBandwidth(const double lowerLimit=-DBL_MAX, const double upperLimit=DBL_MAX);
     
   protected:
     TVector3 antennaPosition;
     TVector3 antennaXAxis;
     TVector3 antennaYAxis;
     TVector3 antennaZAxis;
-
+    
+    // The upper and lower frequency bandwidths 
+    double lowerBandwidth;
+    double upperBandwidth;
+    
     /// Central frequency of the antenna bandwidth
     double centralFreq;
     

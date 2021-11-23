@@ -19,8 +19,9 @@ rad::HalfWaveDipole::HalfWaveDipole(TVector3 antPos, TVector3 antXAx, TVector3 a
   antennaXAxis = antXAx;
   antennaYAxis = antZAx.Cross(antXAx);
   antennaZAxis = antZAx;
-
   centralFreq = freq;
+
+  SetBandwidth();
 }
 
 // Calculate the radiation pattern in the theta hat direction

@@ -20,12 +20,12 @@ rad::PatchAntenna::PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antZA
   antennaZAxis = antZAx;
   antennaYAxis = antZAx.Cross(antXAx);
   
-  
   L = length;
   W = width;
   relativePerm = permittivity;
-
   centralFreq = TMath::C() / (2.0 * L * TMath::Sqrt(relativePerm));
+  
+  SetBandwidth();
 }
 
 TVector3 rad::PatchAntenna::GetETheta(const TVector3 electronPosition) {
@@ -51,5 +51,6 @@ TVector3 rad::PatchAntenna::GetEPhi(const TVector3 electronPosition) {
 }
 
 double rad::PatchAntenna::GetHEff() {
-  return (GetCentralWavelength());
+  double LEff = TMath::C() / GetCentralFrequency();
+  return LEff;
 }
