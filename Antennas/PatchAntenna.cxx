@@ -51,6 +51,6 @@ TVector3 rad::PatchAntenna::GetEPhi(const TVector3 electronPosition) {
 }
 
 double rad::PatchAntenna::GetHEff() {
-  double LEff = TMath::C() / GetCentralFrequency();
+  double LEff = TMath::C() / (2*GetCentralFrequency());
   return LEff;
 }
