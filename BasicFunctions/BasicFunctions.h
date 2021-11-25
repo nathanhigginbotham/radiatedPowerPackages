@@ -51,6 +51,10 @@ namespace rad
 
   // CDF of the Rayleigh distribution
   double RayleighCDF(const double x, const double sigma);
+
+  double RayleighPDFFunc(double *x, double *par);
+  
+  void AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff);
 }
  
 #endif

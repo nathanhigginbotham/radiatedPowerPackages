@@ -11,6 +11,8 @@
 #include "TMath.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TF1.h"
+#include "TRandom3.h"
 
 #include "FFTtools.h"
 #include "FFTWComplex.h"
@@ -203,4 +205,28 @@ double rad::RayleighPDF(const double x, const double sigma) {
 double rad::RayleighCDF(const double x, const double sigma) {
   double f = 1.0 - exp( -1*x*x / (2*sigma*sigma) );
   return f;
+}
+
+double rad::RayleighPDFFunc(double *x, double *par) {
+  Double_t xx = x[0];
+  Double_t retVal = RayleighPDF(xx, par[0]);
+  return retVal;
+}
+
+void rad::AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff) {
+  TRandom3 r(0);
+  const double sampleRate = 2*grIn->GetPointX(grIn->GetN()-1);
+  const double deltaT = 1.0 / sampleRate;
+  const double deltaF = grIn->GetPointX(1) - grIn->GetPointX(0);
+  const double sigma = TMath::Sqrt( TMath::K() * Teff * sampleRate );
+  TF1* f1 = new TF1("f1", RayleighPDFFunc, 0, 4*sigma, 1);
+  f1->SetParameter(0, sigma);
+
+  // Now loop through the bins of the graph and add the noise
+  for (int i = 0; i < grIn->GetN(); i++) {
+    double noise = pow(f1->GetRandom()*sqrt(0.5), 2)*(1/deltaF)*(deltaT);
+    grIn->SetPointY(i, grIn->GetPointY(i) + noise);
+  }
+  
+  delete f1;
 }
