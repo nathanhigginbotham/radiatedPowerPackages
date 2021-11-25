@@ -45,7 +45,12 @@ namespace rad
 
   // Implements a simple band pass filter
   TGraph* BandPassFilter(const TGraph* grWave, const double minFreq, const double maxFreq);
-  
+
+  // PDF of the Rayleigh distribution
+  double RayleighPDF(const double x, const double sigma);
+
+  // CDF of the Rayleigh distribution
+  double RayleighCDF(const double x, const double sigma);
 }
  
 #endif

@@ -1,4 +1,7 @@
 // BasicFunctions.cxx
+
+#include <cmath>
+
 #include "BasicFunctions/BasicFunctions.h"
 #include "BasicFunctions/Constants.h"
 
@@ -79,6 +82,7 @@ void rad::SetHistAttr(TH1 *h)
   h->GetYaxis()->SetTitleSize(0.05);
   h->GetXaxis()->SetLabelSize(0.05);
   h->GetYaxis()->SetLabelSize(0.05);
+  h->SetLineWidth(2);
 }
 
 void rad::SetHistAttr(TH2 *h)
@@ -146,6 +150,7 @@ TGraph* rad::MakePowerSpectrumNorm(const TGraph* grWave)
   }
 
   TGraph *grPower = new TGraph(newLength,newX,newY);
+  setGraphAttr(grPower);
   delete [] theFFT;
   delete [] newY;
   delete [] newX;
@@ -187,4 +192,15 @@ TGraph* rad::BandPassFilter(const TGraph* grWave, const double minFreq, const do
     delete [] theFFT;
     delete [] filteredVals;
     return grFiltered;
+}
+
+double rad::RayleighPDF(const double x, const double sigma) {
+  double sigmaSq = sigma*sigma;
+  double prob = (x / sigmaSq) * exp(-1*x*x / (2*sigmaSq));
+  return prob;
+}
+
+double rad::RayleighCDF(const double x, const double sigma) {
+  double f = 1.0 - exp( -1*x*x / (2*sigma*sigma) );
+  return f;
 }
