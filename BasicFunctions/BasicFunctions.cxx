@@ -208,13 +208,13 @@ double rad::RayleighCDF(const double x, const double sigma) {
 }
 
 double rad::RayleighPDFFunc(double *x, double *par) {
-  Double_t xx = x[0];
-  Double_t retVal = RayleighPDF(xx, par[0]);
+  double xx = x[0];
+  double retVal = RayleighPDF(xx, par[0]);
   return retVal;
 }
 
-void rad::AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff) {
-  TRandom3 r(0);
+void rad::AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff, const int seed) {
+  gRandom->SetSeed(seed);
   const double sampleRate = 2*grIn->GetPointX(grIn->GetN()-1);
   const double deltaT = 1.0 / sampleRate;
   const double deltaF = grIn->GetPointX(1) - grIn->GetPointX(0);

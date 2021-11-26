@@ -54,7 +54,7 @@ namespace rad
 
   double RayleighPDFFunc(double *x, double *par);
   
-  void AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff);
+  void AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff, const int seed=0);
 }
  
 #endif
