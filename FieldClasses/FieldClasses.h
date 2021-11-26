@@ -26,10 +26,8 @@ namespace rad
     TGraph* EField[3];
     TGraph* BField[3];
 
-    // Time series of electron dynamics
+    // Time series of electron position
     TGraph* pos[3];
-    TGraph* vel[3];
-    TGraph* acc[3];
 
     TGraph* tPrime; // Relationship between time and retarded time
     

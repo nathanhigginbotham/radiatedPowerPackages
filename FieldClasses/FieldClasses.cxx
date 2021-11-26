@@ -31,12 +31,6 @@ rad::FieldPoint::~FieldPoint() {
   delete pos[0];
   delete pos[1];
   delete pos[2];
-  delete vel[0];
-  delete vel[1];
-  delete vel[2];
-  delete acc[0];
-  delete acc[1];
-  delete acc[2];
 
   delete tPrime;
 }
@@ -52,12 +46,6 @@ rad::FieldPoint::FieldPoint(TString trajectoryFilePath, IAntenna* myAnt) {
   pos[0] = new TGraph();
   pos[1] = new TGraph();
   pos[2] = new TGraph();
-  vel[0] = new TGraph();
-  vel[1] = new TGraph();
-  vel[2] = new TGraph();
-  acc[0] = new TGraph();
-  acc[1] = new TGraph();
-  acc[2] = new TGraph();
   tPrime = new TGraph();
   
   // Now check that the input file exists
@@ -79,8 +67,6 @@ rad::FieldPoint::FieldPoint(const FieldPoint &fp) {
     EField[coord] = (TGraph*)fp.EField[coord]->Clone();
     BField[coord] = (TGraph*)fp.BField[coord]->Clone();
     pos[coord] = (TGraph*)fp.pos[coord]->Clone();
-    vel[coord] = (TGraph*)fp.vel[coord]->Clone();
-    acc[coord] = (TGraph*)fp.acc[coord]->Clone();
   }
   tPrime = (TGraph*)fp.tPrime->Clone();
 
@@ -97,12 +83,6 @@ void rad::FieldPoint::ResetFields() {
   pos[0]->Clear();
   pos[1]->Clear();
   pos[2]->Clear();
-  vel[0]->Clear();
-  vel[1]->Clear();
-  vel[2]->Clear();
-  acc[0]->Clear();
-  acc[1]->Clear();
-  acc[2]->Clear();
   tPrime->Clear();
 }
 
@@ -156,11 +136,22 @@ void rad::FieldPoint::GenerateFields(const double maxTime) {
   tree->SetBranchAddress("zAcc", &zAcc);
 
   ROOT::Math::XYZPoint antennaPoint((myAntenna->GetAntennaPosition()).X(), (myAntenna->GetAntennaPosition()).Y(), (myAntenna->GetAntennaPosition()).Z());
+
+  tree->GetEntry(0);
+  const double t0 = time;
+  tree->GetEntry(1);
+  const double t1 = time;
+  const double timeStepSize = t1 - t0;
   
   // Loop through the entries and get the fields at each point
   for (int e = 0; e < tree->GetEntries(); e++) {
     tree->GetEntry(e);
     if (time > maxTime) break;
+
+    if (std::fmod(time, 1e-6) < timeStepSize) {
+      std::cout<<time<<" seconds generated..."<<std::endl;
+    }
+    
     ROOT::Math::XYZPoint ePos(xPos, yPos, zPos);
     ROOT::Math::XYZVector eVel(xVel, yVel, zVel);
     ROOT::Math::XYZVector eAcc(xAcc, yAcc, zAcc);
@@ -177,12 +168,6 @@ void rad::FieldPoint::GenerateFields(const double maxTime) {
     pos[0]->SetPoint(pos[0]->GetN(), time, xPos);
     pos[1]->SetPoint(pos[1]->GetN(), time, yPos);
     pos[2]->SetPoint(pos[2]->GetN(), time, zPos);
-    vel[0]->SetPoint(vel[0]->GetN(), time, xVel);
-    vel[1]->SetPoint(vel[1]->GetN(), time, yVel);
-    vel[2]->SetPoint(vel[2]->GetN(), time, zVel);
-    acc[0]->SetPoint(acc[0]->GetN(), time, xAcc);
-    acc[1]->SetPoint(acc[1]->GetN(), time, yAcc);
-    acc[2]->SetPoint(acc[2]->GetN(), time, zAcc);
 
     tPrime->SetPoint(tPrime->GetN(), time, CalcRetardedTime(antennaPoint, ePos, time));
   }
