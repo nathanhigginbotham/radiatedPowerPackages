@@ -10,22 +10,30 @@
 #include "Antennas/IAntenna.h"
 
 #include "TGraph.h"
+#include "TString.h"
 
 namespace rad
 {
   class InducedVoltage
   {
   private:
+    // Open circuit voltage with no signal processing performed
     TGraph* grVoltage;
     
   public:
     /// Constructor for a voltage
     /// \param trajectoryFilePath Path to the file containing the electron trajectory
     /// \param myAntenna Pointer to the chosen antenna
-    InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna);
-    
+    /// \param maxTime Maximum time period to generate fields for
+    /// \param kUseRetardedTime Boolean to select the use of the retarded time
+    InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna, const double maxTime,
+		   const bool kUseRetardedTime=false);
+
+    /// Destructor
     ~InducedVoltage();
-    
+
+    /// Copy constructor
+    InducedVoltage(const InducedVoltage &iv);
   };
 }
 
