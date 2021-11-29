@@ -54,14 +54,21 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
     std::cout<<"Performing the downmixing..."<<std::endl;
     TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
     TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
- 
-    // Now we need to filter and then sample these signals
-    std::cout<<"Filtering.."<<std::endl;
-    TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
-    TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+
+    std::cout<<"First downsampling..."<<std::endl;
+    TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate);
+    TGraph* grVQTimeFirstSample = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate);
 
     delete grVITimeUnfiltered;
     delete grVQTimeUnfiltered;
+    
+    // Now we need to filter and then sample these signals
+    std::cout<<"Filtering.."<<std::endl;
+    TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
+    TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
+
+    delete grVITimeFirstSample;
+    delete grVQTimeFirstSample;
     
     // Now do sampling
     // Use simple linear interpolation for the job
@@ -133,14 +140,21 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
   TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
- 
-  // Now we need to filter and then sample these signals
-  std::cout<<"Filtering.."<<std::endl;
-  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
-  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+
+  std::cout<<"First downsampling..."<<std::endl;
+  TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate);
+  TGraph* grVQTimeFirstSample = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate);
 
   delete grVITimeUnfiltered;
   delete grVQTimeUnfiltered;
+  
+  // Now we need to filter and then sample these signals
+  std::cout<<"Filtering.."<<std::endl;
+  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
+  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
+
+  delete grVITimeFirstSample;
+  delete grVQTimeFirstSample;
   
   // Now do sampling
   // Use simple linear interpolation for the job
