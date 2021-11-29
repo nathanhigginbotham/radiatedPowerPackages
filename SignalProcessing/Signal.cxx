@@ -173,13 +173,20 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
   TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
 
-  // Now we need to filter and then sample these signals
-  std::cout<<"Filtering.."<<std::endl;
-  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
-  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+  std::cout<<"First downsampling"<<std::endl;
+  TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate);
+  TGraph* grVQTimeFirstSample = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate);  
 
   delete grVITimeUnfiltered;
   delete grVQTimeUnfiltered;
+  
+  // Now we need to filter and then sample these signals
+  std::cout<<"Filtering.."<<std::endl;
+  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
+  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
+
+  delete grVITimeFirstSample;
+  delete grVQTimeFirstSample;
   
   // Now do sampling
   // The actual output graphs
@@ -272,6 +279,30 @@ TGraph* rad::Signal::SampleWaveform(TGraph* grInput) {
     }
   }
   
+  return grOut;
+}
+
+TGraph* rad::Signal::SampleWaveform(TGraph* grInput, const double sRate) {
+  TGraph* grOut = new TGraph();
+  double sampleSpacing = 1.0 / sRate;
+  double sampleTime = grInput->GetPointX(0);
+  
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double time = grInput->GetPointX(i);
+    if (time < sampleTime) continue;
+    else if (i == 0) {
+      double calcV = grInput->GetPointY(0);
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;
+    }
+    else {
+      // Sample the distribution using linear interpolation
+      double calcV = grInput->GetPointY(i-1) + (sampleTime - grInput->GetPointX(i-1)) * (grInput->GetPointY(i) - grInput->GetPointY(i-1)) / (time - grInput->GetPointX(i-1));
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;      
+    }
+  }
+
   return grOut;
 }
 

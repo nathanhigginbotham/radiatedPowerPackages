@@ -35,7 +35,18 @@ namespace rad
     
     TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
     TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
+
+    /// Function for performing downsampling on a time domain wave using the class sample rate
+    /// \param grInput The input time domain waveform
+    /// Returns the downsampled waveform    
     TGraph* SampleWaveform(TGraph* grInput);
+
+    /// Function for performing downsampling on a time domain wave
+    /// \param grInput The input time domain waveform
+    /// \param sRate The designated sample rate
+    /// Returns the downsampled waveform
+    TGraph* SampleWaveform(TGraph* grInput, const double sRate);
+    
     void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms);
     
   public:
