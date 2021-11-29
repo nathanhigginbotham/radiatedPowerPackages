@@ -6,6 +6,7 @@
 #ifndef SIGNAL_H
 #define SIGNAL_H
 
+#include "SignalProcessing/InducedVoltage.h"
 #include "SignalProcessing/LocalOscillator.h"
 #include "SignalProcessing/NoiseFunc.h"
 #include "FieldClasses/FieldClasses.h"
@@ -54,6 +55,14 @@ namespace rad
     /// \param noiseTerms A vector of noise terms to be added to the signal
     /// \param kUseRetardedTime Boolean on whether or not to use the retarded time
     Signal(FieldPoint fp, LocalOscillator lo, double srate, std::vector<GaussianNoise> noiseTerms={}, const bool kUseRetardedTime=false);
+
+    /// Constructor for a single induced voltage
+    /// \param iv The induced voltage at a particular field point
+    /// \param lo The local oscillator used to do the downmixing
+    /// \param srate The sample rate of a hypothetical ADC
+    /// \param noiseTerms A vector of noise terms to be added to the signal
+    Signal(InducedVoltage iv, LocalOscillator lo, double srate,
+	   std::vector<GaussianNoise> noiseTerms={});
     
     /// Copy constructor
     Signal(const Signal &s1);
