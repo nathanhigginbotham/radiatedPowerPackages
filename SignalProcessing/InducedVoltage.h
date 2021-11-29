@@ -34,6 +34,9 @@ namespace rad
 
     /// Copy constructor
     InducedVoltage(const InducedVoltage &iv);
+
+    /// Returns the voltage graph
+    TGraph* GetVoltageGraph() { return grVoltage; }
   };
 }
 
