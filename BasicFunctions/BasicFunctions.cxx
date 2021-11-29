@@ -168,7 +168,7 @@ double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBi
   return integral;
 }
 
-// Re-implementation of the filter from FFTtools but without and converstion factors
+// Re-implementation of the filter from FFTtools but without the conversion factors
 TGraph* rad::BandPassFilter(const TGraph* grWave, const double minFreq, const double maxFreq) {
     double *oldY = grWave->GetY();
     double *oldX = grWave->GetX();
