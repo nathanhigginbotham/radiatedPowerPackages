@@ -213,6 +213,12 @@ double rad::RayleighPDFFunc(double *x, double *par) {
   return retVal;
 }
 
+double rad::RayleighCDFFunc(double *x, double *par) {
+  double xx = x[0];
+  double retVal = RayleighCDF(xx, par[0]);
+  return retVal;
+}
+
 void rad::AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff, const int seed) {
   gRandom->SetSeed(seed);
   const double sampleRate = 2*grIn->GetPointX(grIn->GetN()-1);

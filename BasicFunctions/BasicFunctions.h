@@ -53,6 +53,8 @@ namespace rad
   double RayleighCDF(const double x, const double sigma);
 
   double RayleighPDFFunc(double *x, double *par);
+
+  double RayleighCDFFunc(double *x, double *par);
   
   void AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff, const int seed=0);
 }
