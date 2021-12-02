@@ -35,5 +35,7 @@ add_subdirectory(Antennas)
 list(APPEND EXTRA_LIBS Antennas)
 list(APPEND EXTRA_INCLUDES "${PROJECT_SOURCE_DIR}/Antennas")
 
+add_subdirectory(ElectronDynamics)
+
 add_subdirectory(executables)
 
