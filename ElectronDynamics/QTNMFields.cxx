@@ -55,3 +55,16 @@ TVector3 rad::CoilField::evaluate_field_at_point(const TVector3 vec) {
   TVector3 BField(b_r*vec.X()/rad, b_r*vec.Y()/rad, b_z);
   return BField;
 }
+
+rad::BathtubField::BathtubField(const double radius, const double current, const double Z1, const double Z2, TVector3 background) {
+   coil1 = CoilField(radius, current, Z1, MU0);
+   coil2 = CoilField(radius, current, Z2, MU0);
+   btBkg = background;
+}
+
+TVector3 rad::BathtubField::evaluate_field_at_point(const TVector3 vec) {
+  TVector3 field1 = coil1.evaluate_field_at_point(vec);
+  TVector3 field2 = coil2.evaluate_field_at_point(vec);
+  TVector3 totalField = field1 + field2 + btBkg;
+  return totalField;
+}
