@@ -14,6 +14,10 @@ include(${ROOT_USE_FILE})
 include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS})
 add_definitions(${ROOT_CXX_FLAGS})
 
+# Locate Boost libraries
+find_package(Boost REQUIRED ALL)
+include_directories(${Boost_INCLUDE_DIRS})
+
 # Add the FFTW ROOT library
 find_library(ROOTFFTW_LIB RootFftwWrapper REQUIRED)
 message("ROOTFFTW_LIB is set to ${ROOTFFTW_LIB}")
