@@ -25,3 +25,9 @@ target_link_libraries(perpendicularAntenna PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES
 
 add_executable(noiseLevels noiseLevels.cxx)
 target_link_libraries(noiseLevels PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
+
+add_executable(rayleighDistributionChecks rayleighDistributionChecks.cxx)
+target_link_libraries(rayleighDistributionChecks PUBLIC BasicFunctions ${ROOT_LIBRARIES})
+
+add_executable(writeTrajectory writeTrajectory.cxx)
+target_link_libraries(writeTrajectory PUBLIC ElectronDynamics ${ROOT_LIBRARIES})
