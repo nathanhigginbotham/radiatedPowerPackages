@@ -50,6 +50,7 @@ namespace rad
     std::tuple<TVector3, TVector3> advance_step(const double time_step,
 						const TVector3 x0, const TVector3 v0);
 
+    /// Returns the B field at the position
     TVector3 calc_b_field(const TVector3 pos);
     
   public:
