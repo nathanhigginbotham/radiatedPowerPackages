@@ -236,3 +236,8 @@ void rad::AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff,
   
   delete f1;
 }
+
+TVector3 rad::calculate_omega(const TVector3 BField, const double charge, const double energy, const double mass) {
+  double gamma_m0 = mass + energy * TMath::Qe() / pow(TMath::C(), 2);
+  return (charge * BField * (1.0 / gamma_m0));
+}

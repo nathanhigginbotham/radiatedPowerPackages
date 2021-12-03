@@ -2,6 +2,8 @@
 #ifndef BASIC_FUNCTIONS_H
 #define BASIC_FUNCTIONS_H
 
+#include "BasicFunctions/Constants.h"
+
 #include "TVector3.h"
 #include "Math/Vector3D.h"
 #include "Math/Point3D.h"
@@ -57,6 +59,13 @@ namespace rad
   double RayleighCDFFunc(double *x, double *par);
   
   void AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff, const int seed=0);
+
+  /// \param BField A 3-vector describing the magnetic field at a point in space
+  /// \param charge Particle charge. Default is electron charge
+  /// \param energy Particle kinetic energy in electronvolts
+  /// \param mass Particle mass in kilograms. Default is electron rest mass
+  /// \Returns the cyclotron frequency
+  TVector3 calculate_omega(const TVector3 BField, const double charge=-TMath::Qe(), const double energy=0.0, const double mass=ME);
 }
  
 #endif
