@@ -11,6 +11,9 @@ namespace rad
 
   // Electron rest mass in kg
   constexpr double ME = 9.1093837015e-31;
+
+  // Classical electron radius in metres
+  constexpr double R_E = 2.8179403227e-15;
 }
  
 #endif
