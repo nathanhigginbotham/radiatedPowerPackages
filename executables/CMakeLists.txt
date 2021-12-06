@@ -23,9 +23,6 @@ target_link_libraries(timeNoiseTests PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${RO
 add_executable(perpendicularAntenna perpendicularAntenna.cxx)
 target_link_libraries(perpendicularAntenna PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 
-add_executable(noiseLevels noiseLevels.cxx)
-target_link_libraries(noiseLevels PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
-
 add_executable(rayleighDistributionChecks rayleighDistributionChecks.cxx)
 target_link_libraries(rayleighDistributionChecks PUBLIC BasicFunctions ${ROOT_LIBRARIES})
 
