@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cmath>
 #include <tuple>
+#include <string>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -23,9 +24,9 @@ int main(int argc, char *argv[])
 {
   int opt;
 
-  char* outputFile;
-  double simTime;
-  double simStepSize;
+  std::string outputFile = " ";
+  double simTime = -1;
+  double simStepSize = -1;
   char* inputFile;
   double pitchAngle = 90;
   bool energyLoss = false;
@@ -67,6 +68,21 @@ int main(int argc, char *argv[])
     }
   }
 
+  // Check mandatory parameters
+  if (outputFile == " ") {
+    std::cout<<"Must specify output file with -o"<<std::endl;
+    exit(1);
+  }
+  if (simTime == -1) {
+    std::cout<<"Please specify a simulation time (in seconds) with -t"<<std::endl;
+    exit(1);
+  }
+  if ((simStepSize == -1) && !hasInputFile) {
+    std::cout<<"Either specify a time step size with -s or an input file with -i"<<std::endl;
+    exit(1);
+  }
+  
+  
   const double pitchAngleRad = pitchAngle * TMath::Pi() / 180;
   const double TElec = 18600; // eV
   const double gamma = TElec * TMath::Qe() / (ME * TMath::C()*TMath::C()) + 1;
@@ -126,7 +142,7 @@ int main(int argc, char *argv[])
   BorisSolver solver(bathtub, -TMath::Qe(), ME, tau);
 
   // Open the output ROOT file
-  TFile* fout = new TFile(outputFile, "RECREATE");
+  TFile* fout = new TFile(outputFile.data(), "RECREATE");
   TTree* tree = new TTree("tree", "tree");
 
   double time;
