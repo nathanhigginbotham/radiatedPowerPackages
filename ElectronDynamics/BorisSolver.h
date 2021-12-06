@@ -36,12 +36,6 @@ namespace rad
     /// \Returns a 3-vector of the acceleration from the RR force
     TVector3 radiation_acceleration(const TVector3 pos, const TVector3 vel);
 
-    /// Calculate acceleration due to B field and RR force
-    /// \param pos Position of the charge
-    /// \param vec Velocity of the charge
-    /// \returns a 3-vector of the acceleration 
-    TVector3 acc(const TVector3 pos, const TVector3 vel);
-
     /// Returns the B field at the position
     TVector3 calc_b_field(const TVector3 pos);
     
@@ -60,6 +54,11 @@ namespace rad
     std::tuple<TVector3, TVector3> advance_step(const double time_step,
 						const TVector3 x0, const TVector3 v0);
 
+    /// Calculate acceleration due to B field and RR force
+    /// \param pos Position of the charge
+    /// \param vec Velocity of the charge
+    /// \returns a 3-vector of the acceleration 
+    TVector3 acc(const TVector3 pos, const TVector3 vel);
   };
 }
 
