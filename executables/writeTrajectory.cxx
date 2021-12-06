@@ -179,12 +179,15 @@ int main(int argc, char *argv[])
   // If there's no input file then write the initial state
   if (!hasInputFile) tree->Fill();
 
+  TVector3 posVec = X0;
+  TVector3 velVec = vInitial;  
   // Loop through the remaining steps and advance the dynamics
-  for (int i = 0; i < nTimeSteps; i++) {
+  for (int i = 1; i < nTimeSteps; i++) {
     time = simStartTime + double(i) * simStepSize;
-    std::tuple<TVector3, TVector3> outputStep = solver.advance_step(simStepSize, X0, vInitial);
-    TVector3 posVec = std::get<0>(outputStep);
-    TVector3 velVec = std::get<1>(outputStep);
+    std::tuple<TVector3, TVector3> outputStep = solver.advance_step(simStepSize, posVec, velVec);
+    posVec = std::get<0>(outputStep);
+    velVec = std::get<1>(outputStep);
+    std::cout<<posVec.X()<<", "<<posVec.Y()<<", "<<posVec.Z()<<std::endl;
     eAcc = solver.acc(posVec, velVec);
     
     xPos = posVec.X();
