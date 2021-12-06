@@ -187,7 +187,6 @@ int main(int argc, char *argv[])
     std::tuple<TVector3, TVector3> outputStep = solver.advance_step(simStepSize, posVec, velVec);
     posVec = std::get<0>(outputStep);
     velVec = std::get<1>(outputStep);
-    std::cout<<posVec.X()<<", "<<posVec.Y()<<", "<<posVec.Z()<<std::endl;
     eAcc = solver.acc(posVec, velVec);
     
     xPos = posVec.X();
