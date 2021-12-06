@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cmath>
+#include <tuple>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -80,6 +81,7 @@ int main(int argc, char *argv[])
   TVector3 vInitial(V0 * sin(pitchAngleRad), 0, V0 * cos(pitchAngleRad));
 
   double simStartTime = 0;
+  // Get initial state from input style
   if (hasInputFile) {
     TFile* fin = new TFile(inputFile, "READ");
     TTree* intree = (TTree*)fin->Get("tree");
@@ -144,6 +146,46 @@ int main(int argc, char *argv[])
   tree->Branch("zAcc", &zAcc, "zAcc/D");
 
   int nTimeSteps = simTime / simStepSize;
+
+  std::cout<<"Setting initial state"<<std::endl;
+  TVector3 eAcc = solver.acc(X0, vInitial);
+  time = simStartTime;
+  xPos = X0.X();
+  yPos = X0.Y();
+  zPos = X0.Z();
+  xVel = vInitial.X();
+  yVel = vInitial.Y();
+  zVel = vInitial.Z();
+  xAcc = eAcc.X();
+  yAcc = eAcc.Y();
+  zAcc = eAcc.Z();
+
+  // If there's no input file then write the initial state
+  if (!hasInputFile) tree->Fill();
+
+  // Loop through the remaining steps and advance the dynamics
+  for (int i = 0; i < nTimeSteps; i++) {
+    time = simStartTime + double(i) * simStepSize;
+    std::tuple<TVector3, TVector3> outputStep = solver.advance_step(simStepSize, X0, vInitial);
+    TVector3 posVec = std::get<0>(outputStep);
+    TVector3 velVec = std::get<1>(outputStep);
+    eAcc = solver.acc(posVec, velVec);
+    
+    xPos = posVec.X();
+    yPos = posVec.Y();
+    zPos = posVec.Z();
+    xVel = velVec.X();
+    yVel = velVec.Y();
+    zVel = velVec.Z();
+    xAcc = eAcc.X();
+    yAcc = eAcc.Y();
+    zAcc = eAcc.Z();
+
+    tree->Fill();
+  }
+
+  fout->cd();
+  tree->Write();
   
   fout->Close();
   delete fout;
