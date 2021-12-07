@@ -79,16 +79,38 @@ namespace rad
     Signal(const Signal &s1);
 
     TGraph* GetInputVoltage(const unsigned int field=0);
-    
+
+    /// Returns a TGraph of the downmixed in-phase component
+    /// \param lo The local oscillator used for the downmixing
+    /// \param field The field point or induced voltage to choose
     TGraph* GetVIUnfilteredTimeDomain(LocalOscillator lo, const unsigned int field=0);
+
+    /// Returns a TGraph of the downmixed quadrature component
+    /// \param lo The local oscillator used for the downmixing
+    /// \param field The field point or induced voltage to choose
     TGraph* GetVQUnfilteredTimeDomain(LocalOscillator lo, const unsigned int field=0);
+
+    /// Returns a TGraph of the downmixed and filtered in-phase component
+    /// \param lo The local oscillator used for the downmixing
+    /// \param field The field point or induced voltage to choose
     TGraph* GetVIUnsampledTimeDomain(LocalOscillator lo, const unsigned int field=0);
+
+    /// Returns a TGraph of the downmixed and filtered quadrature component
+    /// \param lo The local oscillator used for the downmixing
+    /// \param field The field point or induced voltage to choose
     TGraph* GetVQUnsampledTimeDomain(LocalOscillator lo, const unsigned int field=0);
-    
+
+    /// Returns the summed in-phase voltage component after all signal processing
     TGraph* GetVITimeDomain();
+    /// Returns the summed quadrature voltage component after all signal processing
     TGraph* GetVQTimeDomain();
 
+    /// Returns the power spectrum of the in-phase voltage component after all signal processing
+    /// \param loadResistance The load resistance used for the power calculation
     TGraph* GetVIPowerNorm(const double loadResistance);
+
+    /// Returns the power spectrum of the quadrature voltage component after all signal processing
+    /// \param loadResistance The load resistance used for the power calculation
     TGraph* GetVQPowerNorm(const double loadResistance);
     
   };

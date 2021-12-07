@@ -343,16 +343,20 @@ TGraph* rad::Signal::GetVQUnfilteredTimeDomain(LocalOscillator lo,
 TGraph* rad::Signal::GetVIUnsampledTimeDomain(LocalOscillator lo,
 					      const unsigned int field) {
   TGraph* grVITimeUnfiltered = GetVIUnfilteredTimeDomain(lo, field);
-  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeUnfiltered, 0.0, sampleRate/2.0);
+  TGraph* grVITimeDs = SampleWaveform(grVITimeUnfiltered, 10*sampleRate);
   delete grVITimeUnfiltered;
+  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeDs, 0.0, sampleRate/2.0);
+  delete grVITimeDs;
   return grVITimeUnsampled;
 }
 
 TGraph* rad::Signal::GetVQUnsampledTimeDomain(LocalOscillator lo,
 					      const unsigned int field) {
   TGraph* grVQTimeUnfiltered = GetVQUnfilteredTimeDomain(lo, field);
-  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeUnfiltered, 0.0, sampleRate/2.0);
+  TGraph* grVQTimeDs = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate);
   delete grVQTimeUnfiltered;
+  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeDs, 0.0, sampleRate/2.0);
+  delete grVQTimeDs;
   return grVQTimeUnsampled;
 }
 
