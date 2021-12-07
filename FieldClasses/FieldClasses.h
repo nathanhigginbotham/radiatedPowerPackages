@@ -48,7 +48,7 @@ namespace rad
     
     FieldPoint(const FieldPoint &fp);
     
-    void GenerateFields(const double maxTime);
+    void GenerateFields(const double minTime, const double maxTime);
 
     TGraph* GetPositionTimeDomain(Coord_t coord, const bool kUseRetardedTime=false,
 				  int firstPoint=-1, int lastPoint=-1);

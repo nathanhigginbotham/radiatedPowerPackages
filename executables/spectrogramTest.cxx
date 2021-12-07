@@ -19,7 +19,7 @@ int main() {
   GaussianNoise* noise1 = new GaussianNoise(0.01, 70.0);
   
   FieldPoint *fp = new FieldPoint("/home/sjones/work/qtnm/trajectories/electronTraj600us_89deg.root", myAntenna);
-  fp->GenerateFields(50e-6);
+  fp->GenerateFields(0, 50e-6);
   std::cout<<"Generated the fields for the field point"<<std::endl;
   
   TFile* fout = new TFile("spectrogramOutput.root", "RECREATE");
@@ -27,7 +27,7 @@ int main() {
 
   std::vector<GaussianNoise*> noiseTerms;
   noiseTerms.push_back(noise1);
-  Spectrogram spec(fp, noiseTerms);
+  Spectrogram spec(fp);
   std::cout<<"Created spectrogram class"<<std::endl;
   TH2D* h2spec = spec.MakeSpectrogram(259072, false);
   std::cout<<"Created spectrogram"<<std::endl;

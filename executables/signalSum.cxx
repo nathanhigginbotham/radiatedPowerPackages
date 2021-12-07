@@ -42,13 +42,13 @@ int main()
   const double sampleRate = 0.75e9; // Hz
   
   FieldPoint fp1("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", antenna1);
-  fp1.GenerateFields(4.6e-7);
+  fp1.GenerateFields(0, 4.6e-7);
 
   FieldPoint fp2("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", antenna2);
-  fp2.GenerateFields(4.6e-7);
+  fp2.GenerateFields(0, 4.6e-7);
   
   FieldPoint fp3("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", antenna3);
-  fp3.GenerateFields(4.6e-7);
+  fp3.GenerateFields(0, 4.6e-7);
   
   std::cout<<"Generated the fields for the field point"<<std::endl;
   

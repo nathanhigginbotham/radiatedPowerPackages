@@ -28,7 +28,7 @@ int main() {
   const double sampleRate = 0.75e9; // Hz
   
   FieldPoint fp("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", myAntenna);
-  fp.GenerateFields(4.6e-7);
+  fp.GenerateFields(0, 4.6e-7);
   std::cout<<"Generated the fields for the field point"<<std::endl;
 
   TFile *fout = new TFile("noiseTestOutput.root", "RECREATE");

@@ -112,7 +112,7 @@ TGraph* rad::FieldPoint::MakeRetardedTimeGraph(const TGraph* grOriginal) {
 
 // From an input TFile generate the E and B fields for a given time
 // maxTime is the final time in seconds (if less than the time in the file)
-void rad::FieldPoint::GenerateFields(const double maxTime) {
+void rad::FieldPoint::GenerateFields(const double minTime, const double maxTime) {
   ResetFields();
   
   TFile *fin = new TFile(inputFile, "READ");
@@ -146,6 +146,7 @@ void rad::FieldPoint::GenerateFields(const double maxTime) {
   // Loop through the entries and get the fields at each point
   for (int e = 0; e < tree->GetEntries(); e++) {
     tree->GetEntry(e);
+    if (time < minTime) continue;
     if (time > maxTime) break;
 
     if (std::fmod(time, 1e-6) < timeStepSize) {

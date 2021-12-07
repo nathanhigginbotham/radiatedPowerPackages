@@ -32,7 +32,7 @@ int main()
   const double sampleRate = 0.75e9; // Hz
 
   FieldPoint fpShort("/home/sjones/work/qtnm/trajectories/electronTraj_88deg_800us.root", antenna1);
-  fpShort.GenerateFields(5e-7);
+  fpShort.GenerateFields(0, 5e-7);
   Signal signalShort({fpShort}, myLO, sampleRate, noiseTerms, false);
   
   TGraph* grInputShort = signalShort.GetInputVoltage();
@@ -44,7 +44,7 @@ int main()
   TGraph* grVQShortSpec = MakePowerSpectrumNorm(grVQShort);
   
   FieldPoint fpLong("/home/sjones/work/qtnm/trajectories/electronTraj_88deg_800us.root", antenna1);
-  fpLong.GenerateFields(20e-6);
+  fpLong.GenerateFields(0, 20e-6);
   Signal signalLong({fpLong}, myLO, sampleRate, noiseTerms, false);
 
   TGraph* grInputLong = signalLong.GetInputVoltage();

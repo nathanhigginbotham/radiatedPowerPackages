@@ -21,7 +21,7 @@
 #include "SignalProcessing/LocalOscillator.h"
 #include "BasicFunctions/BasicFunctions.h"
 #include "FieldClasses/FieldClasses.h"
-#include "Antennas/HertzianDipole.h"
+#include "Antennas/HalfWaveDipole.h"
 
 using namespace rad;
 
@@ -40,15 +40,15 @@ int main(int argc, char** argv)
   TVector3 antennaPoint1(antennaRadius*TMath::Cos(antennaAngle1), antennaRadius*TMath::Sin(antennaAngle1), 0.0);
   TVector3 antennaDirZ1(-1*TMath::Sin(antennaAngle1), TMath::Cos(antennaAngle1), 0.0);
   TVector3 antennaDirX1(TMath::Cos(antennaAngle1), TMath::Sin(antennaAngle1), 0.0);
-  HertzianDipole* antenna1 = new HertzianDipole(antennaPoint1, antennaDirX1, antennaDirZ1, 27.01e9);
+  HalfWaveDipole* antenna1 = new HalfWaveDipole(antennaPoint1, antennaDirX1, antennaDirZ1, 27.01e9);
   
   TVector3 antennaPoint2(antennaRadius*TMath::Cos(antennaAngle2), antennaRadius*TMath::Sin(antennaAngle2), 0.0);
   TVector3 antennaDirZ2(-1*TMath::Sin(antennaAngle2), TMath::Cos(antennaAngle2), 0.0);
   TVector3 antennaDirX2(TMath::Cos(antennaAngle2), TMath::Sin(antennaAngle2), 0.0);
-  HertzianDipole* antenna2 = new HertzianDipole(antennaPoint2, antennaDirX2, antennaDirZ2, 27.01e9);
+  HalfWaveDipole* antenna2 = new HalfWaveDipole(antennaPoint2, antennaDirX2, antennaDirZ2, 27.01e9);
 
   const double loadResistance = 70.0;
-  const double noiseTemp = 0.1;
+  const double noiseTemp = 0.01;
   LocalOscillator myLO(26.75e9 * 2 * TMath::Pi());
   GaussianNoise noise1(noiseTemp, loadResistance);
   std::vector<GaussianNoise> noiseTerms;
@@ -57,8 +57,8 @@ int main(int argc, char** argv)
 
   FieldPoint fp1("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", antenna1);
   FieldPoint fp2("/home/sjones/work/qtnm/trajectories/90DegOnAxis.root", antenna2);
-  fp1.GenerateFields(10e-6);
-  fp2.GenerateFields(10e-6);
+  fp1.GenerateFields(0, 10e-6);
+  fp2.GenerateFields(0, 10e-6);
 
   Signal signal1(fp1, myLO, sampleRate, noiseTerms, false);
   Signal signal2(fp2, myLO, sampleRate, noiseTerms, false);
