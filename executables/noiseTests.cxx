@@ -37,28 +37,11 @@ int main() {
   
   fout->cd();
   grInputVoltage->Write("grInputVoltage");
-  TGraph* grVIUnfiltered = mySignal.GetVIUnfilteredTimeDomain(myLO);
-  TGraph* grVQUnfiltered = mySignal.GetVQUnfilteredTimeDomain(myLO);
-  TGraph* grVIUnsampled = mySignal.GetVIUnsampledTimeDomain(myLO);
-  TGraph* grVQUnsampled = mySignal.GetVQUnsampledTimeDomain(myLO);
   TGraph* grVI = mySignal.GetVITimeDomain();
   TGraph* grVQ = mySignal.GetVQTimeDomain();
-
-  TGraph* grVIUnfSpec = MakePowerSpectrumNorm(grVIUnfiltered);
-  TGraph* grVQUnfSpec = MakePowerSpectrumNorm(grVQUnfiltered);
-  TGraph* grVIUnsSpec = MakePowerSpectrumNorm(grVIUnsampled);
-  TGraph* grVQUnsSpec = MakePowerSpectrumNorm(grVQUnsampled);
   TGraph* grVISpec = MakePowerSpectrumNorm(grVI);
   TGraph* grVQSpec = MakePowerSpectrumNorm(grVQ);
   
-  grVIUnfiltered->Write("grVIUnf");
-  grVQUnfiltered->Write("grVQUnf");
-  grVIUnfSpec->Write("grVIUnfSpec");
-  grVQUnfSpec->Write("grVQUnfSpec");
-  grVIUnsampled->Write("grVIUns");
-  grVQUnsampled->Write("grVQUns");
-  grVIUnsSpec->Write("grVIUnsSpec");
-  grVQUnsSpec->Write("grVQUnsSpec");
   grVI->Write("grVI");
   grVQ->Write("grVQ");
   grVISpec->Write("grVISpec");

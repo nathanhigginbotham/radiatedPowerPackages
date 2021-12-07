@@ -64,16 +64,7 @@ int main(int argc, char** argv)
   Signal signal2(fp2, myLO, sampleRate, noiseTerms, false);
   
   TFile* fout = new TFile(outputFile, "RECREATE");
-  
-  TGraph* grInput1 = signal1.GetInputVoltage();
-  grInput1->GetXaxis()->SetRangeUser(0, 1.5e-10);
-  TGraph* grInput2 = signal2.GetInputVoltage();
-  grInput2->GetXaxis()->SetRangeUser(0, 1.5e-10);
-
-  TGraph* grInputCorrelation = FFTtools::getCorrelationGraph(grInput1, grInput2);
-  setGraphAttr(grInputCorrelation);
-  grInputCorrelation->Write("grInputCorrelation");
-  
+    
   TGraph* grVI1 = signal1.GetVITimeDomain();
   TGraph* grVI2 = signal2.GetVITimeDomain();
   TGraph* grVI1Spec = MakePowerSpectrumNorm(grVI1);
@@ -82,8 +73,6 @@ int main(int argc, char** argv)
   setGraphAttr(grVI2Spec);
   
   fout->cd();
-  grInput1->Write("grInput1");
-  grInput2->Write("grInput2");
   grVI1->Write("grVI1");
   grVI2->Write("grVI2");
   grVI1Spec->Write("grVI1Spec");

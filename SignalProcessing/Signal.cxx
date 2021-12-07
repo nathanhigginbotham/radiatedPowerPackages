@@ -15,12 +15,8 @@
 #include "FFTtools.h"
 
 rad::Signal::~Signal() {
-  for (int i = 0; i < grInputVoltage.size(); i++) {
-    delete grInputVoltage[i];
-  }
   delete grVITime;
   delete grVQTime;
-  grInputVoltage.clear();
 }
 
 rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate,
@@ -49,7 +45,6 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
   // For each antenna point generate the field and do the signal processing
   for (int point = 0; point < fp.size(); point++) {
     TGraph* grInputVoltageTemp = fp[point].GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
-    grInputVoltage.push_back(grInputVoltageTemp);
     
     std::cout<<"Performing the downmixing..."<<std::endl;
     TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
@@ -135,7 +130,6 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   grVQTime->GetXaxis()->SetTitle("Time [s]");
 
   TGraph* grInputVoltageTemp = fp.GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, -1, -1);
-  grInputVoltage.push_back(grInputVoltageTemp);
     
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
@@ -181,7 +175,6 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   }
 
   TGraph* grInputVoltageTemp = (TGraph*)(iv.GetVoltageGraph())->Clone();
-  grInputVoltage.push_back(grInputVoltageTemp);
 
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
@@ -228,16 +221,6 @@ rad::Signal::Signal(const Signal &s1) {
   sampleRate = s1.sampleRate;
   grVITime = (TGraph*)s1.grVITime->Clone();
   grVQTime = (TGraph*)s1.grVQTime->Clone();
-  for (int point = 0; point < (s1.grInputVoltage).size(); point++) {
-    TGraph* grTemp = (TGraph*)s1.grInputVoltage[point]->Clone(); 
-    grInputVoltage.push_back(grTemp);
-  }
-}
-
-TGraph* rad::Signal::GetInputVoltage(const unsigned int field) {
-  TGraph* gr = (TGraph*)grInputVoltage[field]->Clone();
-  setGraphAttr(gr);
-  return gr;
 }
 
 TGraph* rad::Signal::GetVITimeDomain() {
@@ -328,36 +311,6 @@ void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> n
     }
     grInput->SetPointY(i, voltage);
   }
-}
-
-TGraph* rad::Signal::GetVIUnfilteredTimeDomain(LocalOscillator lo,
-					       const unsigned int field) {
-  return (DownmixInPhase(grInputVoltage[field], lo));
-}
-
-TGraph* rad::Signal::GetVQUnfilteredTimeDomain(LocalOscillator lo,
-					       const unsigned int field) {
-  return (DownmixQuadrature(grInputVoltage[field], lo));
-}
-
-TGraph* rad::Signal::GetVIUnsampledTimeDomain(LocalOscillator lo,
-					      const unsigned int field) {
-  TGraph* grVITimeUnfiltered = GetVIUnfilteredTimeDomain(lo, field);
-  TGraph* grVITimeDs = SampleWaveform(grVITimeUnfiltered, 10*sampleRate);
-  delete grVITimeUnfiltered;
-  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeDs, 0.0, sampleRate/2.0);
-  delete grVITimeDs;
-  return grVITimeUnsampled;
-}
-
-TGraph* rad::Signal::GetVQUnsampledTimeDomain(LocalOscillator lo,
-					      const unsigned int field) {
-  TGraph* grVQTimeUnfiltered = GetVQUnfilteredTimeDomain(lo, field);
-  TGraph* grVQTimeDs = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate);
-  delete grVQTimeUnfiltered;
-  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeDs, 0.0, sampleRate/2.0);
-  delete grVQTimeDs;
-  return grVQTimeUnsampled;
 }
 
 TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance) {

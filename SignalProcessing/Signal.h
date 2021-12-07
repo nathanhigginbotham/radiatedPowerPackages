@@ -20,7 +20,6 @@ namespace rad
 {
   /// Signal base class
   /// Class members are:
-  /// grInputVoltage A vector of unprocessed voltage signals in the time domain
   /// grVITime In phase processed voltage component
   /// grVQTime Quadrature processed voltage component
   /// sampleRate Hypothetical sample rate of a digitiser
@@ -28,7 +27,6 @@ namespace rad
   class Signal
   {
   private:
-    std::vector<TGraph*> grInputVoltage; 
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
     double sampleRate;
@@ -77,28 +75,6 @@ namespace rad
     
     /// Copy constructor
     Signal(const Signal &s1);
-
-    TGraph* GetInputVoltage(const unsigned int field=0);
-
-    /// Returns a TGraph of the downmixed in-phase component
-    /// \param lo The local oscillator used for the downmixing
-    /// \param field The field point or induced voltage to choose
-    TGraph* GetVIUnfilteredTimeDomain(LocalOscillator lo, const unsigned int field=0);
-
-    /// Returns a TGraph of the downmixed quadrature component
-    /// \param lo The local oscillator used for the downmixing
-    /// \param field The field point or induced voltage to choose
-    TGraph* GetVQUnfilteredTimeDomain(LocalOscillator lo, const unsigned int field=0);
-
-    /// Returns a TGraph of the downmixed and filtered in-phase component
-    /// \param lo The local oscillator used for the downmixing
-    /// \param field The field point or induced voltage to choose
-    TGraph* GetVIUnsampledTimeDomain(LocalOscillator lo, const unsigned int field=0);
-
-    /// Returns a TGraph of the downmixed and filtered quadrature component
-    /// \param lo The local oscillator used for the downmixing
-    /// \param field The field point or induced voltage to choose
-    TGraph* GetVQUnsampledTimeDomain(LocalOscillator lo, const unsigned int field=0);
 
     /// Returns the summed in-phase voltage component after all signal processing
     TGraph* GetVITimeDomain();
