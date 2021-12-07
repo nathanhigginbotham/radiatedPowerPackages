@@ -14,9 +14,11 @@ rad::InducedVoltage::~InducedVoltage() {
 }
 
 rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna,
-				    const double maxTime, const bool kUseRetardedTime) {
+				    double minTime, double maxTime, const bool kUseRetardedTime) {
   FieldPoint fp(trajectoryFilePath, myAntenna);
-  fp.GenerateFields(maxTime);
+  if (minTime == -1) minTime = 0.0;
+  if (maxTime == -1) maxTime = fp.GetFinalTime();
+  fp.GenerateFields(minTime, maxTime);
   std::cout<<"Generating voltages"<<std::endl;
   grVoltage = fp.GetAntennaLoadVoltageTimeDomain(kUseRetardedTime);
 }

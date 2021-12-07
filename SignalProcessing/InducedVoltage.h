@@ -24,9 +24,11 @@ namespace rad
     /// Constructor for a voltage
     /// \param trajectoryFilePath Path to the file containing the electron trajectory
     /// \param myAntenna Pointer to the chosen antenna
-    /// \param maxTime Maximum time period to generate fields for
+    /// \param minTime First time point to generate voltage from
+    /// \param maxTime Maximum time period to generate voltage for
     /// \param kUseRetardedTime Boolean to select the use of the retarded time
-    InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna, const double maxTime,
+    InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna,
+		   double minTime=-1, double maxTime=-1,
 		   const bool kUseRetardedTime=false);
 
     /// Destructor
