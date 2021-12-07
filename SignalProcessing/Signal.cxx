@@ -9,8 +9,10 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <cmath>
 
 #include "TGraph.h"
+#include "TH2.h"
 
 #include "FFTtools.h"
 
@@ -223,19 +225,33 @@ rad::Signal::Signal(const Signal &s1) {
   grVQTime = (TGraph*)s1.grVQTime->Clone();
 }
 
-TGraph* rad::Signal::GetVITimeDomain() {
-  TGraph* gr = (TGraph*)grVITime->Clone();
+TGraph* rad::Signal::GetVITimeDomain(int firstPoint, int lastPoint) {
+  if (firstPoint < 0) firstPoint = 0;
+  if (lastPoint < 0 ) lastPoint = grVITime->GetN() - 1;
+  
+  TGraph* gr = new TGraph();
   setGraphAttr(gr);
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle("V_{I} [V]");
+
+  for (int i = firstPoint; i <= lastPoint; i++) {
+    gr->SetPoint(gr->GetN(), grVITime->GetPointX(i), grVITime->GetPointY(i));
+  }
   return gr;
 }
 
-TGraph* rad::Signal::GetVQTimeDomain() {
-  TGraph* gr = (TGraph*)grVQTime->Clone();
+TGraph* rad::Signal::GetVQTimeDomain(int firstPoint, int lastPoint) {
+  if (firstPoint < 0) firstPoint = 0;
+  if (lastPoint < 0 ) lastPoint = grVQTime->GetN() - 1;
+  
+  TGraph* gr = new TGraph();
   setGraphAttr(gr);
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle("V_{Q} [V]");
+
+  for (int i = firstPoint; i <= lastPoint; i++) {
+    gr->SetPoint(gr->GetN(), grVQTime->GetPointX(i), grVQTime->GetPointY(i));
+  }
   return gr;
 }
 
@@ -313,8 +329,10 @@ void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> n
   }
 }
 
-TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance) {
-  TGraph* grOut = MakePowerSpectrumNorm(grVITime);
+TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance, int firstPoint, int lastPoint) {
+  TGraph* grTime = GetVITimeDomain(firstPoint, lastPoint);
+  TGraph* grOut = MakePowerSpectrumNorm(grTime);
+  delete grTime;
   for (int i = 0; i < grOut->GetN(); i++) {
     grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
   }
@@ -324,8 +342,10 @@ TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance) {
   return grOut;
 }
 
-TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance) {
-  TGraph* grOut = MakePowerSpectrumNorm(grVQTime);
+TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance, int firstPoint, int lastPoint) {
+  TGraph* grTime = GetVQTimeDomain(firstPoint, lastPoint);
+  TGraph* grOut = MakePowerSpectrumNorm(grTime);
+  delete grTime;
   for (int i = 0; i < grOut->GetN(); i++) {
     grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
   }
@@ -334,3 +354,52 @@ TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance) {
   grOut->GetYaxis()->SetTitle("#frac{V_{Q}^{2}}{R} #times (#Deltat)^{2} [W s^{2}]");
   return grOut;
 }
+
+TH2D* rad::Signal::GetVISpectrogram(const double loadResistance, const int NSamplesPerTimeBin) {
+  // Get the number of time bins given the specified NSamplesPerTimeBin
+  const int nTimeBins = int(floor(double(grVITime->GetN()) / double(NSamplesPerTimeBin)));
+  const double firstTime = grVITime->GetPointX(0);
+  const double lastTime  = grVITime->GetPointX(nTimeBins * NSamplesPerTimeBin - 1);
+  const int nFreqBins = (NSamplesPerTimeBin/2)+1;
+  const double deltaF = 1.0 / ((1.0/sampleRate) * NSamplesPerTimeBin);
+  const double lastFreq = nFreqBins * deltaF;
+
+  TH2D* h2 = new TH2D("h2", "Spectrogram V_{I}; Time [s]; Frequency [Hz]; #frac{V_{I}^{2}}{R} #times (#Delta t)^{2} [W s^{2}]", nTimeBins, firstTime, lastTime, nFreqBins, 0, lastFreq);
+  SetHistAttr(h2);
+  // Loop through the time bins and generate the power spectrum at each point
+  for (int t = 1; t <= nTimeBins; t++) {
+    TGraph* grPower = GetVIPowerNorm(loadResistance, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin-1);
+    // Add this data to the histogram
+    for (int i = 0; i < grPower->GetN(); i++) {
+      h2->SetBinContent(t, i+1, grPower->GetPointY(i));
+    }
+    delete grPower;
+  }
+  
+  return h2;
+}
+
+TH2D* rad::Signal::GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin) {
+  // Get the number of time bins given the specified NSamplesPerTimeBin
+  const int nTimeBins = int(floor(double(grVQTime->GetN()) / double(NSamplesPerTimeBin)));
+  const double firstTime = grVQTime->GetPointX(0);
+  const double lastTime  = grVQTime->GetPointX(nTimeBins * NSamplesPerTimeBin - 1);
+  const int nFreqBins = (NSamplesPerTimeBin/2)+1;
+  const double deltaF = 1.0 / ((1.0/sampleRate) * NSamplesPerTimeBin);
+  const double lastFreq = nFreqBins * deltaF;
+
+  TH2D* h2 = new TH2D("h2", "Spectrogram V_{Q}; Time [s]; Frequency [Hz]; #frac{V_{Q}^{2}}{R} #times (#Delta t)^{2} [W s^{2}]", nTimeBins, firstTime, lastTime, nFreqBins, 0, lastFreq);
+  SetHistAttr(h2);
+  // Loop through the time bins and generate the power spectrum at each point
+  for (int t = 1; t <= nTimeBins; t++) {
+    TGraph* grPower = GetVQPowerNorm(loadResistance, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin-1);
+    // Add this data to the histogram
+    for (int i = 0; i < grPower->GetN(); i++) {
+      h2->SetBinContent(t, i+1, grPower->GetPointY(i));
+    }
+    delete grPower;
+  }
+  
+  return h2;
+}
+

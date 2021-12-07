@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "TGraph.h"
+#include "TH2.h"
 
 namespace rad
 {
@@ -77,18 +78,29 @@ namespace rad
     Signal(const Signal &s1);
 
     /// Returns the summed in-phase voltage component after all signal processing
-    TGraph* GetVITimeDomain();
+    TGraph* GetVITimeDomain(int firstPoint=-1, int lastPoint=-1);
     /// Returns the summed quadrature voltage component after all signal processing
-    TGraph* GetVQTimeDomain();
+    TGraph* GetVQTimeDomain(int firstPoint=-1, int lastPoint=-1);
 
     /// Returns the power spectrum of the in-phase voltage component after all signal processing
     /// \param loadResistance The load resistance used for the power calculation
-    TGraph* GetVIPowerNorm(const double loadResistance);
+    /// \param firstPoint The first point to return
+    /// \param lastPoint The last point to return
+    TGraph* GetVIPowerNorm(const double loadResistance, int firstPoint=-1, int lastPoint=-1);
 
     /// Returns the power spectrum of the quadrature voltage component after all signal processing
     /// \param loadResistance The load resistance used for the power calculation
-    TGraph* GetVQPowerNorm(const double loadResistance);
-    
+    TGraph* GetVQPowerNorm(const double loadResistance, int firstPoint=-1, int lastPoint=-1);
+
+    /// Returns the 2D spectrogram made using the in-phase voltage component
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    TH2D* GetVISpectrogram(const double loadResistance, const int NSamplesPerTimeBin);
+
+    /// Returns the 2D spectrogram made using the quadrature voltage component
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    TH2D* GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin);
   };
 }
 
