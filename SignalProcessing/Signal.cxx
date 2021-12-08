@@ -167,7 +167,7 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
 }
 
 rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
-		    std::vector<GaussianNoise> noiseTerms) {
+		    std::vector<GaussianNoise> noiseTerms, double maxTime) {
   sampleRate = srate;
 
   // Make sure the noise terms are all set up correctly
@@ -176,43 +176,73 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
     (noiseTerms.at(iNoise)).SetSigma();
   }
 
-  TGraph* grInputVoltageTemp = (TGraph*)(iv.GetVoltageGraph())->Clone();
-
-  std::cout<<"Performing the downmixing..."<<std::endl;
-  TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
-  TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
-
-  std::cout<<"First downsampling"<<std::endl;
-  TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate);
-  TGraph* grVQTimeFirstSample = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate);  
-
-  delete grVITimeUnfiltered;
-  delete grVQTimeUnfiltered;
-  
-  // Now we need to filter and then sample these signals
-  std::cout<<"Filtering.."<<std::endl;
-  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
-  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
-
-  delete grVITimeFirstSample;
-  delete grVQTimeFirstSample;
-  
-  // Now do sampling
   // The actual output graphs
   grVITime = new TGraph();
   grVQTime = new TGraph();  
   setGraphAttr(grVITime);
   setGraphAttr(grVQTime);
+  grVITime->GetYaxis()->SetTitle("V_{I}");
+  grVQTime->GetYaxis()->SetTitle("V_{Q}");
   grVITime->GetXaxis()->SetTitle("Time [s]");
   grVQTime->GetXaxis()->SetTitle("Time [s]");
-  
-  // Use simple linear interpolation for the job
-  std::cout<<"Sampling..."<<std::endl;
-  grVITime = SampleWaveform(grVITimeUnsampled);
-  grVQTime = SampleWaveform(grVQTimeUnsampled);
 
-  delete grVITimeUnsampled;
-  delete grVQTimeUnsampled; 
+  // Split the signal up into chunks to avoid memory issues
+  if (maxTime < 0) maxTime = iv.GetFinalTime();
+
+  const double chunkSize = 25e-6;
+  double lastChunk = 0;
+  double thisChunk = lastChunk + chunkSize;
+
+  double thisSample = 0;
+  double this10Sample = 0;
+  
+  while (thisChunk <= maxTime && thisChunk != lastChunk) {
+    iv.ResetVoltage();
+    iv.GenerateVoltage(lastChunk, thisChunk);
+    TGraph* grInputVoltageTemp = iv.GetVoltageGraph();
+
+    std::cout<<"Performing the downmixing..."<<std::endl;
+    TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
+    TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
+    delete grInputVoltageTemp;
+  
+    std::cout<<"First downsampling"<<std::endl;
+    TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate, this10Sample);
+    TGraph* grVQTimeFirstSample = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate, this10Sample);
+    delete grVITimeUnfiltered;
+    delete grVQTimeUnfiltered;
+    this10Sample = grVITimeFirstSample->GetPointX(grVITimeFirstSample->GetN()-1) + 1/(10*sampleRate);
+  
+    // Now we need to filter and then sample these signals
+    std::cout<<"Filtering.."<<std::endl;
+    TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
+    TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
+
+    delete grVITimeFirstSample;
+    delete grVQTimeFirstSample;
+  
+    // Now do sampling  
+    // Use simple linear interpolation for the job
+    std::cout<<"Sampling..."<<std::endl;
+    TGraph* grVITimeTemp = SampleWaveform(grVITimeUnsampled, sampleRate, thisSample);
+    TGraph* grVQTimeTemp = SampleWaveform(grVQTimeUnsampled, sampleRate, thisSample);
+    delete grVITimeUnsampled;
+    delete grVQTimeUnsampled;
+    thisSample = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
+
+    // Now add the information from these temporary graphs to the larger ones
+    for (int i = 0; i < grVITimeTemp->GetN(); i++) {
+      grVITime->SetPoint(grVITime->GetN(), grVITimeTemp->GetPointX(i), grVITimeTemp->GetPointY(i));
+      grVQTime->SetPoint(grVQTime->GetN(), grVQTimeTemp->GetPointX(i), grVQTimeTemp->GetPointY(i));
+    }
+    
+    delete grVITimeTemp;
+    delete grVQTimeTemp;
+    
+    lastChunk = thisChunk;
+    thisChunk += chunkSize;
+    if (thisChunk > maxTime) thisChunk = maxTime;
+  }
   
   std::cout<<"Adding noise..."<<std::endl;
   AddGaussianNoise(grVITime, noiseTerms);
@@ -300,6 +330,30 @@ TGraph* rad::Signal::SampleWaveform(TGraph* grInput, const double sRate) {
   double sampleSpacing = 1.0 / sRate;
   double sampleTime = grInput->GetPointX(0);
   
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double time = grInput->GetPointX(i);
+    if (time < sampleTime) continue;
+    else if (i == 0) {
+      double calcV = grInput->GetPointY(0);
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;
+    }
+    else {
+      // Sample the distribution using linear interpolation
+      double calcV = grInput->GetPointY(i-1) + (sampleTime - grInput->GetPointX(i-1)) * (grInput->GetPointY(i) - grInput->GetPointY(i-1)) / (time - grInput->GetPointX(i-1));
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;      
+    }
+  }
+
+  return grOut;
+}
+
+TGraph* rad::Signal::SampleWaveform(TGraph* grInput, const double sRate, const double firstSampleTime) {
+  TGraph* grOut = new TGraph();
+  double sampleSpacing = 1.0 / sRate;
+  double sampleTime = firstSampleTime;
+ 
   for (int i = 0; i < grInput->GetN(); i++) {
     double time = grInput->GetPointX(i);
     if (time < sampleTime) continue;

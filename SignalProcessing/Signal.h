@@ -45,6 +45,14 @@ namespace rad
     /// \param sRate The designated sample rate
     /// Returns the downsampled waveform
     TGraph* SampleWaveform(TGraph* grInput, const double sRate);
+
+    /// Function for performing downsampling on a time domain wave
+    /// Allows for the specification of the first sample time
+    /// \param grInput The input time domain waveform
+    /// \param sRate The designated sample rate
+    /// \param firstSampleTime The first time to sample
+    /// Returns the downsampled waveform
+    TGraph* SampleWaveform(TGraph* grInput, const double sRate, const double firstSampleTime);
     
     void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms);
     
@@ -72,7 +80,7 @@ namespace rad
     /// \param srate The sample rate of a hypothetical ADC
     /// \param noiseTerms A vector of noise terms to be added to the signal
     Signal(InducedVoltage iv, LocalOscillator lo, double srate,
-	   std::vector<GaussianNoise> noiseTerms={});
+	   std::vector<GaussianNoise> noiseTerms={}, double maxTime=-1);
     
     /// Copy constructor
     Signal(const Signal &s1);
