@@ -84,6 +84,20 @@ void rad::FieldPoint::ResetFields() {
   pos[1]->Clear();
   pos[2]->Clear();
   tPrime->Clear();
+
+  for (int coord = 0; coord < 3; coord++) {
+    delete EField[coord];
+    delete BField[coord];
+    delete pos[coord];
+  }
+  delete tPrime;
+
+  for (int coord = 0; coord < 3; coord++) {
+    EField[coord] = new TGraph();
+    BField[coord] = new TGraph();
+    pos[coord] = new TGraph();
+    tPrime = new TGraph();
+  }
 }
 
 /*
