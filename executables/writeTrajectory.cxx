@@ -13,6 +13,7 @@
 #include <cmath>
 #include <tuple>
 #include <string>
+#include <ctime>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -82,6 +83,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   
+  const clock_t begin_time = clock(); // Start timing
   
   const double pitchAngleRad = pitchAngle * TMath::Pi() / 180;
   const double TElec = 18600; // eV
@@ -207,6 +209,9 @@ int main(int argc, char *argv[])
   
   fout->Close();
   delete fout;
+
+  const clock_t end_time = clock();
+  std::cout<<"Execution time is "<<float(end_time - begin_time)/CLOCKS_PER_SEC<<" seconds"<<std::endl;
   
   return 0;
 }
