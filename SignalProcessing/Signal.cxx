@@ -204,7 +204,6 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
     std::cout<<"Performing the downmixing..."<<std::endl;
     TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
     TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
-    delete grInputVoltageTemp;
   
     std::cout<<"First downsampling"<<std::endl;
     TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate, this10Sample);
