@@ -31,9 +31,6 @@ namespace rad
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
     double sampleRate;
-    
-    TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
-    TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
 
     /// Function for performing downsampling on a time domain wave using the class sample rate
     /// \param grInput The input time domain waveform
@@ -109,6 +106,9 @@ namespace rad
     /// \param loadResistance The load resistance used for the power calculation
     /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
     TH2D* GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin);
+
+    TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
+    TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
   };
 }
 
