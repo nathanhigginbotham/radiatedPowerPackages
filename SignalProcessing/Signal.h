@@ -95,7 +95,23 @@ namespace rad
 
     /// Returns the power spectrum of the quadrature voltage component after all signal processing
     /// \param loadResistance The load resistance used for the power calculation
+    /// \param firstPoint The first point to return
+    /// \param lastPoint The last point to return
     TGraph* GetVQPowerNorm(const double loadResistance, int firstPoint=-1, int lastPoint=-1);
+
+    /// Returns the power spectrum of the in-phase voltage component after all signal processing
+    /// Power spectrum in this case is the periodogram
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param firstPoint The first point to return
+    /// \param lastPoint The last point to return
+    TGraph* GetVIPowerPeriodogram(const double loadResistance, int firstPoint=-1, int lastPoint=-1);
+
+    /// Returns the power spectrum of the quadrature voltage component after all signal processing
+    /// Power spectrum in this case is the periodogram
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param firstPoint The first point to return
+    /// \param lastPoint The last point to return
+    TGraph* GetVQPowerPeriodogram(const double loadResistance, int firstPoint=-1, int lastPoint=-1);
 
     /// Returns the 2D spectrogram made using the in-phase voltage component
     /// \param loadResistance The load resistance used for the power calculation

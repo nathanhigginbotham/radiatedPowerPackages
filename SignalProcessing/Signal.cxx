@@ -402,10 +402,32 @@ TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance, int firstPoint,
   delete grTime;
   for (int i = 0; i < grOut->GetN(); i++) {
     grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
-  }
+  } 
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Frequency [Hz]");
   grOut->GetYaxis()->SetTitle("#frac{V_{Q}^{2}}{R} #times (#Deltat)^{2} [W s^{2}]");
+  return grOut;
+}
+
+TGraph* rad::Signal::GetVIPowerPeriodogram(const double loadResistance, int firstPoint, int lastPoint) {
+  TGraph* grTime = GetVITimeDomain(firstPoint, lastPoint);
+  TGraph* grOut = MakePowerSpectrumPeriodogram(grTime);
+  delete grTime;
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Frequency [Hz]");
+  grOut->GetYaxis()->SetTitle("Power [W]");
+  ScaleGraph(grOut, 1/loadResistance);
+  return grOut;
+}
+
+TGraph* rad::Signal::GetVQPowerPeriodogram(const double loadResistance, int firstPoint, int lastPoint) {
+  TGraph* grTime = GetVQTimeDomain(firstPoint, lastPoint);
+  TGraph* grOut = MakePowerSpectrumPeriodogram(grTime);
+  delete grTime;
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Frequency [Hz]");
+  grOut->GetYaxis()->SetTitle("Power [W]");
+  ScaleGraph(grOut, 1/loadResistance);
   return grOut;
 }
 
