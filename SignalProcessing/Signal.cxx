@@ -436,6 +436,54 @@ TH2D* rad::Signal::GetVISpectrogram(const double loadResistance, const int NSamp
   const double deltaF = 1.0 / ((1.0/sampleRate) * NSamplesPerTimeBin);
   const double lastFreq = nFreqBins * deltaF;
 
+  TH2D* h2 = new TH2D("h2", "Spectrogram V_{I}; Time [s]; Frequency [Hz]; Power [W]", nTimeBins, firstTime, lastTime, nFreqBins, 0, lastFreq);
+  SetHistAttr(h2);
+  // Loop through the time bins and generate the power spectrum at each point
+  for (int t = 1; t <= nTimeBins; t++) {
+    TGraph* grPower = GetVIPowerPeriodogram(loadResistance, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin-1);
+    // Add this data to the histogram
+    for (int i = 0; i < grPower->GetN(); i++) {
+      h2->SetBinContent(t, i+1, grPower->GetPointY(i));
+    }
+    delete grPower;
+  }
+  
+  return h2;
+}
+
+TH2D* rad::Signal::GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin) {
+  // Get the number of time bins given the specified NSamplesPerTimeBin
+  const int nTimeBins = int(floor(double(grVQTime->GetN()) / double(NSamplesPerTimeBin)));
+  const double firstTime = grVQTime->GetPointX(0);
+  const double lastTime  = grVQTime->GetPointX(nTimeBins * NSamplesPerTimeBin - 1);
+  const int nFreqBins = (NSamplesPerTimeBin/2)+1;
+  const double deltaF = 1.0 / ((1.0/sampleRate) * NSamplesPerTimeBin);
+  const double lastFreq = nFreqBins * deltaF;
+
+  TH2D* h2 = new TH2D("h2", "Spectrogram V_{I}; Time [s]; Frequency [Hz]; Power [W]", nTimeBins, firstTime, lastTime, nFreqBins, 0, lastFreq);
+  SetHistAttr(h2);
+  // Loop through the time bins and generate the power spectrum at each point
+  for (int t = 1; t <= nTimeBins; t++) {
+    TGraph* grPower = GetVQPowerPeriodogram(loadResistance, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin-1);
+    // Add this data to the histogram
+    for (int i = 0; i < grPower->GetN(); i++) {
+      h2->SetBinContent(t, i+1, grPower->GetPointY(i));
+    }
+    delete grPower;
+  }
+  
+  return h2;
+}
+
+TH2D* rad::Signal::GetVISpectrogramNorm(const double loadResistance, const int NSamplesPerTimeBin) {
+  // Get the number of time bins given the specified NSamplesPerTimeBin
+  const int nTimeBins = int(floor(double(grVITime->GetN()) / double(NSamplesPerTimeBin)));
+  const double firstTime = grVITime->GetPointX(0);
+  const double lastTime  = grVITime->GetPointX(nTimeBins * NSamplesPerTimeBin - 1);
+  const int nFreqBins = (NSamplesPerTimeBin/2)+1;
+  const double deltaF = 1.0 / ((1.0/sampleRate) * NSamplesPerTimeBin);
+  const double lastFreq = nFreqBins * deltaF;
+
   TH2D* h2 = new TH2D("h2", "Spectrogram V_{I}; Time [s]; Frequency [Hz]; #frac{V_{I}^{2}}{R} #times (#Delta t)^{2} [W s^{2}]", nTimeBins, firstTime, lastTime, nFreqBins, 0, lastFreq);
   SetHistAttr(h2);
   // Loop through the time bins and generate the power spectrum at each point
@@ -451,7 +499,7 @@ TH2D* rad::Signal::GetVISpectrogram(const double loadResistance, const int NSamp
   return h2;
 }
 
-TH2D* rad::Signal::GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin) {
+TH2D* rad::Signal::GetVQSpectrogramNorm(const double loadResistance, const int NSamplesPerTimeBin) {
   // Get the number of time bins given the specified NSamplesPerTimeBin
   const int nTimeBins = int(floor(double(grVQTime->GetN()) / double(NSamplesPerTimeBin)));
   const double firstTime = grVQTime->GetPointX(0);

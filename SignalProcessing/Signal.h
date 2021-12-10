@@ -122,6 +122,16 @@ namespace rad
     /// \param loadResistance The load resistance used for the power calculation
     /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
     TH2D* GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin);
+    
+    /// Returns the 2D spectrogram made using the in-phase voltage component
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    TH2D* GetVISpectrogramNorm(const double loadResistance, const int NSamplesPerTimeBin);
+
+    /// Returns the 2D spectrogram made using the quadrature voltage component
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    TH2D* GetVQSpectrogramNorm(const double loadResistance, const int NSamplesPerTimeBin);
 
     TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
     TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
