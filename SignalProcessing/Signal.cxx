@@ -387,9 +387,7 @@ TGraph* rad::Signal::GetVIPowerNorm(const double loadResistance, int firstPoint,
   TGraph* grTime = GetVITimeDomain(firstPoint, lastPoint);
   TGraph* grOut = MakePowerSpectrumNorm(grTime);
   delete grTime;
-  for (int i = 0; i < grOut->GetN(); i++) {
-    grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
-  }
+  ScaleGraph(grOut, 1/loadResistance);
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Frequency [Hz]");
   grOut->GetYaxis()->SetTitle("#frac{V_{I}^{2}}{R} #times (#Deltat)^{2} [W s^{2}]");
@@ -400,9 +398,7 @@ TGraph* rad::Signal::GetVQPowerNorm(const double loadResistance, int firstPoint,
   TGraph* grTime = GetVQTimeDomain(firstPoint, lastPoint);
   TGraph* grOut = MakePowerSpectrumNorm(grTime);
   delete grTime;
-  for (int i = 0; i < grOut->GetN(); i++) {
-    grOut->SetPointY(i, grOut->GetPointY(i) / loadResistance);
-  } 
+  ScaleGraph(grOut, 1/loadResistance);
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Frequency [Hz]");
   grOut->GetYaxis()->SetTitle("#frac{V_{Q}^{2}}{R} #times (#Deltat)^{2} [W s^{2}]");
