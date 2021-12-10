@@ -192,6 +192,7 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   const double chunkSize = 25e-6;
   double lastChunk = 0;
   double thisChunk = lastChunk + chunkSize;
+  if (thisChunk > maxTime) thisChunk = maxTime;
 
   double thisSample = 0;
   double this10Sample = 0;
