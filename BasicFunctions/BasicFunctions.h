@@ -42,6 +42,9 @@ namespace rad
   // Produces power spectrum with the desired normalisation
   TGraph* MakePowerSpectrumNorm(const TGraph* grWave);
 
+  // Produdces power spectrum normalised to the mean squared amplitude of the time domain
+  TGraph* MakePowerSpectrumPeriodogram(const TGraph* grWave);  
+  
   // Integrate the power spectrum
   double IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin=-1, Int_t lastBin=-1);
 
@@ -66,6 +69,29 @@ namespace rad
   /// \param mass Particle mass in kilograms. Default is electron rest mass
   /// \Returns the cyclotron frequency
   TVector3 calculate_omega(const TVector3 BField, const double charge=-TMath::Qe(), const double energy=0.0, const double mass=ME);
+
+  /// Downmixes a time series of data with the appropriate frequency
+  /// \param grInput The input time series data
+  /// \param freq The frequency in Hertz with which to downmix
+  /// \Returns The downmixed time series
+  TGraph* DownmixInPhase(TGraph* grInput, const double freq);
+
+  /// Downmixes a time series of data with the appropriate frequency
+  /// \param grInput The input time series data
+  /// \param freq The frequency in Hertz with which to downmix
+  /// \Returns The downmixed time series
+  TGraph* DownmixQuadrature(TGraph* grInput, const double freq);
+
+  /// Scales all points of a TGraph by a constant
+  /// \param grInput The input graph
+  /// \param scale factor
+  /// \Returns grInput * scale
+  void ScaleGraph(TGraph* grInput, const double scale);
+
+  /// Calculates relativistic electron cyclotron frequency
+  /// \param KE The electron kinetic energy in eV
+  /// \param B Magnetic field strength in Tesla
+  double CalcCyclotronFreq(const double KE, const double B=1.0);
 }
  
 #endif

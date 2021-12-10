@@ -159,6 +159,40 @@ TGraph* rad::MakePowerSpectrumNorm(const TGraph* grWave)
   return grPower;
 }
 
+TGraph* rad::MakePowerSpectrumPeriodogram(const TGraph* grWave)
+{
+  double *oldY = grWave->GetY();
+  double *oldX = grWave->GetX();
+  double deltaT = oldX[1] - oldX[0];
+  int length = grWave->GetN();
+  FFTWComplex *theFFT = FFTtools::doFFT(length, oldY);
+  double lengthDub = (double)length;
+  int newLength = (length/2) + 1;
+  double *newY = new double[newLength];
+  double *newX = new double[newLength];
+
+  double deltaF = 1/(deltaT*length);
+
+  double tempF = 0;
+  for(int i=0;i<newLength;i++) {
+    float power=pow(FFTtools::getAbs(theFFT[i]),2);
+    if(i>0 && i<newLength-1) power*=2; //account for symmetry
+    double scale = lengthDub*lengthDub;
+    power /= scale;
+    newX[i]=tempF;
+    newY[i]=power;
+    tempF+=deltaF;    
+  }
+
+  TGraph *grPower = new TGraph(newLength,newX,newY);
+  setGraphAttr(grPower);
+  grPower->GetXaxis()->SetTitle("Frequency [Hz]");
+  delete [] theFFT;
+  delete [] newY;
+  delete [] newX;
+  return grPower;
+}
+
 double rad::IntegratePowerNorm(const TGraph* grFFT, Int_t firstBin, Int_t lastBin)
 {
   double integral = FFTtools::integratePower(grFFT, firstBin, lastBin);
@@ -240,4 +274,35 @@ void rad::AddWhiteNoiseFrequencyDomainPowerNorm(TGraph* grIn, const double Teff,
 TVector3 rad::calculate_omega(const TVector3 BField, const double charge, const double energy, const double mass) {
   double gamma_m0 = mass + energy * TMath::Qe() / pow(TMath::C(), 2);
   return (charge * BField * (1.0 / gamma_m0));
+}
+
+TGraph* rad::DownmixInPhase(TGraph* grInput, const double freq) {
+  TGraph* grOut = new TGraph();
+  setGraphAttr(grOut);
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double time = grInput->GetPointX(i);
+    grOut->SetPoint(i, time, grInput->GetPointY(i)*TMath::Cos(2*TMath::Pi()*freq*time));
+  }
+  return grOut;
+}
+
+TGraph* rad::DownmixQuadrature(TGraph* grInput, const double freq) {
+  TGraph* grOut = new TGraph();
+  setGraphAttr(grOut);
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double time = grInput->GetPointX(i);
+    grOut->SetPoint(i, time, grInput->GetPointY(i)*TMath::Sin(2*TMath::Pi()*freq*time));
+  }
+  return grOut;
+}
+
+void rad::ScaleGraph(TGraph* grInput, const double scale) {
+  for (int i = 0; i < grInput->GetN(); i++) {
+    grInput->SetPointY(i, grInput->GetPointY(i) * scale);
+  }
+}
+
+double rad::CalcCyclotronFreq(const double KE, const double B) {
+  double freq = TMath::Qe()*B / (ME + (KE*TMath::Qe()/pow(TMath::C(), 2)));
+  return freq / (2*TMath::Pi());
 }
