@@ -60,6 +60,9 @@ namespace rad
     /// \param grInput The input TGraph
     /// \param noiseTerms Vector containing the various noise contributions
     void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms);
+
+    /// Default constructor
+    Signal();
     
   public:
     ~Signal();

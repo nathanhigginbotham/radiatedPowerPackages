@@ -21,6 +21,13 @@ rad::Signal::~Signal() {
   delete grVQTime;
 }
 
+rad::Signal::Signal()
+{
+  sampleRate = 0;
+  grVITime = 0;
+  grVQTime = 0;
+}
+
 rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate,
 		    std::vector<GaussianNoise> noiseTerms, const bool kUseRetardedTime) {
   assert(fp.size() > 0);
