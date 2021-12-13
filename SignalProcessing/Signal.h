@@ -27,6 +27,11 @@ namespace rad
   
   class Signal
   {
+  private:
+    /// Function to actually do the signal processing for a given time chunk
+    void ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo, double thisChunk, double lastChunk,
+			  double &firstSampleTime, double &firstSample10Time);
+    
   protected:
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
@@ -50,7 +55,10 @@ namespace rad
     /// \param firstSampleTime The first time to sample
     /// Returns the downsampled waveform
     TGraph* SampleWaveform(TGraph* grInput, const double sRate, const double firstSampleTime);
-    
+
+    /// Adds Gaussian white noise to a time series of voltage values
+    /// \param grInput The input TGraph
+    /// \param noiseTerms Vector containing the various noise contributions
     void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms);
     
   public:
