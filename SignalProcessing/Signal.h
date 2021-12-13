@@ -27,7 +27,7 @@ namespace rad
   
   class Signal
   {
-  private:
+  protected:
     TGraph* grVITime; // In phase component
     TGraph* grVQTime; // Quadrature component
     double sampleRate;
