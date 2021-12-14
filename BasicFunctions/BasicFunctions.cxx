@@ -306,3 +306,27 @@ double rad::CalcCyclotronFreq(const double KE, const double B) {
   double freq = TMath::Qe()*B / (ME + (KE*TMath::Qe()/pow(TMath::C(), 2)));
   return freq / (2*TMath::Pi());
 }
+
+TGraph* rad::SumGraphs(std::vector<TGraph*> grInput)
+{
+  TGraph* grOut = new TGraph();
+  setGraphAttr(grOut);
+  int nPoints = -1;
+  int maxGr = -1;
+  for (int iGr = 0; iGr < grInput.size(); iGr++) {
+    if (grInput[iGr]->GetN() > nPoints) {
+      nPoints = grInput[iGr]->GetN();
+      maxGr = iGr;
+    }
+  }
+
+  for (int iPnt = 0; iPnt < nPoints; iPnt++) {
+    double thisPoint = 0;
+    for (int iGr = 0; iGr < grInput.size(); iGr++) {
+      thisPoint += grInput[iGr]->GetPointY(iPnt);
+    }
+    grOut->SetPoint(iPnt, grInput[maxGr]->GetPointX(iPnt), thisPoint);
+  }
+
+  return grOut;
+}

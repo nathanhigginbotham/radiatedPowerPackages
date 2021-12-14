@@ -12,6 +12,8 @@
 #include "TH1.h"
 #include "TH2.h"
 
+#include <vector>
+
 namespace rad
 {
 
@@ -92,6 +94,11 @@ namespace rad
   /// \param KE The electron kinetic energy in eV
   /// \param B Magnetic field strength in Tesla
   double CalcCyclotronFreq(const double KE, const double B=1.0);
+
+  /// Sums the points in a number of TGraphs
+  /// \param grInput A vector of the graphs to be summed
+  /// \Returns A graph containing the summed points
+  TGraph* SumGraphs(std::vector<TGraph*> grInput);
 }
  
 #endif
