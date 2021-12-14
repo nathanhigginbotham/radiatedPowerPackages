@@ -13,6 +13,7 @@
 
 #include "TGraph.h"
 #include "TH2.h"
+#include "TRandom3.h"
 
 #include "FFTtools.h"
 
@@ -170,7 +171,7 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
   
   std::cout<<"Adding noise..."<<std::endl;
   AddGaussianNoise(grVITime, noiseTerms);
-  AddGaussianNoise(grVQTime, noiseTerms); 
+  AddGaussianNoise(grVQTime, noiseTerms);  
 }
 
 void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
@@ -181,7 +182,7 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   iv.GenerateVoltage(lastChunk, thisChunk);
 
   TGraph* grInputVoltageTemp = iv.GetVoltageGraph();
-
+ 
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
   TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
@@ -209,6 +210,10 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   delete grVITimeUnsampled;
   delete grVQTimeUnsampled;
   firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
+
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grVITimeTemp, noiseTerms);
+  AddGaussianNoise(grVQTimeTemp, noiseTerms); 
   
   // Now add the information from these temporary graphs to the larger ones
   for (int i = 0; i < grVITimeTemp->GetN(); i++) {
@@ -257,10 +262,6 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
     thisChunk += chunkSize;
     if (thisChunk > maxTime) thisChunk = maxTime;
   }
-  
-  std::cout<<"Adding noise..."<<std::endl;
-  AddGaussianNoise(grVITime, noiseTerms);
-  AddGaussianNoise(grVQTime, noiseTerms); 
 }
 
 rad::Signal::Signal(const Signal &s1) {
@@ -387,7 +388,7 @@ TGraph* rad::Signal::SampleWaveform(TGraph* grInput, const double sRate, const d
   return grOut;
 }
 
-void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms) {
+void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms) {  
   for (int i = 0; i < grInput->GetN(); i++) {
     double voltage = grInput->GetPointY(i);
     for (int noise = 0; noise < noiseTerms.size(); noise++) {
