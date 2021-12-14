@@ -30,6 +30,7 @@ namespace rad
   private:
     /// Function to actually do the signal processing for a given time chunk
     void ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo, double thisChunk, double lastChunk,
+			  std::vector<GaussianNoise> noiseTerms,
 			  double &firstSampleTime, double &firstSample10Time);
     
   protected:
@@ -59,7 +60,9 @@ namespace rad
     /// Adds Gaussian white noise to a time series of voltage values
     /// \param grInput The input TGraph
     /// \param noiseTerms Vector containing the various noise contributions
-    void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms);
+    /// \param IsComponent Are we adding noise to in phase and voltage components?
+    void AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms,
+			  bool IsComponent=true);
 
     /// Default constructor
     Signal();

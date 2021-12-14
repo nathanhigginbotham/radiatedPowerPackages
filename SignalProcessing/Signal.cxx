@@ -176,6 +176,7 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
 
 void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 				   double thisChunk, double lastChunk,
+				   std::vector<GaussianNoise> noiseTerms, 
 				   double &firstSampleTime, double &firstSample10Time)
 {
   iv.ResetVoltage();
@@ -257,7 +258,7 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   double this10Sample = 0;
   
   while (thisChunk <= maxTime && thisChunk != lastChunk) {
-    ProcessTimeChunk(iv, lo, thisChunk, lastChunk, thisSample, this10Sample);
+    ProcessTimeChunk(iv, lo, thisChunk, lastChunk, noiseTerms, thisSample, this10Sample);
     lastChunk = thisChunk;
     thisChunk += chunkSize;
     if (thisChunk > maxTime) thisChunk = maxTime;
@@ -388,11 +389,18 @@ TGraph* rad::Signal::SampleWaveform(TGraph* grInput, const double sRate, const d
   return grOut;
 }
 
-void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms) {  
+void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> noiseTerms,
+				   bool IsComponent) {
+  double sampleFreqCalc = 1 / (grInput->GetPointX(1) - grInput->GetPointX(1));
+  for (int noise = 0; noise < noiseTerms.size(); noise++) {
+    (noiseTerms.at(noise)).SetSampleFreq(sampleFreqCalc);
+    (noiseTerms.at(noise)).SetSigma();
+  }
+  
   for (int i = 0; i < grInput->GetN(); i++) {
     double voltage = grInput->GetPointY(i);
     for (int noise = 0; noise < noiseTerms.size(); noise++) {
-      voltage += (noiseTerms.at(noise)).GetNoiseVoltage();  
+      voltage += (noiseTerms.at(noise)).GetNoiseVoltage(IsComponent);  
     }
     grInput->SetPointY(i, voltage);
   }
