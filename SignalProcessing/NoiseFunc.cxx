@@ -46,8 +46,8 @@ void rad::GaussianNoise::SetSigma() {
   sigma = TMath::Sqrt( TMath::K() * noiseTemp * sampleFreq );
 }
 
-double rad::GaussianNoise::GetNoiseVoltage() {
-  double premult = TMath::Sqrt(resistance*0.5);
+double rad::GaussianNoise::GetNoiseVoltage(bool IsComponent) {
+  double premult = IsComponent ? TMath::Sqrt(resistance*0.5) : TMath::Sqrt(resistance);
   double volt = premult * numGen->Gaus(0.0, sigma);
   return volt;
 }

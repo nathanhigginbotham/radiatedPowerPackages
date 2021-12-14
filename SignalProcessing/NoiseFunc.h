@@ -33,7 +33,7 @@ namespace rad
 
     void SetSampleFreq(double fs);
     void SetSigma();
-    double GetNoiseVoltage();
+    double GetNoiseVoltage(bool IsComponent=true);
     double GetSigma() { return sigma; }
     double GetNoiseTemp() { return noiseTemp; }
     double GetFs() { return sampleFreq; }
