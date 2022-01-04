@@ -18,10 +18,13 @@ add_executable(perpendicularAntenna perpendicularAntenna.cxx)
 target_link_libraries(perpendicularAntenna PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 
 add_executable(rayleighDistributionChecks rayleighDistributionChecks.cxx)
-target_link_libraries(rayleighDistributionChecks PUBLIC BasicFunctions ${ROOT_LIBRARIES})
+target_link_libraries(rayleighDistributionChecks PUBLIC BasicFunctions SignalProcessing Antennas ${ROOT_LIBRARIES})
 
 add_executable(writeTrajectory writeTrajectory.cxx)
 target_link_libraries(writeTrajectory PUBLIC ElectronDynamics ${ROOT_LIBRARIES})
 
-add_executable(toySpectrogram toySpectrogram.cxx)
-target_link_libraries(toySpectrogram PUBLIC BasicFunctions ${ROOT_LIBRARIES})
+add_executable(idealCaseSpectrogram idealCaseSpectrogram.cxx)
+target_link_libraries(idealCaseSpectrogram PUBLIC SignalProcessing Antennas ${ROOT_LIBRARIES})
+
+add_executable(singleBinPower singleBinPower.cxx)
+target_link_libraries(singleBinPower PUBLIC SignalProcessing Antennas BasicFunctions ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
