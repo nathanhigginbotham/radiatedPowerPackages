@@ -31,7 +31,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
 
   // To avoid running out of memory, generate the fields in more manageable chunks
   // Avoids having massive versions of unnecessary graphs
-  const double chunkSize = 25e-6;
+  const double chunkSize = 5e-6;
   double thisChunk = minTime + chunkSize;
   if (thisChunk > maxTime) thisChunk = maxTime;
   double lastChunk = minTime;
