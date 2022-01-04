@@ -29,13 +29,15 @@ int main(int argc, char** argv)
 
   const double antennaLowerBandwidth = 26.95e9;
   const double antennaUpperBandwidth = 27.05e9;
+
+  const double acquisitionTime = 5e-6;
   
   TVector3 antennaPoint1(0.02, 0, 0);
   TVector3 antennaDirZ1(0, 1, 0);
   TVector3 antennaDirX1(1, 0, 0);
   HalfWaveDipole* antenna1 = new HalfWaveDipole(antennaPoint1, antennaDirX1, antennaDirZ1, 27.01e9);
   antenna1->SetBandwidth(antennaLowerBandwidth, antennaUpperBandwidth);
-  InducedVoltage fp1("/home/sjones/work/qtnm/trajectories/electronTraj60us90Deg.root", antenna1, 54e-6);
+  InducedVoltage fp1("/home/sjones/work/qtnm/trajectories/electronTraj60us90Deg.root", antenna1, false);
 
   LocalOscillator myLO(26.75e9 * 2 * TMath::Pi());
   const double loadResistance = 70.0;
@@ -45,23 +47,23 @@ int main(int argc, char** argv)
   std::vector<GaussianNoise> noiseTerms;
   noiseTerms.push_back(noise1);
   
-  Signal signal1(fp1, myLO, sampleRate, noiseTerms);
-  Signal signalNoNoise(fp1, myLO, sampleRate);
+  Signal signal(fp1, myLO, sampleRate, noiseTerms, 54e-6);
+  Signal signalNoNoise(fp1, myLO, sampleRate, {}, 54e-6);
   
   TFile* fout = new TFile(outputFile, "RECREATE");
   fout->cd();
 
-  TGraph* grVIPowerSpectrum = signal1.GetVIPowerNorm(loadResistance);
+  TGraph* grVIPowerSpectrum = signal.GetVIPowerNorm(loadResistance);
   TGraph* grVIPowerSpectrumNoNoise = signalNoNoise.GetVIPowerNorm(loadResistance);
   grVIPowerSpectrum->Write("grVIPowerSpectrum");
   grVIPowerSpectrumNoNoise->Write("grVIPowerSpectrumNoNoise");
   std::cout<<"Power integral "<<IntegratePowerNorm(grVIPowerSpectrum)<<std::endl;
   std::cout<<"Power integral no noise "<<IntegratePowerNorm(grVIPowerSpectrumNoNoise)<<std::endl;
 
-  TGraph* grVIPeriodogram = signal1.GetVIPowerPeriodogram(loadResistance);
+  TGraph* grVIPeriodogram = signal.GetVIPowerPeriodogram(loadResistance);
   TGraph* grVIPeriodogramNoNoise = signalNoNoise.GetVIPowerPeriodogram(loadResistance);
   std::cout<<"Power integral "<<FFTtools::sumPower(grVIPeriodogram)<<std::endl;
-  std::cout<<"Power integral no noise"<<FFTtools::sumPower(grVIPeriodogramNoNoise)<<std::endl;
+  std::cout<<"Power integral no noise "<<FFTtools::sumPower(grVIPeriodogramNoNoise)<<std::endl;
   grVIPeriodogram->Write("grVIPeriodogram");
   grVIPeriodogramNoNoise->Write("grVIPeriodogramNoNoise");
   
