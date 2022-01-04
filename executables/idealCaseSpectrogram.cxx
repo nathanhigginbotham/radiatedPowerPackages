@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
   HalfWaveDipole* antenna1 = new HalfWaveDipole(antennaPoint1, antennaDirX1, antennaDirZ1, 27.01e9);
 
   const double loadResistance = 70.0;
-  const double noiseTemp = 0.0;
+  const double noiseTemp = 4.0;
   const double optimalTimeBin = 54e-6;
   LocalOscillator myLO(26.75e9 * 2 * TMath::Pi());
   GaussianNoise noise1(noiseTemp, loadResistance);
