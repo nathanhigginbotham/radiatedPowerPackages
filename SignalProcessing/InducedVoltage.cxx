@@ -43,6 +43,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     // Account for antenna bandwidth
     if (theAntenna->GetBandwidthUpperLimit() != DBL_MAX ||
 	theAntenna->GetBandwidthLowerLimit() != -DBL_MAX) {
+      std::cout<<"Accounting for antenna bandwidth..."<<std::endl;
       voltageTemp = BandPassFilter(voltageTemp, theAntenna->GetBandwidthLowerLimit(), theAntenna->GetBandwidthUpperLimit());
     }
     
