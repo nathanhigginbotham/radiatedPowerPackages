@@ -3,6 +3,7 @@
 #include "SignalProcessing/InducedVoltage.h"
 #include "Antennas/IAntenna.h"
 #include "FieldClasses/FieldClasses.h"
+#include "BasicFunctions/BasicFunctions.h"
 
 #include "TString.h"
 #include "TGraph.h"
@@ -38,6 +39,13 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
   while (thisChunk <= maxTime && thisChunk != lastChunk) {
     fp.GenerateFields(lastChunk, thisChunk);
     TGraph* voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
+    
+    // Account for antenna bandwidth
+    if (theAntenna->GetBandwidthUpperLimit() != DBL_MAX ||
+	theAntenna->GetBandwidthLowerLimit() != -DBL_MAX) {
+      voltageTemp = BandPassFilter(voltageTemp, theAntenna->GetBandwidthLowerLimit(), theAntenna->GetBandwidthUpperLimit());
+    }
+    
     // Now write this to the main voltage graph
     std::cout<<"Writing to main voltage graph"<<std::endl;
     for (int i = 0; i < voltageTemp->GetN(); i++) {
@@ -48,6 +56,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     thisChunk += chunkSize;
     if (thisChunk > maxTime) thisChunk = maxTime;
   }
+
 }
 
 rad::InducedVoltage::InducedVoltage(const InducedVoltage &iv) {
@@ -75,3 +84,10 @@ double rad::InducedVoltage::GetFinalTime() {
   return lastTime;
 }
 
+double rad::InducedVoltage::GetUpperAntennaBandwidth() {
+  return theAntenna->GetBandwidthUpperLimit();
+}
+
+double rad::InducedVoltage::GetLowerAntennaBandwidth() {
+  return theAntenna->GetBandwidthLowerLimit();
+}

@@ -54,6 +54,12 @@ namespace rad
 
     // Returns the final time in the file
     double GetFinalTime();
+
+    // Returns the upper antenna bandwidth
+    double GetUpperAntennaBandwidth();
+
+    // Returns the lower antenna bandwidth limit
+    double GetLowerAntennaBandwidth();
   };
 }
 
