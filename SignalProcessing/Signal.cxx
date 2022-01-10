@@ -258,7 +258,7 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   // Split the signal up into chunks to avoid memory issues
   if (maxTime < 0) maxTime = iv.GetFinalTime();
   
-  const double chunkSize = 10e-6;
+  const double chunkSize = 25e-6;
   double lastChunk = 0;
   double thisChunk = lastChunk + chunkSize;
   if (thisChunk > maxTime) thisChunk = maxTime;
