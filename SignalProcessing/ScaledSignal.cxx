@@ -41,19 +41,16 @@ rad::ScaledSignal::ScaledSignal(InducedVoltage iv, LocalOscillator lo, double sr
   double this10Sample = 0;
 
   while (thisChunk <= maxTime && thisChunk != lastChunk) {
-    ProcessTimeChunk(iv, lo, thisChunk, lastChunk, thisSample, this10Sample);
+    ProcessTimeChunk(iv, lo, thisChunk, lastChunk, noiseTerms, thisSample, this10Sample);
     lastChunk = thisChunk;
     thisChunk += chunkSize;
     if (thisChunk > maxTime) thisChunk = maxTime;
   }
-  
-  std::cout<<"Adding noise..."<<std::endl;
-  AddGaussianNoise(grVITime, noiseTerms);
-  AddGaussianNoise(grVQTime, noiseTerms);   
 }
 
 void rad::ScaledSignal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 					 double thisChunk, double lastChunk,
+					 std::vector<GaussianNoise> noiseTerms,
 					 double &firstSampleTime, double &firstSample10Time)
 { 
   iv.ResetVoltage();
@@ -63,6 +60,14 @@ void rad::ScaledSignal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 
   // Scale the input voltage
   ScaleGraph(grInputVoltageTemp, scaleFactor);
+
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grInputVoltageTemp, noiseTerms, false);
+
+  if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
+    std::cout<<"Implementing antenna bandwidth..."<<std::endl;
+    grInputVoltageTemp = BandPassFilter(grInputVoltageTemp, iv.GetLowerAntennaBandwidth(), iv.GetUpperAntennaBandwidth());
+  }
   
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
@@ -100,12 +105,6 @@ void rad::ScaledSignal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
     
   delete grVITimeTemp;
   delete grVQTimeTemp;
-}
-
-rad::ScaledSignal::~ScaledSignal()
-{
-  delete grVITime;
-  delete grVQTime;
 }
 
 rad::ScaledSignal::ScaledSignal(const ScaledSignal &s1)

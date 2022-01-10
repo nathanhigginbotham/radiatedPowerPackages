@@ -12,6 +12,8 @@
 #include "SignalProcessing/NoiseFunc.h"
 #include "SignalProcessing/InducedVoltage.h"
 
+#include <vector>
+
 namespace rad
 {
   class ScaledSignal : public Signal {
@@ -20,6 +22,7 @@ namespace rad
     double scaleFactor;
 
     void ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo, double thisChunk, double lastChunk,
+			  std::vector<GaussianNoise> noiseTerms,
 			  double &firstSampleTime, double &firstSample10Time);
         
   public:
@@ -31,9 +34,6 @@ namespace rad
     /// \param noiseTerms A vector of noise terms to be added to the signal
     ScaledSignal(InducedVoltage iv, LocalOscillator lo, double srate, double scaleFactor,
 		 std::vector<GaussianNoise> noiseTerms={}, double maxTime=-1);
-
-    /// Destructor
-    ~ScaledSignal();
 
     /// Copy constructor
     ScaledSignal(const ScaledSignal &s1);
