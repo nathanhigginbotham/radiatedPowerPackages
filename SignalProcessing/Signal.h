@@ -136,6 +136,20 @@ namespace rad
     /// \param loadResistance The load resistance used for the power calculation
     /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
     TH2D* GetVQSpectrogram(const double loadResistance, const int NSamplesPerTimeBin);
+
+    /// Returns a 2D sparse spectrogram made using the in-phase voltage component
+    /// along with a threshold for considering a pixel as a hit
+    /// \param loadResistance The load resistance used for power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    /// \param ThresholdPower The power (in Watts) above which a pixel is considered a hit
+    TH2D* GetVISparseSpectrogram(const double loadResistance, const int NSamplesPerTimeBin, const double ThresholdPower);
+
+    /// Returns a 2D sparse spectrogram made using the quadrature voltage component
+    /// along with a threshold for considering a pixel as a hit
+    /// \param loadResistance The load resistance used for power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    /// \param ThresholdPower The power (in Watts) above which a pixel is considered a hit
+    TH2D* GetVQSparseSpectrogram(const double loadResistance, const int NSamplesPerTimeBin, const double ThresholdPower);
     
     /// Returns the 2D spectrogram made using the in-phase voltage component
     /// \param loadResistance The load resistance used for the power calculation

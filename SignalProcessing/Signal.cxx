@@ -14,6 +14,7 @@
 #include "TGraph.h"
 #include "TH2.h"
 #include "TRandom3.h"
+#include "TAxis.h"
 
 #include "FFTtools.h"
 
@@ -257,7 +258,7 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   // Split the signal up into chunks to avoid memory issues
   if (maxTime < 0) maxTime = iv.GetFinalTime();
   
-  const double chunkSize = 5e-6;
+  const double chunkSize = 10e-6;
   double lastChunk = 0;
   double thisChunk = lastChunk + chunkSize;
   if (thisChunk > maxTime) thisChunk = maxTime;
@@ -502,6 +503,36 @@ TH2D* rad::Signal::GetVQSpectrogram(const double loadResistance, const int NSamp
     }
     delete grPower;
   }
+  
+  return h2;
+}
+
+TH2D* rad::Signal::GetVISparseSpectrogram(const double loadResistance, const int NSamplesPerTimeBin, const double ThresholdPower) {
+  TH2D* hSpec = GetVISpectrogram(loadResistance, NSamplesPerTimeBin);
+  TH2D* h2 = new TH2D("h2", "Sparse spectrogram V_{I}; Time [s]; Frequency [Hz]", hSpec->GetNbinsX(), hSpec->GetXaxis()->GetBinLowEdge(1), hSpec->GetXaxis()->GetBinUpEdge(hSpec->GetNbinsX()), hSpec->GetNbinsY(), hSpec->GetYaxis()->GetBinLowEdge(1), hSpec->GetYaxis()->GetBinUpEdge(hSpec->GetNbinsY()));
+
+  for (int x = 1; x <= hSpec->GetNbinsX(); x++) {
+    for (int y = 1; y <= hSpec->GetNbinsY(); y++) {
+      double binPower = hSpec->GetBinContent(x, y);
+      (binPower > ThresholdPower) ? h2->SetBinContent(x, y, 1) : h2->SetBinContent(x, y, 0);  
+    }
+  }
+  delete hSpec;
+  
+  return h2;
+}
+
+TH2D* rad::Signal::GetVQSparseSpectrogram(const double loadResistance, const int NSamplesPerTimeBin, const double ThresholdPower) {
+  TH2D* hSpec = GetVQSpectrogram(loadResistance, NSamplesPerTimeBin);
+  TH2D* h2 = new TH2D("h2", "Sparse spectrogram V_{Q}; Time [s]; Frequency [Hz]", hSpec->GetNbinsX(), hSpec->GetXaxis()->GetBinLowEdge(1), hSpec->GetXaxis()->GetBinUpEdge(hSpec->GetNbinsX()), hSpec->GetNbinsY(), hSpec->GetYaxis()->GetBinLowEdge(1), hSpec->GetYaxis()->GetBinUpEdge(hSpec->GetNbinsY()));
+
+  for (int x = 1; x <= hSpec->GetNbinsX(); x++) {
+    for (int y = 1; y <= hSpec->GetNbinsY(); y++) {
+      double binPower = hSpec->GetBinContent(x, y);
+      (binPower > ThresholdPower) ? h2->SetBinContent(x, y, 1) : h2->SetBinContent(x, y, 0);  
+    }
+  }
+  delete hSpec;
   
   return h2;
 }
