@@ -31,7 +31,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
 
   // To avoid running out of memory, generate the fields in more manageable chunks
   // Avoids having massive versions of unnecessary graphs
-  const double chunkSize = 5e-6;
+  const double chunkSize = 10e-6;
   double thisChunk = minTime + chunkSize;
   if (thisChunk > maxTime) thisChunk = maxTime;
   double lastChunk = minTime;
@@ -41,11 +41,11 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     TGraph* voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
     
     // Account for antenna bandwidth
-    if (theAntenna->GetBandwidthUpperLimit() != DBL_MAX ||
-	theAntenna->GetBandwidthLowerLimit() != -DBL_MAX) {
-      std::cout<<"Accounting for antenna bandwidth..."<<std::endl;
-      voltageTemp = BandPassFilter(voltageTemp, theAntenna->GetBandwidthLowerLimit(), theAntenna->GetBandwidthUpperLimit());
-    }
+    // if (theAntenna->GetBandwidthUpperLimit() != DBL_MAX ||
+    // 	theAntenna->GetBandwidthLowerLimit() != -DBL_MAX) {
+    //   std::cout<<"Accounting for antenna bandwidth..."<<std::endl;
+    //   voltageTemp = BandPassFilter(voltageTemp, theAntenna->GetBandwidthLowerLimit(), theAntenna->GetBandwidthUpperLimit());
+    // }
     
     // Now write this to the main voltage graph
     std::cout<<"Writing to main voltage graph"<<std::endl;
@@ -91,4 +91,8 @@ double rad::InducedVoltage::GetUpperAntennaBandwidth() {
 
 double rad::InducedVoltage::GetLowerAntennaBandwidth() {
   return theAntenna->GetBandwidthLowerLimit();
+}
+
+void rad::InducedVoltage::ApplyAntennaBandwidth() {
+  grVoltage = BandPassFilter(grVoltage, theAntenna->GetBandwidthLowerLimit(), theAntenna->GetBandwidthUpperLimit());
 }

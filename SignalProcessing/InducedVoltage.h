@@ -60,6 +60,9 @@ namespace rad
 
     // Returns the lower antenna bandwidth limit
     double GetLowerAntennaBandwidth();
+
+    // Applies the antenna bandwidth to the signal
+    void ApplyAntennaBandwidth();
   };
 }
 
