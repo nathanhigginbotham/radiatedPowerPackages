@@ -83,7 +83,7 @@ namespace rad
   /// \param freq The frequency in Hertz with which to downmix
   /// \Returns The downmixed time series
   TGraph* DownmixQuadrature(TGraph* grInput, const double freq);
-
+  
   /// Scales all points of a TGraph by a constant
   /// \param grInput The input graph
   /// \param scale factor
@@ -99,6 +99,8 @@ namespace rad
   /// \param grInput A vector of the graphs to be summed
   /// \Returns A graph containing the summed points
   TGraph* SumGraphs(std::vector<TGraph*> grInput);
+
+  TGraph* SampleWaveform(TGraph* grInput, const double sRate);
 }
  
 #endif

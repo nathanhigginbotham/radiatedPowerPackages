@@ -330,3 +330,28 @@ TGraph* rad::SumGraphs(std::vector<TGraph*> grInput)
 
   return grOut;
 }
+
+TGraph* rad::SampleWaveform(TGraph* grInput, const double sRate)
+{
+  TGraph* grOut = new TGraph();
+  const double sampleSpacing = 1.0 / sRate;
+  double sampleTime = grInput->GetPointX(0);
+
+  for (int i = 0; i < grInput->GetN(); i++) {
+    double time = grInput->GetPointX(i);
+    if (time < sampleTime) continue;
+    else if (i == 0) {
+      double calcV = grInput->GetPointY(0);
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;
+    }
+    else {
+      // Sample the distribution using linear interpolation
+      double calcV = grInput->GetPointY(i-1) + (sampleTime - grInput->GetPointX(i-1)) * (grInput->GetPointY(i) - grInput->GetPointY(i-1)) / (time - grInput->GetPointX(i-1));
+      grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
+      sampleTime += sampleSpacing;
+    }
+  }
+
+  return grOut;
+}
