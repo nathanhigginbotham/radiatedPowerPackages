@@ -63,6 +63,10 @@ namespace rad
 
     // Applies the antenna bandwidth to the signal
     void ApplyAntennaBandwidth();
+
+    /// Returns periodogram
+    /// \param loadResistance The resistance of the load circuit
+    TGraph* GetPowerPeriodogram(const double loadResistance);
   };
 }
 

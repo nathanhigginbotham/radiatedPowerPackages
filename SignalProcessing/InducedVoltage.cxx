@@ -96,3 +96,9 @@ double rad::InducedVoltage::GetLowerAntennaBandwidth() {
 void rad::InducedVoltage::ApplyAntennaBandwidth() {
   grVoltage = BandPassFilter(grVoltage, theAntenna->GetBandwidthLowerLimit(), theAntenna->GetBandwidthUpperLimit());
 }
+
+TGraph* rad::InducedVoltage::GetPowerPeriodogram(const double loadResistance) {
+  TGraph* pgram = MakePowerSpectrumPeriodogram(grVoltage);
+  ScaleGraph(grVoltage, 1.0 / loadResistance);
+  return pgram;
+}
