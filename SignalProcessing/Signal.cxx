@@ -185,14 +185,6 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 
   TGraph* grInputVoltageTemp = iv.GetVoltageGraph();
 
-  std::cout<<"Adding noise..."<<std::endl;
-  AddGaussianNoise(grInputVoltageTemp, noiseTerms, false);
-
-  if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
-    std::cout<<"Implementing antenna bandwidth..."<<std::endl;
-    grInputVoltageTemp = BandPassFilter(grInputVoltageTemp, iv.GetLowerAntennaBandwidth(), iv.GetUpperAntennaBandwidth());
-  }
-  
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
   TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
@@ -203,7 +195,7 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   delete grVITimeUnfiltered;
   delete grVQTimeUnfiltered;
   firstSample10Time = grVITimeFirstSample->GetPointX(grVITimeFirstSample->GetN()-1) + 1/(10*sampleRate);
-
+  
   // Now we need to filter and then sample these signals
   std::cout<<"Filtering.."<<std::endl;
   TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
@@ -221,9 +213,19 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   delete grVQTimeUnsampled;
   firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
 
-  // std::cout<<"Adding noise..."<<std::endl;
-  // AddGaussianNoise(grVITimeTemp, noiseTerms);
-  // AddGaussianNoise(grVQTimeTemp, noiseTerms);  
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grVITimeTemp, noiseTerms);
+  AddGaussianNoise(grVQTimeTemp, noiseTerms);  
+
+  std::cout<<"After noise "<<grVITimeTemp->GetPointY(1)<<std::endl;
+  
+  if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
+    std::cout<<"Implementing antenna bandwidth..."<<std::endl;
+    grVITimeTemp = BandPassFilter(grVITimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
+    grVQTimeTemp = BandPassFilter(grVQTimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
+  }
+
+  std::cout<<"After antenna bandwidth "<<grVITimeTemp->GetPointY(1)<<std::endl;
   
   // Now add the information from these temporary graphs to the larger ones
   for (int i = 0; i < grVITimeTemp->GetN(); i++) {
@@ -402,7 +404,7 @@ void rad::Signal::AddGaussianNoise(TGraph* grInput, std::vector<GaussianNoise> n
 				   bool IsComponent) {
   double sampleFreqCalc = 1 / (grInput->GetPointX(1) - grInput->GetPointX(0));
   for (int noise = 0; noise < noiseTerms.size(); noise++) {
-    (noiseTerms.at(noise)).SetSampleFreq(sampleFreqCalc/2);
+    (noiseTerms.at(noise)).SetSampleFreq(sampleFreqCalc);
     (noiseTerms.at(noise)).SetSigma();
   }
   
