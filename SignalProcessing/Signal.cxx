@@ -216,16 +216,12 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   std::cout<<"Adding noise..."<<std::endl;
   AddGaussianNoise(grVITimeTemp, noiseTerms);
   AddGaussianNoise(grVQTimeTemp, noiseTerms);  
-
-  std::cout<<"After noise "<<grVITimeTemp->GetPointY(1)<<std::endl;
   
   if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
     std::cout<<"Implementing antenna bandwidth..."<<std::endl;
     grVITimeTemp = BandPassFilter(grVITimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
     grVQTimeTemp = BandPassFilter(grVQTimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
   }
-
-  std::cout<<"After antenna bandwidth "<<grVITimeTemp->GetPointY(1)<<std::endl;
   
   // Now add the information from these temporary graphs to the larger ones
   for (int i = 0; i < grVITimeTemp->GetN(); i++) {
