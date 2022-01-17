@@ -355,3 +355,17 @@ TGraph* rad::SampleWaveform(TGraph* grInput, const double sRate)
 
   return grOut;
 }
+
+TH1D* rad::GraphToHistogram(TGraph* grInput)
+{
+  double binWidth = grInput->GetPointX(1) - grInput->GetPointX(0);
+  double firstPoint = grInput->GetPointX(0);
+  double lastPoint  = grInput->GetPointX(grInput->GetN()-1);
+  TH1D* h = new TH1D("h", "", grInput->GetN(), firstPoint - binWidth/2, lastPoint + binWidth/2);
+  SetHistAttr(h);
+  for (int i = 0; i < grInput->GetN(); i++) {
+    h->SetBinContent(i+1, grInput->GetPointY(i)); 
+  }
+  
+  return h;
+}

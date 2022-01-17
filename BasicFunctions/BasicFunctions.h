@@ -100,7 +100,16 @@ namespace rad
   /// \Returns A graph containing the summed points
   TGraph* SumGraphs(std::vector<TGraph*> grInput);
 
+  /// Downsamples a time series graph at a given sample rate using linear interpolation
+  /// \param grInput The input graph to be sampled
+  /// \param sRate The sample rate
+  /// \Returns The downsampled graph
   TGraph* SampleWaveform(TGraph* grInput, const double sRate);
+
+  /// Converts an input TGraph to a histogram
+  /// \param grInput Input graph to be converted
+  /// \Returns The converted histogram
+  TH1D* GraphToHistogram(TGraph* grInput);
 }
  
 #endif
