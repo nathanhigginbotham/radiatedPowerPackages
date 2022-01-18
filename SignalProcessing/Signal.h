@@ -161,7 +161,16 @@ namespace rad
     /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
     TH2D* GetVQSpectrogramNorm(const double loadResistance, const int NSamplesPerTimeBin);
 
+    /// Downmixes the inputted signal with given local oscillator
+    /// \param grInput The input time domain signal
+    /// \param lo The local oscillator used to do the downmixing
+    /// \Returns The in-phase voltage component in the time domain
     TGraph* DownmixInPhase(TGraph* grInput, LocalOscillator lo);
+
+    /// Downmixes the inputted signal with given local oscillator
+    /// \param grInput The input time domain signal
+    /// \param lo The local oscillator used to do the downmixing
+    /// \Returns The quadrature voltage component in the time domain
     TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
   };
 }
