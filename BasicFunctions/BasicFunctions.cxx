@@ -369,3 +369,16 @@ TH1D* rad::GraphToHistogram(TGraph* grInput)
   
   return h;
 }
+
+TGraph* rad::SignalProcessGraph(TGraph* grInput, const double downmixFreq, const double sampleRate)
+{
+  TGraph* grDM = DownmixInPhase(grInput, downmixFreq);
+  TGraph* grS1 = SampleWaveform(grDM, 10*sampleRate);
+  delete grDM;
+  TGraph* grF  = BandPassFilter(grS1, 0.0, sampleRate/2.0);
+  delete grS1;
+  TGraph* grS2 = SampleWaveform(grF, sampleRate);
+  delete grF;
+
+  return grS2;
+}

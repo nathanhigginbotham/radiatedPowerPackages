@@ -110,6 +110,13 @@ namespace rad
   /// \param grInput Input graph to be converted
   /// \Returns The converted histogram
   TH1D* GraphToHistogram(TGraph* grInput);
+
+  /// Dowmixes, filters and downsamples a time series graph
+  /// \param grInput The inputted time domain voltage graph
+  /// \param downmixFreq The frequency at which to downmix, in Hertz
+  /// \param sampleRate The frequency at which to sample, in Hertz
+  /// \Returns The downmixed, filtered and sampled time domain graph
+  TGraph* SignalProcessGraph(TGraph* grInput, const double downmixFreq, const double sampleRate);
 }
  
 #endif
