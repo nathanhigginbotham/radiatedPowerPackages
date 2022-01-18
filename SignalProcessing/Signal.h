@@ -172,6 +172,13 @@ namespace rad
     /// \param lo The local oscillator used to do the downmixing
     /// \Returns The quadrature voltage component in the time domain
     TGraph* DownmixQuadrature(TGraph* grInput, LocalOscillator lo);
+
+    /// Returns a signal with the dechirping operator applied
+    /// \param alpha Parameter defining the strength of the chirp (units of s^-2)
+    /// \param firstPoint The first point in the time series to return
+    /// \param lastPoint The last point in the time series to return
+    /// \Returns The voltage signal after the operator has been applied
+    TGraph* GetDechirpedSignalTimeDomain(const double alpha, int firstPoint=-1, int lastPoint=-1);
   };
 }
 

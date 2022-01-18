@@ -583,3 +583,25 @@ TH2D* rad::Signal::GetVQSpectrogramNorm(const double loadResistance, const int N
   return h2;
 }
 
+TGraph* rad::Signal::GetDechirpedSignalTimeDomain(const double alpha, int firstPoint, int lastPoint)
+{
+  TGraph* vi = GetVITimeDomain(firstPoint, lastPoint);
+  TGraph* vq = GetVQTimeDomain(firstPoint, lastPoint);
+
+  TGraph* gr = new TGraph();
+  setGraphAttr(gr);
+  gr->GetXaxis()->SetTitle("Time [s]");
+  gr->GetYaxis()->SetTitle("Voltage [V]");
+
+  for (int i = 0; vi->GetN(); i++) {
+    double time = vi->GetPointX(i);
+    double dechirpRe = TMath::Cos( -alpha*time*time/2 );
+    double dechirpIm = TMath::Sin( -alpha*time*time/2 );
+    double dechirpedSignal = vi->GetPointY(i)*dechirpRe - vq->GetPointY(i)*dechirpIm;
+    gr->SetPoint(i, time, dechirpedSignal);
+  }
+  delete vi;
+  delete vq;
+  
+  return gr;
+}
