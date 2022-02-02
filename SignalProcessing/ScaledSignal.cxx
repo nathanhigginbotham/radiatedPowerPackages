@@ -61,18 +61,10 @@ void rad::ScaledSignal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   // Scale the input voltage
   ScaleGraph(grInputVoltageTemp, scaleFactor);
 
-  std::cout<<"Adding noise..."<<std::endl;
-  AddGaussianNoise(grInputVoltageTemp, noiseTerms, false);
-
-  if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
-    std::cout<<"Implementing antenna bandwidth..."<<std::endl;
-    grInputVoltageTemp = BandPassFilter(grInputVoltageTemp, iv.GetLowerAntennaBandwidth(), iv.GetUpperAntennaBandwidth());
-  }
-  
   std::cout<<"Performing the downmixing..."<<std::endl;
   TGraph* grVITimeUnfiltered = DownmixInPhase(grInputVoltageTemp, lo);
   TGraph* grVQTimeUnfiltered = DownmixQuadrature(grInputVoltageTemp, lo);
-  
+
   std::cout<<"First downsampling"<<std::endl;
   TGraph* grVITimeFirstSample = SampleWaveform(grVITimeUnfiltered, 10*sampleRate, firstSample10Time);
   TGraph* grVQTimeFirstSample = SampleWaveform(grVQTimeUnfiltered, 10*sampleRate, firstSample10Time);
@@ -97,6 +89,16 @@ void rad::ScaledSignal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   delete grVQTimeUnsampled;
   firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
   
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grVITimeTemp, noiseTerms);
+  AddGaussianNoise(grVQTimeTemp, noiseTerms);
+
+  if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
+    std::cout<<"Implementing antenna bandwidth..."<<std::endl;
+    grVITimeTemp = BandPassFilter(grVITimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
+    grVQTimeTemp = BandPassFilter(grVQTimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
+  }
+    
   // Now add the information from these temporary graphs to the larger ones
   for (int i = 0; i < grVITimeTemp->GetN(); i++) {
     grVITime->SetPoint(grVITime->GetN(), grVITimeTemp->GetPointX(i), grVITimeTemp->GetPointY(i));
