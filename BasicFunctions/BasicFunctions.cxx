@@ -382,3 +382,33 @@ TGraph* rad::SignalProcessGraph(TGraph* grInput, const double downmixFreq, const
 
   return grS2;
 }
+
+TGraph* rad::MakeFFTMagGraph(TGraph* grInput) {
+  double *oldY = grInput->GetY();
+  double *oldX = grInput->GetX();
+  double deltaT = oldX[1] - oldX[0];
+  int length = grInput->GetN();
+  FFTWComplex *theFFT = FFTtools::doFFT(length, oldY);
+  double lengthDub = (double)length;
+  int newLength = (length/2) + 1;
+  double *newY = new double[newLength];
+  double *newX = new double[newLength];
+
+  double deltaF = 1/(deltaT*length);
+
+  double tempF = 0;
+  for(int i = 0; i < newLength; i++) {
+    float mag = FFTtools::getAbs(theFFT[i]);
+    newX[i] = tempF;
+    newY[i] = mag;
+    tempF += deltaF;
+  }
+
+  TGraph* grMag = new TGraph(newLength, newX, newY);
+  setGraphAttr(grMag);
+  
+  delete [] theFFT;
+  delete [] newY;
+  delete [] newX;
+  return grMag;
+}

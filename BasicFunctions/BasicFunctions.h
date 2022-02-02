@@ -117,6 +117,11 @@ namespace rad
   /// \param sampleRate The frequency at which to sample, in Hertz
   /// \Returns The downmixed, filtered and sampled time domain graph
   TGraph* SignalProcessGraph(TGraph* grInput, const double downmixFreq, const double sampleRate);
+
+  /// Produces a graph of the FFT magnitudes
+  /// \param grInput The input real-valued time series data
+  /// \Returns The FFT magnitudes in frequency space
+  TGraph* MakeFFTMagGraph(TGraph* grInput);
 }
  
 #endif
