@@ -43,6 +43,7 @@ namespace rad
 
   /// Class describing the bathtub field
   /// Made up of two superposed current loops and a background magnetic field
+  /// The coils must be located along the z axis 
   class BathtubField : public BaseField {
   private:
     CoilField coil1;
@@ -50,8 +51,15 @@ namespace rad
     TVector3 btBkg;
     
   public:
+    /// \param radius The radius of both coils
+    /// \param The current (in amps) flowing through each trap coil
+    /// \param Z1 The z position of the centre of the first trap coil
+    /// \param Z2 The z position of the centre of the second trap coil
+    /// \param background A vector describing the background field in Tesla
     BathtubField(const double radius, const double current, const double Z1, const double Z2, TVector3 background);
 
+    /// \param vec Position vector of charge
+    /// \returns The magnetic field vector at the point
     TVector3 evaluate_field_at_point(const TVector3 vec);
   };
 }
