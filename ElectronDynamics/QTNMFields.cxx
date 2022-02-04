@@ -10,6 +10,7 @@
 
 #include <boost/math/special_functions/ellint_1.hpp>
 #include <boost/math/special_functions/ellint_2.hpp>
+#include <boost/math/special_functions/heuman_lambda.hpp>
 
 rad::CoilField::CoilField(const double radius, const double current, const double z, const double mu) {
   coilRadius = radius;
@@ -67,4 +68,46 @@ TVector3 rad::BathtubField::evaluate_field_at_point(const TVector3 vec) {
   TVector3 field2 = coil2.evaluate_field_at_point(vec);
   TVector3 totalField = field1 + field2 + btBkg;
   return totalField;
+}
+
+double rad::SolenoidField::on_axis_field(const double z) {
+  const double xiPlus  = z + l/2;
+  const double xiMinus = z - l/2;
+  double field = (mu * n * i / 4) * ( (xiPlus/sqrt(xiPlus*xiPlus + r*r)) - (xiMinus/sqrt(xiMinus*xiMinus + r*r)) );
+  return field;
+}
+
+TVector3 rad::SolenoidField::evaluate_field_at_point(const TVector3 vec) {
+  double rad = sqrt(vec.X()*vec.X() + vec.Y()*vec.Y());
+
+  // Check for on axis case
+  if (rad / r < 1e-10) {
+    TVector3 BField(0, 0, on_axis_field(vec.Z()));
+    return BField;
+  }
+
+  double xiPlus  = vec.Z() + l/2;
+  double xiMinus = vec.Z() - l/2;
+
+  double premultR = (mu*n*i/TMath::Pi()) * TMath::Sqrt( r/rad );
+  double premultZ = (mu*n*i/4);
+  double kPlus  = sqrt( 4*rad*r / (xiPlus*xiPlus + pow(rad+r, 2)) );
+  double kMinus = sqrt( 4*rad*r / (xiMinus*xiMinus + pow(rad+r, 2)) );
+
+  double int_kPlus  = boost::math::ellint_1(kPlus);
+  double int_kMinus = boost::math::ellint_1(kMinus);
+  double int_ePlus  = boost::math::ellint_2(kPlus);
+  double int_eMinus = boost::math::ellint_2(kMinus);
+  
+  double Br = ((2-kPlus*kPlus)/(2*kPlus)*int_kPlus - int_ePlus/kPlus) - ((2-kMinus*kMinus)/(2*kMinus)*int_kMinus - int_eMinus/kMinus);
+  Br *= premultR;
+  
+  double phiPlus  = atan( abs(xiPlus / (r - rad)) );
+  double phiMinus = atan( abs(xiMinus / (r - rad)) );
+
+  double Bz = ( xiPlus*kPlus*int_kPlus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiPlus*boost::math::heuman_lambda(kPlus,phiPlus)/abs((r-rad)*xiPlus) ) - ( xiMinus*kMinus*int_kMinus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiMinus*boost::math::heuman_lambda(kMinus,phiMinus)/abs((r-rad)*xiMinus) );
+  Bz *= premultZ;
+
+  TVector3 BField(Br*vec.X()/rad, Br*vec.Y()/rad, Bz);  
+  return BField;
 }

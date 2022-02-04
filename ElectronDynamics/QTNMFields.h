@@ -62,6 +62,34 @@ namespace rad
     /// \returns The magnetic field vector at the point
     TVector3 evaluate_field_at_point(const TVector3 vec);
   };
+
+  /// Class describing the field of a finite solenoid
+  /// Axis of the solenoid coincides with z axis with origin at z = 0
+  class SolenoidField : public BaseField {
+  private:
+    double r;
+    double l;
+    double i;
+    double n;
+    double mu;
+
+    /// Gives the on axis field for the solenoid
+    /// \param z The position along the z axis
+    /// \Returns The magnetic field in Tesla
+    double on_axis_field(const double z);
+    
+  public:
+    /// \param radius The internal radius of the solenoid (in metres)
+    /// \param length The length of the bore of the solenoid (in metres)
+    /// \param current The current (in amps) passing through each filament
+    /// \param turnsPerMetre Number of coil terms per metre
+    SolenoidField(const double radius, const double length, const double current, const double turnsPerMetre, const double perm=MU0) : r(radius), l(length), i(current), n(turnsPerMetre), mu(perm) {}
+
+    /// Gives the field at a positon vector 
+    /// \param vec Position vector of charge
+    /// \Returns The magnetic field vector at the point (in Tesla)
+    TVector3 evaluate_field_at_point(const TVector3 vec);
+  };
 }
 
 #endif
