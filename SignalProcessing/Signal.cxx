@@ -15,6 +15,7 @@
 #include "TH2.h"
 #include "TRandom3.h"
 #include "TAxis.h"
+#include "TMath.h"
 
 #include "FFTtools.h"
 
@@ -593,15 +594,48 @@ TGraph* rad::Signal::GetDechirpedSignalTimeDomain(const double alpha, int firstP
   gr->GetXaxis()->SetTitle("Time [s]");
   gr->GetYaxis()->SetTitle("Voltage [V]");
 
-  for (int i = 0; vi->GetN(); i++) {
+  for (int i = 0; i < vi->GetN(); i++) {
     double time = vi->GetPointX(i);
     double dechirpRe = TMath::Cos( -alpha*time*time/2 );
     double dechirpIm = TMath::Sin( -alpha*time*time/2 );
     double dechirpedSignal = vi->GetPointY(i)*dechirpRe - vq->GetPointY(i)*dechirpIm;
-    gr->SetPoint(i, time, dechirpedSignal);
+    gr->SetPoint(gr->GetN(), time, dechirpedSignal);
   }
   delete vi;
   delete vq;
   
   return gr;
+}
+
+TH2D* rad::Signal::GetDechirpedSpectrogram(const double loadResistance, const int NSamplesPerTimeBin, const double alpha)
+{  
+  // Get the number of time bins given the specified NSamplesPerTimeBin
+  TGraph* grTimeTest = GetVITimeDomain();
+  const int nTimeBins = int(floor(double(grTimeTest->GetN()) / double(NSamplesPerTimeBin)));
+  const double firstTime = grTimeTest->GetPointX(0);
+  const double lastTime  = grTimeTest->GetPointX(nTimeBins * NSamplesPerTimeBin - 1);
+  const int nFreqBins = (NSamplesPerTimeBin/2)+1;
+  const double deltaF = 1.0 / ((1.0/sampleRate) * NSamplesPerTimeBin);
+  const double lastFreq = nFreqBins * deltaF;
+  delete grTimeTest;
+  
+  TH2D* h2 = new TH2D("h2", "Dechirped spectrogram; Time [s]; Frequency [Hz]; Power [W]", nTimeBins, firstTime, lastTime, nFreqBins, 0, lastFreq);
+  SetHistAttr(h2);
+
+  // Loop through the time bins and generate the power spectrum at each point
+  for (int t = 1; t <= nTimeBins; t++) {
+    // First get the dechirped time domain signal
+    TGraph* grTime = GetDechirpedSignalTimeDomain(alpha, (t-1)*NSamplesPerTimeBin, t*NSamplesPerTimeBin-1);
+    TGraph* grPower = MakePowerSpectrumPeriodogram(grTime);
+    delete grTime;
+    ScaleGraph(grPower, 1.0 / loadResistance);
+    
+    // Add this data to the histogram
+    for (int i = 0; i < grPower->GetN(); i++) {
+      h2->SetBinContent(t, i+1, grPower->GetPointY(i));
+    }
+    delete grPower;
+  }
+  
+  return h2;
 }

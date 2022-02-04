@@ -179,6 +179,13 @@ namespace rad
     /// \param lastPoint The last point in the time series to return
     /// \Returns The voltage signal after the operator has been applied
     TGraph* GetDechirpedSignalTimeDomain(const double alpha, int firstPoint=-1, int lastPoint=-1);
+
+    /// Returns the 2D spectrogram made using the dechirped voltage signal
+    /// \param loadResistance The load resistance used for the power calculation
+    /// \param NSamplesPerTimeBin The number of time samples used to make each time bin
+    /// \param alpha Parameter defining the strength of the dechirp (units of s^-2)
+    /// \Returns The spectrogram with the dechirping operator applied
+    TH2D* GetDechirpedSpectrogram(const double loadResistance, const int NSamplesPerTimeBin, const double alpha);
   };
 }
 
