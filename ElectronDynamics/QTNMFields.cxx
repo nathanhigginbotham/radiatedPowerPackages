@@ -73,7 +73,7 @@ TVector3 rad::BathtubField::evaluate_field_at_point(const TVector3 vec) {
 double rad::SolenoidField::on_axis_field(const double z) {
   const double xiPlus  = z + l/2;
   const double xiMinus = z - l/2;
-  double field = (mu * n * i / 4) * ( (xiPlus/sqrt(xiPlus*xiPlus + r*r)) - (xiMinus/sqrt(xiMinus*xiMinus + r*r)) );
+  double field = (mu * n * i / 2) * ( (xiPlus/sqrt(xiPlus*xiPlus + r*r)) - (xiMinus/sqrt(xiMinus*xiMinus + r*r)) );
   return field;
 }
 
