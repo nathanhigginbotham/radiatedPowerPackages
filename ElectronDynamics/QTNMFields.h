@@ -106,10 +106,33 @@ namespace rad
     /// \param maximumField The maximum central field
     /// \param fractionalInhom The maximum inhomogeneity as a fraction of the maximum field
     /// \param inhomZPos Z position at which the inhomogeneity reaches fractionalInhom
-    InhomogeneousBackgroundField(const double maximumField, const double fractionalInhom, const double inhomZPos) : maxB(maximumField), inhom(fractionalInhom), inhomZ(inhomZPos) {}
+    InhomogeneousBackgroundField(const double maximumField=1.0, const double fractionalInhom=1e-6, const double inhomZPos=0.15) : maxB(maximumField), inhom(fractionalInhom), inhomZ(inhomZPos) {}
 
     /// Gives the field at a positon vector 
     /// \param vec Position vector of charge
+    /// \Returns The magnetic field vector at the point (in Tesla)
+    TVector3 evaluate_field_at_point(const TVector3 vec);
+  };
+
+  /// Class describing a bathtub trap with some inhomogeneity added
+  /// Coils are located along the z axis which is the same as the background field
+  class InhomogeneousBathtubField : public BaseField {
+  private:
+    CoilField coil1;
+    CoilField coil2;
+    InhomogeneousBackgroundField bkgField;
+
+  public:
+    /// \param radius The radius of both coils
+    /// \param The current (in amps) flowing through each trap coil
+    /// \param Z The distance from the trap centre of the trap coils.
+    /// The inhomogeneity is also measured to here
+    /// \param maximumField The maximum background field
+    /// \param fractionalInhom The maximum inhomogeneity as a fraction of the maximum field
+    InhomogeneousBathtubField(const double radius, const double current, const double Z, const double maximumField, const double fractionalInhom);
+
+    /// Get the magnetic field at a point
+    /// \param vec The position vector of the charge
     /// \Returns The magnetic field vector at the point (in Tesla)
     TVector3 evaluate_field_at_point(const TVector3 vec);
   };

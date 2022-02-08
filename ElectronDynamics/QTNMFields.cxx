@@ -58,9 +58,9 @@ TVector3 rad::CoilField::evaluate_field_at_point(const TVector3 vec) {
 }
 
 rad::BathtubField::BathtubField(const double radius, const double current, const double Z1, const double Z2, TVector3 background) {
-   coil1 = CoilField(radius, current, Z1, MU0);
-   coil2 = CoilField(radius, current, Z2, MU0);
-   btBkg = background;
+  coil1 = CoilField(radius, current, Z1, MU0);
+  coil2 = CoilField(radius, current, Z2, MU0);
+  btBkg = background;
 }
 
 TVector3 rad::BathtubField::evaluate_field_at_point(const TVector3 vec) {
@@ -117,4 +117,20 @@ TVector3 rad::InhomogeneousBackgroundField::evaluate_field_at_point(const TVecto
   double field = squareConst * pow(vec.Z(), 2) + maxB;
   TVector3 BField(0, 0, field);
   return BField;
+}
+
+rad::InhomogeneousBathtubField::InhomogeneousBathtubField(const double radius, const double current, const double Z, const double maximumField, const double fractionalInhom) {
+  // Generate coil fields at +/- Z
+  coil1 = CoilField(radius, current, -1.0*Z, MU0);
+  coil2 = CoilField(radius, current, Z, MU0);
+  // Generate the background field
+  bkgField = InhomogeneousBackgroundField(maximumField, fractionalInhom, Z);
+}
+
+TVector3 rad::InhomogeneousBathtubField::evaluate_field_at_point(const TVector3 vec) {
+  TVector3 field1 = coil1.evaluate_field_at_point(vec);
+  TVector3 field2 = coil2.evaluate_field_at_point(vec);
+  TVector3 field3 = bkgField.evaluate_field_at_point(vec);
+  TVector3 totalField = field1 + field2 + field3;
+  return totalField;
 }
