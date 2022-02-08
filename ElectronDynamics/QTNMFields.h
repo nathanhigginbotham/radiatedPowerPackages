@@ -90,6 +90,29 @@ namespace rad
     /// \Returns The magnetic field vector at the point (in Tesla)
     TVector3 evaluate_field_at_point(const TVector3 vec);
   };
+
+  /// Class describing something like a non-ideal background field, i.e. from a finite solenoid
+  /// The field variation is expressed as a quadratic function of the axial distance
+  /// The axis of the field coincides with the z axis
+  /// Inhomogeneity only varies as a function of z
+  class InhomogeneousBackgroundField : public BaseField {
+  private:
+    double maxB;
+    double inhom;
+    double inhomZ;
+
+  public:
+    /// Parametrised constructor for the inhomogeneous background field
+    /// \param maximumField The maximum central field
+    /// \param fractionalInhom The maximum inhomogeneity as a fraction of the maximum field
+    /// \param inhomZPos Z position at which the inhomogeneity reaches fractionalInhom
+    InhomogeneousBackgroundField(const double maximumField, const double fractionalInhom, const double inhomZPos) : maxB(maximumField), inhom(fractionalInhom), inhomZ(inhomZPos) {}
+
+    /// Gives the field at a positon vector 
+    /// \param vec Position vector of charge
+    /// \Returns The magnetic field vector at the point (in Tesla)
+    TVector3 evaluate_field_at_point(const TVector3 vec);
+  };
 }
 
 #endif

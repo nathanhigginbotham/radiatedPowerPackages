@@ -111,3 +111,10 @@ TVector3 rad::SolenoidField::evaluate_field_at_point(const TVector3 vec) {
   TVector3 BField(Br*vec.X()/rad, Br*vec.Y()/rad, Bz);  
   return BField;
 }
+
+TVector3 rad::InhomogeneousBackgroundField::evaluate_field_at_point(const TVector3 vec) {
+  const double squareConst = ( (1 - inhom)*maxB - maxB ) / pow(inhomZ, 2);
+  double field = squareConst * pow(vec.Z(), 2) + maxB;
+  TVector3 BField(0, 0, field);
+  return BField;
+}
