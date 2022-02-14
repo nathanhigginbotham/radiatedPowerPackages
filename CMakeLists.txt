@@ -15,7 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR} ${ROOT_INCLUDE_DIRS})
 add_definitions(${ROOT_CXX_FLAGS})
 
 # Locate Boost libraries
-find_package(Boost REQUIRED ALL)
+find_package(Boost 1.73.0 REQUIRED ALL)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Add the FFTW ROOT library
