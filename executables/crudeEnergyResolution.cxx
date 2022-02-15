@@ -1,0 +1,342 @@
+/// crudeEnergyResolution.cxx
+/// Program to measure the energy resolution of endpoint electrons for a given trap geometry
+/// Electrons are generated isotropically throughout the trap and the trapping condition checked
+
+#include "ElectronDynamics/BorisSolver.h"
+#include "ElectronDynamics/QTNMFields.h"
+#include "BasicFunctions/Constants.h"
+
+#include "Antennas/HalfWaveDipole.h"
+#include "SignalProcessing/Signal.h"
+#include "SignalProcessing/InducedVoltage.h"
+
+// STL includes
+#include <unistd.h>
+#include <iostream>
+#include <cmath>
+#include <string>
+#include <ctime>
+#include <tuple>
+#include <filesystem>
+
+// ROOT includes
+#include "TFile.h"
+#include "TTree.h"
+#include "TRandom3.h"
+#include "TMath.h"
+#include "TVector3.h"
+#include "TSystem.h"
+
+using namespace rad;
+
+int main(int argc, char *argv[])
+{
+  int opt;
+
+  double trapLength = 0.3; // m  
+  double RCoil = 0.025; // m
+  int nElectrons = 1000;
+  std::string outputDir = " ";
+  bool keepTracks = false;  
+
+  while((opt = getopt(argc, argv, ":d:n:r:l:k")) != -1) {
+    switch(opt) {
+    case 'd':
+      outputDir = optarg;
+      break;
+    case 'n':
+      nElectrons = atoi(optarg);
+      break;
+    case 'r':
+      RCoil = atof(optarg);
+      break;
+    case 'l':
+      trapLength = atof(optarg);
+      break;
+    case 'k':
+      keepTracks = true;
+      std::cout<<"Choosing to keep the track output"<<std::endl;
+      break;
+    case ':':
+      std::cout<<"Option needs a value"<<std::endl;
+      break;
+    case '?':
+      std::cout<<"Unknown option: "<<optopt<<std::endl;
+      break;
+    }
+  }
+
+  // Check parameter values
+  if (nElectrons <= 0) {
+    std::cout<<"Invalid simulated number of electrons"<<std::endl;
+    exit(1);
+  }
+  if (outputDir == " ") {
+    std::cout<<"Must specify directory file with -d"<<std::endl;
+    exit(1);
+  }
+  if (RCoil <= 0) {
+    std::cout<<"Invalid coil radius provided"<<std::endl;
+    exit(1);
+  }
+  if (trapLength <= 0) {
+    std::cout<<"Invalid trap length provided"<<std::endl;
+    exit(1);    
+  }
+
+  std::cout<<"Output directory is "<<outputDir<<std::endl;
+  std::cout<<"Simulating "<<nElectrons<<" electrons"<<std::endl;
+  std::cout<<"Coil radius is "<<RCoil<<" m"<<std::endl;
+  std::cout<<"Chosen trap length is "<<trapLength<<" m"<<std::endl;
+
+  // RNG
+  TRandom3* thisRand = new TRandom3(0);
+  
+  // Simulation parameters
+  const double timeStepSize = 3.7e-12; // seconds
+  const double maxSimTime = 55e-6;     // seconds
+  const double RGen = 0.02; // m 
+  const double ICoil = 2.0 * 0.0049 * RCoil / MU0; // Amps
+  const double centralField = 1.0; // Tesla
+
+  // Generate the bathtub field
+  BathtubField* bathtubFieldNoInhom = new BathtubField(RCoil, ICoil, -trapLength/2, trapLength/2, TVector3(0, 0, 1));
+  
+  // Antenna specifications
+  const double antennaRadius = 0.03;
+  const double antennaAngle1 = 0*TMath::Pi()/180;                                                   
+  const double antennaAngle2 = 90*TMath::Pi()/180;
+  TVector3 antennaPoint1(antennaRadius*TMath::Cos(antennaAngle1), antennaRadius*TMath::Sin(antennaAngle1), 0.0);
+  TVector3 antennaDirZ1(-1*TMath::Sin(antennaAngle1), TMath::Cos(antennaAngle1), 0.0);
+  TVector3 antennaDirX1(TMath::Cos(antennaAngle1), TMath::Sin(antennaAngle1), 0.0);
+  HalfWaveDipole* antenna1 = new HalfWaveDipole(antennaPoint1, antennaDirX1, antennaDirZ1, 27.01e9);
+  const double antennaLowerBandwidth = 26.95e9;
+  const double antennaUpperBandwidth = 27.05e9;
+  antenna1->SetBandwidth(antennaLowerBandwidth, antennaUpperBandwidth);
+
+  // Electron dynamics
+  const double TElec = 18600; // eV
+  const double gamma = TElec * TMath::Qe() / (ME * TMath::C()*TMath::C()) + 1;
+  const double betaSq = 1 - 1 / pow(gamma, 2);
+  const double initialSpeed = sqrt(betaSq)*TMath::C();
+  const double tau = 2 * R_E / (3 * TMath::C());
+
+  // Parameters for signal processing
+  const double tAcq   = maxSimTime - 1e-6; // seconds
+  const double loFreq = 26.75e9; // Hz
+  const double loadResistance = 70; // Ohms
+  const double sampleRate = 750e6; // Hz
+  LocalOscillator lo(2 * TMath::Pi() * loFreq);
+
+  // Create the output directory if it doesn't exist
+  bool directoryExists = std::filesystem::is_directory(outputDir);
+  if (!directoryExists) {
+    // Attempt to create the directory
+    bool directoryCreated = std::filesystem::create_directories(outputDir);
+    if (!directoryCreated) {
+      std::cout<<"Failed to create output directory"<<std::endl;
+      exit(2);
+    }
+  }
+
+  TFile* fout = new TFile(Form("%s/output.root", outputDir.data()), "RECREATE");
+  
+  TTree* startTree = new TTree("startTree", "startTree");
+  double pitchAngle;
+  double xpos, ypos, zpos;
+  double xvel, yvel, zvel;
+  int isTrapped_val;
+  startTree->Branch("pitchAngle", &pitchAngle, "pitchAngle/D");
+  startTree->Branch("xpos", &xpos, "xpos/D");
+  startTree->Branch("ypos", &ypos, "ypos/D");
+  startTree->Branch("zpos", &zpos, "zpos/D");
+  startTree->Branch("xvel", &xvel, "xvel/D");
+  startTree->Branch("yvel", &yvel, "yvel/D");
+  startTree->Branch("zvel", &zvel, "zvel/D");
+  startTree->Branch("isTrapped", &isTrapped_val, "isTrapped/I");
+
+  TH1D* hPitchAngle = new TH1D("hPitchAngle", "Pitch angles; Angle [degrees]; N", 90, 0, 90);
+  SetHistAttr(hPitchAngle);
+  TH1D* hPitchAngleAcc = new TH1D("hPitchAngleAcc", "Pitch angles; Angle [degrees]; N", 90, 0, 90);
+  SetHistAttr(hPitchAngleAcc);
+  TH1D* hRPos    = new TH1D("hRPos", "Radial position; R [m]; N", 50, 0, RGen);
+  SetHistAttr(hRPos);
+  TH1D* hRPosAcc = new TH1D("hRPosAcc", "Radial position; R [m]; N", 50, 0, RGen);
+  SetHistAttr(hRPosAcc);
+  TH1D* hZPos    = new TH1D("hZPos", "Axial position; z [m]; N", 50, -trapLength/2, trapLength/2);
+  SetHistAttr(hZPos);
+  TH1D* hZPosAcc = new TH1D("hZPosAcc", "Axial position; z [m]; N", 50, -trapLength/2, trapLength/2);
+  SetHistAttr(hZPosAcc);
+  TH2D* h2RZPos = new TH2D("h2RZPos", "Position; z [m]; R [m]; N", 8, -trapLength/2, trapLength/2, 8, 0, RGen);
+  SetHistAttr(h2RZPos);
+  TH2D* h2RZPosAcc = new TH2D("h2RZPosAcc", "Position; z [m]; R [m]; N", 8, -trapLength/2, trapLength/2, 8, 0, RGen);
+  SetHistAttr(h2RZPosAcc);
+  
+  // Generate the electrons
+  for (int n = 0; n < nElectrons; n++) {
+    std::cout<<"Electron number "<<n<<std::endl;
+
+    const clock_t begin_time = clock();
+      
+    // Generate random electron directions
+    double phiVelGen   = thisRand->Uniform() * 2 * TMath::Pi();
+    double thetaVelGen = thisRand->Uniform() * TMath::Pi();
+    // Generate random uniform volume distribution
+    double radialPosGen = sqrt(thisRand->Uniform()) * RGen;
+    double thetaPosGen  = thisRand->Uniform() * 2 * TMath::Pi(); 
+    double zPosGen      = -trapLength/2 + (thisRand->Uniform() * trapLength);
+
+    TVector3 posVec(radialPosGen*cos(thetaPosGen), radialPosGen*sin(thetaPosGen), zPosGen);
+    TVector3 velVec(initialSpeed*cos(phiVelGen)*sin(thetaVelGen),
+		    initialSpeed*sin(phiVelGen)*sin(thetaVelGen), initialSpeed*cos(thetaVelGen));
+
+    xpos = posVec.X();
+    ypos = posVec.Y();
+    zpos = posVec.Z();
+    xvel = velVec.X();
+    yvel = velVec.Y();
+    zvel = velVec.Z();
+    
+    double RVel = sqrt( velVec.X()*velVec.X() + velVec.Y()*velVec.Y() );
+    std::cout<<RVel<<", "<<velVec.Z()<<std::endl;
+    pitchAngle = abs( atan(RVel / velVec.Z()) );    
+    
+    std::cout<<"Angle (degrees), rPos, zPos = "<<(pitchAngle*180/TMath::Pi())<<", "<<radialPosGen<<" m, "<<zPosGen<<" m"<<std::endl;
+    
+    // Set up the solver
+    BorisSolver solver(bathtubFieldNoInhom, -TMath::Qe(), ME, tau);
+    // Calculate the number of time steps
+    int nTimeSteps = maxSimTime / timeStepSize;
+
+    bool isTrapped = true;
+    isTrapped_val = 1;
+
+    hZPos->Fill(posVec.Z());
+    hRPos->Fill(radialPosGen);
+    h2RZPos->Fill(posVec.Z(), radialPosGen);
+    hPitchAngle->Fill(pitchAngle*180/TMath::Pi());    
+
+    TFile* fElec = new TFile(Form("%s/track%d.root", outputDir.data(), n), "RECREATE");
+    
+    // Create a new TTree representing the trajectory of this electron
+    TTree* tree = new TTree("tree", "tree");
+    double time;
+    double xPos, yPos, zPos;
+    double xVel, yVel, zVel;
+    double xAcc, yAcc, zAcc;
+    tree->Branch("time", &time, "time/D");
+    tree->Branch("xPos", &xPos, "xPos/D");
+    tree->Branch("yPos", &yPos, "yPos/D");
+    tree->Branch("zPos", &zPos, "zPos/D");
+    tree->Branch("xVel", &xVel, "xVel/D");
+    tree->Branch("yVel", &yVel, "yVel/D");
+    tree->Branch("zVel", &zVel, "zVel/D");
+    tree->Branch("xAcc", &xAcc, "xAcc/D");
+    tree->Branch("yAcc", &yAcc, "yAcc/D");
+    tree->Branch("zAcc", &zAcc, "zAcc/D");
+
+    // Set the initial state
+    TVector3 eAcc = solver.acc(posVec, velVec);
+    time = 0;
+    xPos = posVec.X();
+    yPos = posVec.Y();
+    zPos = posVec.Z();
+    xVel = velVec.X();
+    yVel = velVec.Y();
+    zVel = velVec.Z();
+    xAcc = eAcc.X();
+    yAcc = eAcc.Y();
+    zAcc = eAcc.Z();    
+
+    tree->Fill();
+    
+    for (int iStep = 0; iStep < nTimeSteps; iStep++) {
+      
+      std::tuple<TVector3, TVector3> outputStep = solver.advance_step(timeStepSize, posVec, velVec);
+      posVec = std::get<0>(outputStep);
+      velVec = std::get<1>(outputStep);
+      eAcc = solver.acc(posVec, velVec);
+
+      time = double(iStep+1) * timeStepSize;
+      if (std::fmod(time, 5e-6) < timeStepSize) std::cout<<time<<" seconds generated"<<std::endl; 
+      
+      xPos = posVec.X();
+      yPos = posVec.Y();
+      zPos = posVec.Z();
+      xVel = velVec.X();
+      yVel = velVec.Y();
+      zVel = velVec.Z();
+      xAcc = eAcc.X();
+      yAcc = eAcc.Y();
+      zAcc = eAcc.Z();    
+      
+      tree->Fill();
+      
+      // Check if the electron has escaped the trap
+      if (abs(posVec.Z()) > trapLength/2) {
+	isTrapped = false;
+	isTrapped_val = 0;
+	std::cout<<"Was not trapped"<<std::endl;
+	break;
+      }
+    }
+
+    fElec->cd();
+    tree->Write();
+    delete tree;
+    fElec->Close();
+    delete fElec;
+    
+    if (isTrapped) {
+      std::cout<<"Was trapped"<<std::endl;
+      hZPosAcc->Fill(posVec.Z());
+      hRPosAcc->Fill(radialPosGen);
+      h2RZPosAcc->Fill(posVec.Z(), radialPosGen);
+      hPitchAngleAcc->Fill(pitchAngle*180/TMath::Pi());
+
+      // If the electron was trapped we can do some signal processing
+      // Create an InducedVoltage using the newly created file
+      InducedVoltage iv(Form("%s/track%d.root", outputDir.data(), n), antenna1);
+      // Now create the Signal with no noise
+      Signal sig(iv, lo, sampleRate, {}, tAcq);
+
+      // Get the spectrogram and time domain signal
+      TGraph* grVI = sig.GetVITimeDomain();
+      grVI->SetTitle(Form("Length = %.2f m: #theta = %.2f deg, r_{i} = %.2f m, z_{i} = %.2f m", trapLength, (pitchAngle*180/TMath::Pi()), radialPosGen, zPosGen));
+      TGraph* grVIPgram = sig.GetVIPowerPeriodogram(loadResistance);
+      grVIPgram->SetTitle(Form("Length = %.2f m: #theta = %.2f deg, r_{i} = %.2f m, z_{i} = %.2f m", trapLength, (pitchAngle*180/TMath::Pi()), radialPosGen, zPosGen));
+      
+      fout->cd();
+      grVI->Write(Form("grVI%d", n));
+      grVIPgram->Write(Form("grVIPgram%d", n));
+      delete grVI;
+      delete grVIPgram;
+    } // Signal processing if electron is trapped
+
+    const clock_t end_time = clock();
+    std::cout<<"Simulation time was "<<float(end_time - begin_time)/CLOCKS_PER_SEC<<" seconds"<<std::endl;
+
+    startTree->Fill();
+    
+    // If chosen, delete the file containing the track
+    // This is necessary as each trajectory is about 1 GB
+    if (!keepTracks) gSystem->Exec(TString::Format("rm -f %s/track%d.root", outputDir.data(), n));
+
+    std::cout<<"\n";
+  } // Loop over electrons
+
+  fout->cd();
+
+  startTree->Write();
+  hZPos->Write();
+  hRPos->Write();
+  h2RZPos->Write();
+  hPitchAngle->Write();
+  hZPosAcc->Write();
+  hRPosAcc->Write();
+  h2RZPosAcc->Write();
+  hPitchAngleAcc->Write();
+  
+  fout->Close();
+  delete fout;
+}

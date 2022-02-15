@@ -28,3 +28,6 @@ target_link_libraries(idealCaseSpectrogram PUBLIC SignalProcessing Antennas ${RO
 
 add_executable(singleBinPower singleBinPower.cxx)
 target_link_libraries(singleBinPower PUBLIC SignalProcessing Antennas BasicFunctions ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
+
+add_executable(crudeEnergyResolution crudeEnergyResolution.cxx)
+target_link_libraries(crudeEnergyResolution PUBLIC ElectronDynamics SignalProcessing Antennas BasicFunctions ${ROOT_LIBRARIES})
