@@ -12,6 +12,7 @@
 
 // STL includes
 #include <unistd.h>
+#include <getopt.h>
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -29,6 +30,18 @@
 
 using namespace rad;
 
+void PrintHelp()
+{
+  std::cout<<
+    "--radius <r>:      Set the coil radius in metres\n"
+    "--length <l>:      Set the trap length in metres\n"
+    "--number <n>:      Number of electrons to simulate\n"
+    "--outputDir <d>:   Output directory to write to\n"
+    "--keepTracks <k>:  Sets flag to keep electron trajectories\n" 
+    "--help <h>:        Prints this help message\n";
+  exit(1);
+}
+
 int main(int argc, char *argv[])
 {
   int opt;
@@ -39,8 +52,20 @@ int main(int argc, char *argv[])
   std::string outputDir = " ";
   bool keepTracks = false;  
 
-  while((opt = getopt(argc, argv, ":d:n:r:l:k")) != -1) {
+  const option long_opts[] = {
+    {"outputDir", required_argument, nullptr, 'd'},
+    {"number", required_argument, nullptr, 'n'},
+    {"radius", required_argument, nullptr, 'r'},
+    {"length", required_argument, nullptr, 'l'},
+    {"keepTracks", no_argument, nullptr, 'k'},
+    {"help", no_argument, nullptr, 'h'},
+    {nullptr, no_argument, nullptr, 0}
+  };
+
+  while((opt = getopt_long(argc, argv, ":d:n:r:l:kh", long_opts, nullptr)) != -1) {
     switch(opt) {
+    case 'h':
+      PrintHelp();
     case 'd':
       outputDir = optarg;
       break;
