@@ -92,21 +92,24 @@ namespace rad
   };
 
   /// Class describing something like a non-ideal background field, i.e. from a finite solenoid
-  /// The field variation is expressed as a quadratic function of the axial distance
+  /// The field variation is expressed as quadratic functions of the axial and radial distances
   /// The axis of the field coincides with the z axis
-  /// Inhomogeneity only varies as a function of z
   class InhomogeneousBackgroundField : public BaseField {
   private:
-    double maxB;
-    double inhom;
-    double inhomZ;
+    double BCent;
+    double inhomAx;
+    double inhomAxPosition;
+    double inhomRad;
+    double inhomRadRadius;
 
   public:
     /// Parametrised constructor for the inhomogeneous background field
-    /// \param maximumField The maximum central field
-    /// \param fractionalInhom The maximum inhomogeneity as a fraction of the maximum field
-    /// \param inhomZPos Z position at which the inhomogeneity reaches fractionalInhom
-    InhomogeneousBackgroundField(const double maximumField=1.0, const double fractionalInhom=1e-6, const double inhomZPos=0.15) : maxB(maximumField), inhom(fractionalInhom), inhomZ(inhomZPos) {}
+    /// \param centralField The magnetic field (in Tesla) at the centre of the trap
+    /// \param fractionalInhomAx The maximum axial inhomogeneity as a fraction of the maximum field
+    /// \param inhomZPos Z position at which the inhomogeneity reaches fractionalInhomAx
+    /// \param fractionalInhomRad The maximum radial inhomogeneity as a fraction of the maximum field
+    /// \param inhomRadPos Radial position at which the inhomogeneity reaches fractionalInhomRad
+    InhomogeneousBackgroundField(const double centralField=1.0, const double fractionalInhomAx=1e-6, const double inhomZPos=0.15, const double fractionalInhomRad=0.0, const double inhomRadPos=0.05) : BCent(centralField), inhomAx(fractionalInhomAx), inhomAxPosition(inhomZPos), inhomRad(fractionalInhomRad), inhomRadRadius(inhomRadPos) {}
 
     /// Gives the field at a positon vector 
     /// \param vec Position vector of charge
@@ -123,13 +126,15 @@ namespace rad
     InhomogeneousBackgroundField bkgField;
 
   public:
-    /// \param radius The radius of both coils
+    /// \param radius The radius of both coils in metres
+    /// The radial inhomogeneity is also measured to here
     /// \param The current (in amps) flowing through each trap coil
-    /// \param Z The distance from the trap centre of the trap coils.
-    /// The inhomogeneity is also measured to here
-    /// \param maximumField The maximum background field
-    /// \param fractionalInhom The maximum inhomogeneity as a fraction of the maximum field
-    InhomogeneousBathtubField(const double radius, const double current, const double Z, const double maximumField, const double fractionalInhom);
+    /// \param Z The distance from the trap centre of the trap coils (in metres)
+    /// The axial inhomogeneity is also measured to here
+    /// \param centralField The central background field (in Tesla)
+    /// \param fractionalInhomZ The maximum axial inhomogeneity as a fraction of the maximum field
+    /// \param fractionalInhomR The maximum radial inhomogeneity as a fraction of the maximum field
+    InhomogeneousBathtubField(const double radius, const double current, const double Z, const double centralField, const double fractionalInhomZ, const double fractionalInhomR=0.0);
 
     /// Get the magnetic field at a point
     /// \param vec The position vector of the charge

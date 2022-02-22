@@ -113,18 +113,23 @@ TVector3 rad::SolenoidField::evaluate_field_at_point(const TVector3 vec) {
 }
 
 TVector3 rad::InhomogeneousBackgroundField::evaluate_field_at_point(const TVector3 vec) {
-  const double squareConst = ( (1 - inhom)*maxB - maxB ) / pow(inhomZ, 2);
+  const double r = sqrt( vec.X()*vec.X() + vec.Y()*vec.Y() );
+  // First calculate the field at the off-axis position r, at z = 0
+  const double maxB = ((inhomRad*BCent)/pow(inhomRadRadius, 2)) * r * r + BCent;
+  // Use this calculated field to get the axial variation
+  const double squareConst = -inhomAx*maxB / pow(inhomAxPosition, 2);
   double field = squareConst * pow(vec.Z(), 2) + maxB;
   TVector3 BField(0, 0, field);
   return BField;
 }
 
-rad::InhomogeneousBathtubField::InhomogeneousBathtubField(const double radius, const double current, const double Z, const double maximumField, const double fractionalInhom) {
+rad::InhomogeneousBathtubField::InhomogeneousBathtubField(const double radius, const double current, const double Z, const double centralField, const double fractionalInhomZ, const double fractionalInhomR)
+{
   // Generate coil fields at +/- Z
   coil1 = CoilField(radius, current, -1.0*Z, MU0);
   coil2 = CoilField(radius, current, Z, MU0);
   // Generate the background field
-  bkgField = InhomogeneousBackgroundField(maximumField, fractionalInhom, Z);
+  bkgField = InhomogeneousBackgroundField(centralField, fractionalInhomZ, Z, fractionalInhomR, radius);
 }
 
 TVector3 rad::InhomogeneousBathtubField::evaluate_field_at_point(const TVector3 vec) {
