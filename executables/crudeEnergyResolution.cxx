@@ -36,6 +36,8 @@ void PrintHelp()
     "--radius <r>:      Set the coil radius in metres\n"
     "--length <l>:      Set the trap length in metres\n"
     "--number <n>:      Number of electrons to simulate\n"
+    "--inhomAx:     Fractional inhomogeneity in the axial direction\n"
+    "--inhomRad:    Fractional inhomogeneity in the radial direction\n"
     "--outputDir <d>:   Output directory to write to\n"
     "--keepTracks <k>:  Sets flag to keep electron trajectories\n" 
     "--help <h>:        Prints this help message\n";
@@ -50,13 +52,17 @@ int main(int argc, char *argv[])
   double RCoil = 0.025; // m
   int nElectrons = 1000;
   std::string outputDir = " ";
-  bool keepTracks = false;  
+  bool keepTracks = false;
+  double inhomAx  = 0.0;
+  double inhomRad = 0.0;
 
   const option long_opts[] = {
     {"outputDir", required_argument, nullptr, 'd'},
     {"number", required_argument, nullptr, 'n'},
     {"radius", required_argument, nullptr, 'r'},
     {"length", required_argument, nullptr, 'l'},
+    {"inhomAx", required_argument, nullptr, 'z'},
+    {"inhomRad", required_argument, nullptr, 'x'},
     {"keepTracks", no_argument, nullptr, 'k'},
     {"help", no_argument, nullptr, 'h'},
     {nullptr, no_argument, nullptr, 0}
@@ -78,9 +84,15 @@ int main(int argc, char *argv[])
     case 'l':
       trapLength = atof(optarg);
       break;
+    case 'z':
+      inhomAx = atof(optarg);
+      break;
+    case 'x':
+      inhomRad = atof(optarg);
+      break;
     case 'k':
       keepTracks = true;
-      std::cout<<"Choosing to keep the track output"<<std::endl;
+      std::cout<<"WARNING!: Choosing to keep the track output. The full tracks take up about 1GB each so make sure you have enough space."<<std::endl;
       break;
     case ':':
       std::cout<<"Option needs a value"<<std::endl;
@@ -113,20 +125,27 @@ int main(int argc, char *argv[])
   std::cout<<"Simulating "<<nElectrons<<" electrons"<<std::endl;
   std::cout<<"Coil radius is "<<RCoil<<" m"<<std::endl;
   std::cout<<"Chosen trap length is "<<trapLength<<" m"<<std::endl;
-
+  std::cout<<"Axial inhomogeneity is "<<inhomAx<<std::endl;
+  std::cout<<"Radial inhomogeneity is "<<inhomRad<<std::endl;
+  
   // RNG
   TRandom3* thisRand = new TRandom3(0);
   
   // Simulation parameters
   const double timeStepSize = 3.7e-12; // seconds
   const double maxSimTime = 55e-6;     // seconds
-  const double RGen = 0.02; // m 
-  const double ICoil = 2.0 * 0.0049 * RCoil / MU0; // Amps
+  const double RGen = 0.02; // m
+  const double trapDepth = 0.0049; // Tesla
   const double centralField = 1.0; // Tesla
 
-  // Generate the bathtub field
-  BathtubField* bathtubFieldNoInhom = new BathtubField(RCoil, ICoil, -trapLength/2, trapLength/2, TVector3(0, 0, 1));
+  InhomogeneousBackgroundField* bkg  = new InhomogeneousBackgroundField(centralField, inhomAx, trapLength/2, inhomRad, RCoil);
+  const double trapFieldOffset = centralField - bkg->evaluate_field_at_point(TVector3(0, 0, trapLength/2)).Mag();
   
+  const double ICoil = 2.0 * (trapDepth + trapFieldOffset) * RCoil / MU0; // Amps
+  delete bkg;
+  
+  // Generate the bathtub field
+  InhomogeneousBathtubField* bathtubField = new InhomogeneousBathtubField(RCoil, ICoil, trapLength/2, centralField, inhomAx, inhomRad);
   // Antenna specifications
   const double antennaRadius = 0.03;
   const double antennaAngle1 = 0*TMath::Pi()/180;                                                   
@@ -229,7 +248,7 @@ int main(int argc, char *argv[])
     std::cout<<"Angle (degrees), rPos, zPos = "<<(pitchAngle*180/TMath::Pi())<<", "<<radialPosGen<<" m, "<<zPosGen<<" m"<<std::endl;
     
     // Set up the solver
-    BorisSolver solver(bathtubFieldNoInhom, -TMath::Qe(), ME, tau);
+    BorisSolver solver(bathtubField, -TMath::Qe(), ME, tau);
     // Calculate the number of time steps
     int nTimeSteps = maxSimTime / timeStepSize;
 
@@ -350,6 +369,8 @@ int main(int argc, char *argv[])
     std::cout<<"\n";
   } // Loop over electrons
 
+  delete bathtubField;
+  
   fout->cd();
 
   startTree->Write();
