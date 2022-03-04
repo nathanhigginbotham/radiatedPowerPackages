@@ -119,7 +119,7 @@ double rad::CalcAlHertzianDipole(const double wavelength, const ROOT::Math::XYZV
 
 double rad::CalcRetardedTime(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const double labTime)
 {
-  double time = labTime - TMath::Sqrt(((ePosition - fieldPoint).Mag2()) / TMath::C());
+  double time = labTime - TMath::Sqrt((ePosition - fieldPoint).Mag2()) / TMath::C();
   return time;
 }
 
