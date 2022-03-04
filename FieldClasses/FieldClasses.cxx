@@ -109,9 +109,18 @@ TGraph* rad::FieldPoint::MakeRetardedTimeGraph(const TGraph* grOriginal) {
   TSpline3 *sptPrime = new TSpline3("sptPrime", tPrime);
   TSpline3 *spgrOriginal = new TSpline3("spgrOriginal", grOriginal);
 
+  // Need to work out the first time that we should take this spline from
+  double timeToStart = 0;
+  for (int i = 0; i < tPrime->GetN(); i++) {
+    if (tPrime->GetPointY(i) > 0) {
+      timeToStart = tPrime->GetPointX(i);
+      break;
+    }
+  }
+  
   TGraph *grOut = new TGraph();
   for (int i = 0; i < grOriginal->GetN(); i++) {
-    if (grOriginal->GetPointX(i) < 0.2e-9) continue;
+    if (grOriginal->GetPointX(i) < timeToStart) continue;
     double tRet = sptPrime->Eval(grOriginal->GetPointX(i));
     grOut->SetPoint(grOut->GetN(), grOriginal->GetPointX(i), spgrOriginal->Eval(tRet));
   }
@@ -207,19 +216,22 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetar
     gr = (TGraph*)EField[2]->Clone("grEz");
     grOut->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
   }
-
-  if (firstPoint < 0) firstPoint = 0;
-  if (lastPoint < 0) lastPoint = gr->GetN() - 1;
   
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Time [s]");
   if (!kUseRetardedTime) {
+    if (firstPoint < 0) firstPoint = 0;
+    if (lastPoint < 0) lastPoint = gr->GetN() - 1;
+    
     for (int i = firstPoint; i <= lastPoint; i++) {
       grOut->SetPoint(grOut->GetN(), gr->GetPointX(i), gr->GetPointY(i));
     }
   }
   else {
     TGraph* grRet = MakeRetardedTimeGraph(gr);
+    if (firstPoint < 0) firstPoint = 0;
+    if (lastPoint < 0) lastPoint = grRet->GetN() - 1;
+    
     for (int i = firstPoint; i <= lastPoint; i++) {
       grOut->SetPoint(grOut->GetN(), grRet->GetPointX(i), grRet->GetPointY(i));
     }
@@ -246,18 +258,21 @@ TGraph* rad::FieldPoint::GetPositionTimeDomain(Coord_t coord, const bool kUseRet
     grOut->GetYaxis()->SetTitle("z [m]");
   }
 
-  if (firstPoint < 0) firstPoint = 0;
-  if (lastPoint < 0) lastPoint = gr->GetN() - 1;
-
   setGraphAttr(grOut);
   grOut->GetXaxis()->SetTitle("Time [s]");
   if (!kUseRetardedTime) {
+    if (firstPoint < 0) firstPoint = 0;
+    if (lastPoint < 0) lastPoint = gr->GetN() - 1;
+    
     for (int i = firstPoint; i <= lastPoint; i++) {
       grOut->SetPoint(grOut->GetN(), gr->GetPointX(i), gr->GetPointY(i));
     }
   }
   else {
     TGraph* grRet = MakeRetardedTimeGraph(gr);
+    if (firstPoint < 0) firstPoint = 0;
+    if (lastPoint < 0) lastPoint = grRet->GetN() - 1;
+    
     for (int i = firstPoint; i <= lastPoint; i++) {
       grOut->SetPoint(grOut->GetN(), grRet->GetPointX(i), grRet->GetPointY(i));
     }
