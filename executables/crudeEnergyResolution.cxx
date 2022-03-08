@@ -186,11 +186,15 @@ int main(int argc, char *argv[])
   TFile* fout = new TFile(Form("%s/output.root", outputDir.data()), "RECREATE");
   
   TTree* startTree = new TTree("startTree", "startTree");
+  double initialAngle;
   double pitchAngle;
+  double BMean;
   double xpos, ypos, zpos;
   double xvel, yvel, zvel;
   int isTrapped_val;
+  startTree->Branch("initialAngle", &initialAngle, "initialAngle/D");
   startTree->Branch("pitchAngle", &pitchAngle, "pitchAngle/D");
+  startTree->Branch("BMean", &BMean, "BMean/D");
   startTree->Branch("xpos", &xpos, "xpos/D");
   startTree->Branch("ypos", &ypos, "ypos/D");
   startTree->Branch("zpos", &zpos, "zpos/D");
@@ -199,8 +203,12 @@ int main(int argc, char *argv[])
   startTree->Branch("zvel", &zvel, "zvel/D");
   startTree->Branch("isTrapped", &isTrapped_val, "isTrapped/I");
 
-  TH1D* hPitchAngle = new TH1D("hPitchAngle", "Pitch angles; Angle [degrees]; N", 90, 0, 90);
+  TH1D* hInitialAngle = new TH1D("hInitialAngle", "Initial angles; Angle [degrees]; N", 180, 0, 90);
+  SetHistAttr(hInitialAngle);
+  TH1D* hPitchAngle = new TH1D("hPitchAngle", "Pitch angles; Angle [degrees]; N", 180, 0, 90);
   SetHistAttr(hPitchAngle);
+  TH1D* hInitialAngleAcc = new TH1D("hInitialAngleAcc", "Initial angles; Angle [degrees]; N", 90, 0, 90);
+  SetHistAttr(hInitialAngleAcc);
   TH1D* hPitchAngleAcc = new TH1D("hPitchAngleAcc", "Pitch angles; Angle [degrees]; N", 90, 0, 90);
   SetHistAttr(hPitchAngleAcc);
   TH1D* hRPos    = new TH1D("hRPos", "Radial position; R [m]; N", 50, 0, RGen);
@@ -234,6 +242,9 @@ int main(int argc, char *argv[])
     TVector3 velVec(initialSpeed*cos(phiVelGen)*sin(thetaVelGen),
 		    initialSpeed*sin(phiVelGen)*sin(thetaVelGen), initialSpeed*cos(thetaVelGen));
 
+    BMean = 0.0;
+    int nRecordedSteps = 0;
+
     xpos = posVec.X();
     ypos = posVec.Y();
     zpos = posVec.Z();
@@ -243,9 +254,10 @@ int main(int argc, char *argv[])
     
     double RVel = sqrt( velVec.X()*velVec.X() + velVec.Y()*velVec.Y() );
     std::cout<<RVel<<", "<<velVec.Z()<<std::endl;
-    pitchAngle = abs( atan(RVel / velVec.Z()) );    
-    
-    std::cout<<"Angle (degrees), rPos, zPos = "<<(pitchAngle*180/TMath::Pi())<<", "<<radialPosGen<<" m, "<<zPosGen<<" m"<<std::endl;
+    initialAngle = abs( atan(RVel / velVec.Z()) );    
+    pitchAngle   = abs( atan(RVel / velVec.Z()) ); // Initial value
+
+    std::cout<<"Initial angle (degrees), rPos, zPos = "<<(initialAngle*180/TMath::Pi())<<", "<<radialPosGen<<" m, "<<zPosGen<<" m"<<std::endl;
     
     // Set up the solver
     BorisSolver solver(bathtubField, -TMath::Qe(), ME, tau);
@@ -258,7 +270,7 @@ int main(int argc, char *argv[])
     hZPos->Fill(posVec.Z());
     hRPos->Fill(radialPosGen);
     h2RZPos->Fill(posVec.Z(), radialPosGen);
-    hPitchAngle->Fill(pitchAngle*180/TMath::Pi());    
+    hInitialAngle->Fill(initialAngle*180/TMath::Pi());    
 
     TFile* fElec = new TFile(Form("%s/track%d.root", outputDir.data(), n), "RECREATE");
     
@@ -295,7 +307,6 @@ int main(int argc, char *argv[])
     tree->Fill();
     
     for (int iStep = 0; iStep < nTimeSteps; iStep++) {
-      
       std::tuple<TVector3, TVector3> outputStep = solver.advance_step(timeStepSize, posVec, velVec);
       posVec = std::get<0>(outputStep);
       velVec = std::get<1>(outputStep);
@@ -315,6 +326,9 @@ int main(int argc, char *argv[])
       zAcc = eAcc.Z();    
       
       tree->Fill();
+
+      double thisPitchAngle = abs( atan(RVel / velVec.Z()) );
+      if (thisPitchAngle < pitchAngle) pitchAngle = thisPitchAngle;
       
       // Check if the electron has escaped the trap
       if (abs(posVec.Z()) > trapLength/2) {
@@ -323,7 +337,15 @@ int main(int argc, char *argv[])
 	std::cout<<"Was not trapped"<<std::endl;
 	break;
       }
+
+      double BField = bathtubField->evaluate_field_at_point(posVec).Mag();
+      BMean += BField;
+      nRecordedSteps++;
     }
+
+    BMean /= double(nRecordedSteps);
+
+    hPitchAngle->Fill(pitchAngle*180/TMath::Pi());
 
     fElec->cd();
     tree->Write();
@@ -336,6 +358,7 @@ int main(int argc, char *argv[])
       hZPosAcc->Fill(posVec.Z());
       hRPosAcc->Fill(radialPosGen);
       h2RZPosAcc->Fill(posVec.Z(), radialPosGen);
+      hInitialAngleAcc->Fill(initialAngle*180/TMath::Pi());
       hPitchAngleAcc->Fill(pitchAngle*180/TMath::Pi());
 
       // If the electron was trapped we can do some signal processing
@@ -378,10 +401,12 @@ int main(int argc, char *argv[])
   hRPos->Write();
   h2RZPos->Write();
   hPitchAngle->Write();
+  hInitialAngle->Write();
   hZPosAcc->Write();
   hRPosAcc->Write();
   h2RZPosAcc->Write();
   hPitchAngleAcc->Write();
+  hInitialAngleAcc->Write();
   
   fout->Close();
   delete fout;
