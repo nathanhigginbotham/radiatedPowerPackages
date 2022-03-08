@@ -17,6 +17,9 @@
 #include "FFTtools.h"
 #include "FFTWComplex.h"
 
+#include <iostream>
+#include <vector>
+
 // Electric field at the field point, calculated from Lienard-Wiechert potentials
 ROOT::Math::XYZVector rad::CalcEField(const ROOT::Math::XYZPoint fieldPoint,
 				      const ROOT::Math::XYZPoint ePosition,
@@ -311,23 +314,68 @@ TGraph* rad::SumGraphs(std::vector<TGraph*> grInput)
 {
   TGraph* grOut = new TGraph();
   setGraphAttr(grOut);
-  int nPoints = -1;
-  int maxGr = -1;
+
+  std::cout<<"Input vector size = "<<grInput.size()<<std::endl;
+  
+  std::cout<<"Checking time spacing"<<std::endl;
+  // First of all check that our graphs have the same x (time) spacing
+  double testSpacing = grInput[0]->GetPointX(1) - grInput[0]->GetPointX(0);
+  std::cout<<"Test spacing = "<<testSpacing<<std::endl;
   for (int iGr = 0; iGr < grInput.size(); iGr++) {
-    if (grInput[iGr]->GetN() > nPoints) {
-      nPoints = grInput[iGr]->GetN();
-      maxGr = iGr;
+    double thisSpacing = grInput[iGr]->GetPointX(1) - grInput[iGr]->GetPointX(0);
+    std::cout<<"This spacing = "<<thisSpacing<<std::endl;
+    // Return empty graph if not
+    if ((thisSpacing-testSpacing)/testSpacing > 1e-10) {
+      std::cout<<"Graphs do not have equivalent time spacing! -- returning empty graph."<<std::endl;
+      return grOut;
     }
   }
 
-  for (int iPnt = 0; iPnt < nPoints; iPnt++) {
-    double thisPoint = 0;
+  std::cout<<"Determining lengths"<<std::endl;
+  // The time series may be of different lengths
+  // Need to determine the overlapping times between all the graphs
+  double latestStart = -DBL_MAX;
+  double earliestEnd = DBL_MAX;
+  for (int iGr = 0; iGr < grInput.size(); iGr++) {
+    if (grInput[iGr]->GetPointX(0) > latestStart)
+      latestStart = grInput[iGr]->GetPointX(0);
+
+    if (grInput[iGr]->GetPointX(grInput[iGr]->GetN()-1) < earliestEnd)
+      earliestEnd = grInput[iGr]->GetPointX(grInput[iGr]->GetN()-1);
+  }
+  std::cout<<"Start, end time = "<<latestStart<<", "<<earliestEnd<<std::endl;
+  
+  std::vector<int> startIndices;
+  std::vector<int> endIndices;
+  // Find the indices where these start and end times are satisfied
+  for (int iGr = 0; iGr < grInput.size(); iGr++) {
+    // Loop through points from start
+    for (int iPnt = 0; iPnt < grInput[iGr]->GetN(); iPnt++) {
+      if (grInput[iGr]->GetPointX(iPnt) == latestStart) {
+	startIndices.push_back(iPnt);
+	break;
+      }
+    }
+    // Now loop through the points from the end to get the end 
+    for (int iPnt = grInput[iGr]->GetN()-1; iPnt >= 0; iPnt--) {
+      if (grInput[iGr]->GetPointX(iPnt) == earliestEnd) {
+	endIndices.push_back(iPnt);
+	break;
+      }
+    } // Loop through points
+  }
+
+  // Now sum the graphs between the appropriate ranges
+  int nPointsToSum = endIndices[0] - startIndices[0];
+  for (int iPnt = 0; iPnt < nPointsToSum; iPnt++) {
+    double xVal = grInput[0]->GetPointX(startIndices[0]+iPnt);
+    double yVal = 0;
     for (int iGr = 0; iGr < grInput.size(); iGr++) {
-      thisPoint += grInput[iGr]->GetPointY(iPnt);
+      yVal += grInput[iGr]->GetPointY(startIndices[iGr]+iPnt);
     }
-    grOut->SetPoint(iPnt, grInput[maxGr]->GetPointX(iPnt), thisPoint);
+    grOut->SetPoint(grOut->GetN(), xVal, yVal);
   }
-
+  
   return grOut;
 }
 
