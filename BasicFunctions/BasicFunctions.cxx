@@ -314,16 +314,11 @@ TGraph* rad::SumGraphs(std::vector<TGraph*> grInput)
 {
   TGraph* grOut = new TGraph();
   setGraphAttr(grOut);
-
-  std::cout<<"Input vector size = "<<grInput.size()<<std::endl;
   
-  std::cout<<"Checking time spacing"<<std::endl;
   // First of all check that our graphs have the same x (time) spacing
   double testSpacing = grInput[0]->GetPointX(1) - grInput[0]->GetPointX(0);
-  std::cout<<"Test spacing = "<<testSpacing<<std::endl;
   for (int iGr = 0; iGr < grInput.size(); iGr++) {
     double thisSpacing = grInput[iGr]->GetPointX(1) - grInput[iGr]->GetPointX(0);
-    std::cout<<"This spacing = "<<thisSpacing<<std::endl;
     // Return empty graph if not
     if ((thisSpacing-testSpacing)/testSpacing > 1e-10) {
       std::cout<<"Graphs do not have equivalent time spacing! -- returning empty graph."<<std::endl;
@@ -331,7 +326,6 @@ TGraph* rad::SumGraphs(std::vector<TGraph*> grInput)
     }
   }
 
-  std::cout<<"Determining lengths"<<std::endl;
   // The time series may be of different lengths
   // Need to determine the overlapping times between all the graphs
   double latestStart = -DBL_MAX;
@@ -343,7 +337,6 @@ TGraph* rad::SumGraphs(std::vector<TGraph*> grInput)
     if (grInput[iGr]->GetPointX(grInput[iGr]->GetN()-1) < earliestEnd)
       earliestEnd = grInput[iGr]->GetPointX(grInput[iGr]->GetN()-1);
   }
-  std::cout<<"Start, end time = "<<latestStart<<", "<<earliestEnd<<std::endl;
   
   std::vector<int> startIndices;
   std::vector<int> endIndices;
