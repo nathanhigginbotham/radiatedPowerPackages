@@ -46,8 +46,8 @@ TVector3 rad::CoilField::evaluate_field_at_point(const TVector3 vec) {
   double alpha = pow(1.0 + rad_norm, 2) + z_norm*z_norm;
   double root_alpha_pi = sqrt(alpha) * TMath::Pi();
   double beta = 4 * rad_norm / alpha;
-  double int_k = boost::math::ellint_1(beta);
-  double int_e = boost::math::ellint_2(beta);
+  double int_k = boost::math::ellint_1(sqrt(beta));
+  double int_e = boost::math::ellint_2(sqrt(beta));
   double gamma = alpha - 4 * rad_norm;
 
   double b_r = b_central * (int_e * ((1.0 + rad_norm*rad_norm + z_norm*z_norm) / gamma) - int_k) / root_alpha_pi *(z_rel / rad);
