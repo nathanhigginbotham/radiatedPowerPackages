@@ -141,6 +141,26 @@ namespace rad
     /// \Returns The magnetic field vector at the point (in Tesla)
     TVector3 evaluate_field_at_point(const TVector3 vec);
   };
+
+  /// Class describing a harmonic trap                                                          
+  /// Formed using a single coil in a background field                                               
+  /// Trap coil is located at z = 0 with field anti parallel to z axis
+  class HarmonicField : public BaseField {
+  private:
+    CoilField coil;
+    TVector3 btBkg;
+
+  public:
+    /// \param radius of the trap coil (in metres)                                                  
+    /// \param current The current (in amps) flowing through each trap coil                          
+    /// \param background The background field in Tesla                                               
+    HarmonicField(const double radius, const double current, const double background);
+
+    /// \param vec Position vector of charge                                                      
+    /// \returns The magnetic field at the point                                                     
+    TVector3 evaluate_field_at_point(const TVector3 vec);
+  };
+
 }
 
 #endif
