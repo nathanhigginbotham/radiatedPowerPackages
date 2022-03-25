@@ -44,7 +44,7 @@ namespace rad
     InducedVoltage(const InducedVoltage &iv);
 
     /// Returns the voltage graph
-    TGraph* GetVoltageGraph() { return grVoltage; }
+    TGraph* GetVoltageGraph();
 
     /// Deletes the TGraph pointer to free up memory
     void ResetVoltage();

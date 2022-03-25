@@ -67,6 +67,12 @@ rad::InducedVoltage::InducedVoltage(const InducedVoltage &iv) {
   UseRetardedTime = iv.UseRetardedTime;
 }
 
+TGraph* rad::InducedVoltage::GetVoltageGraph() {
+  TGraph* grOut = (TGraph*)grVoltage->Clone();
+  setGraphAttr(grOut);
+  return grOut;
+}
+
 void rad::InducedVoltage::ResetVoltage() {
   delete grVoltage;
   grVoltage = new TGraph();
@@ -98,7 +104,10 @@ void rad::InducedVoltage::ApplyAntennaBandwidth() {
 }
 
 TGraph* rad::InducedVoltage::GetPowerPeriodogram(const double loadResistance) {
-  TGraph* pgram = MakePowerSpectrumPeriodogram(grVoltage);
-  ScaleGraph(grVoltage, 1.0 / loadResistance);
+  std::cout<<"Creating power spectrum"<<std::endl;
+  TGraph* grV = GetVoltageGraph();
+  TGraph* pgram = MakePowerSpectrumPeriodogram(grV);
+  ScaleGraph(pgram, 1.0 / loadResistance);
+  delete grV;
   return pgram;
 }
