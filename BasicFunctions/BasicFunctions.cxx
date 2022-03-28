@@ -37,6 +37,16 @@ ROOT::Math::XYZVector rad::CalcEField(const ROOT::Math::XYZPoint fieldPoint,
   return field;
 }
 
+ROOT::Math::XYZVector rad::CalcEField(const TVector3 fieldPoint, const TVector3 ePosition, const TVector3 eVelocity, const TVector3 eAcceleration)
+{
+  ROOT::Math::XYZPoint fp(fieldPoint.X(), fieldPoint.Y(), fieldPoint.Z());
+  ROOT::Math::XYZPoint ep(ePosition.X(), ePosition.Y(), ePosition.Z());
+  ROOT::Math::XYZVector ev(eVelocity.X(), eVelocity.Y(), eVelocity.Z());
+  ROOT::Math::XYZVector ea(eAcceleration.X(), eAcceleration.Y(), eAcceleration.Z());
+  ROOT::Math::XYZVector field = CalcEField(fp, ep, ev, ea);
+  return field;
+}
+
 // Magnetic field at the field point, calculated from Lienard-Wiechert potentials
 ROOT::Math::XYZVector rad::CalcBField(const ROOT::Math::XYZPoint fieldPoint,
 				      const ROOT::Math::XYZPoint ePosition,
@@ -54,6 +64,17 @@ ROOT::Math::XYZVector rad::CalcBField(const ROOT::Math::XYZPoint fieldPoint,
   return field;
 }
 
+ROOT::Math::XYZVector rad::CalcBField(const TVector3 fieldPoint, const TVector3 ePosition,
+				      const TVector3 eVelocity, const TVector3 eAcceleration)
+{
+  ROOT::Math::XYZPoint fp(fieldPoint.X(), fieldPoint.Y(), fieldPoint.Z());
+  ROOT::Math::XYZPoint ep(ePosition.X(), ePosition.Y(), ePosition.Z());
+  ROOT::Math::XYZVector ev(eVelocity.X(), eVelocity.Y(), eVelocity.Z());
+  ROOT::Math::XYZVector ea(eAcceleration.X(), eAcceleration.Y(), eAcceleration.Z());
+  ROOT::Math::XYZVector field = CalcBField(fp, ep, ev, ea);
+  return field;
+}
+
 // Calculate Poynting vector
 ROOT::Math::XYZVector rad::CalcPoyntingVec(const ROOT::Math::XYZPoint fieldPoint,
 					   const ROOT::Math::XYZPoint ePosition,
@@ -63,6 +84,17 @@ ROOT::Math::XYZVector rad::CalcPoyntingVec(const ROOT::Math::XYZPoint fieldPoint
   ROOT::Math::XYZVector EField = CalcEField(fieldPoint, ePosition, eVelocity, eAcceleration);
   ROOT::Math::XYZVector BField = CalcBField(fieldPoint, ePosition, eVelocity, eAcceleration);
   ROOT::Math::XYZVector vec = EField.Cross(BField) * (1.0 / MU0);
+  return vec;
+}
+
+ROOT::Math::XYZVector rad::CalcPoyntingVec(const TVector3 fieldPoint, const TVector3 ePosition,
+					   const TVector3 eVelocity, const TVector3 eAcceleration)
+{
+  ROOT::Math::XYZPoint fp(fieldPoint.X(), fieldPoint.Y(), fieldPoint.Z());
+  ROOT::Math::XYZPoint ep(ePosition.X(), ePosition.Y(), ePosition.Z());
+  ROOT::Math::XYZVector ev(eVelocity.X(), eVelocity.Y(), eVelocity.Z());
+  ROOT::Math::XYZVector ea(eAcceleration.X(), eAcceleration.Y(), eAcceleration.Z());
+  ROOT::Math::XYZVector vec = CalcPoyntingVec(fp, ep, ev, ea);
   return vec;
 }
 
