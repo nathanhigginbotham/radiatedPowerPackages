@@ -12,6 +12,7 @@
 #include "Math/Point3D.h"
 
 #include "BasicFunctions/BasicFunctions.h"
+#include "BasicFunctions/EMFunctions.h"
 #include "SignalProcessing/NoiseFunc.h"
 #include "Antennas/IAntenna.h"
 

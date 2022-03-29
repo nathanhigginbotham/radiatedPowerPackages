@@ -32,8 +32,10 @@ int main(int argc, char *argv[])
   double pitchAngle = 90;
   bool energyLoss = false;
   bool hasInputFile = false;
+  double trapLength = 0.3;
+  double Rcoil = 0.03;
   
-  while((opt = getopt(argc, argv, ":o:t:s:i:p:e")) != -1) {
+  while((opt = getopt(argc, argv, ":o:t:s:i:p:l:r:e")) != -1) {
     switch(opt) {
     case 'o':
       outputFile = optarg;
@@ -60,6 +62,12 @@ int main(int argc, char *argv[])
       energyLoss = true;
       std::cout<<"Energy loss turned on"<<std::endl;
       break;
+    case 'l':
+      trapLength = atof(optarg);
+      break;
+    case 'r':
+      Rcoil = atof(optarg);
+      break;
     case ':':
       std::cout<<"Option needs a value"<<std::endl;
       break;
@@ -82,7 +90,14 @@ int main(int argc, char *argv[])
     std::cout<<"Either specify a time step size with -s or an input file with -i"<<std::endl;
     exit(1);
   }
-  
+  if (trapLength <= 0) {
+    std::cout<<"Invalid trap length"<<std::endl;
+    exit(1);
+  }
+
+  std::cout<<"Trap length is "<<trapLength<<" m"<<std::endl;
+  std::cout<<"Trap coil radius is "<<Rcoil<<" m"<<std::endl;
+    
   const clock_t begin_time = clock(); // Start timing
   
   const double pitchAngleRad = pitchAngle * TMath::Pi() / 180;
@@ -131,10 +146,9 @@ int main(int argc, char *argv[])
     delete fin;
   }
 
-  // Set up the QTNM bathtub trap with coils at +/- 25cm
-  double zc1 = -0.25;
-  double zc2 = 0.25;
-  double Rcoil = 0.03;
+  // Set up the QTNM bathtub trap with coils at +/- half the trap length
+  double zc1 = -trapLength/2;
+  double zc2 = trapLength/2;
   double I = 2.0 * 0.0049 * Rcoil / MU0;
   BathtubField* bathtub = new BathtubField(Rcoil, I, zc1, zc2, B0);
   TVector3 maxVec(0, 0, zc1);
