@@ -22,6 +22,25 @@ rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, IAntenna* myAnte
   theAntenna = myAntenna;
   UseRetardedTime = kUseRetardedTime;
   grVoltage = new TGraph();
+
+  // Get the time spacing in the input file
+  TFile* file1 = new TFile(theFile, "READ");
+  assert(file1);
+  TTree* tree1 = (TTree*)file1->Get("tree");
+  assert(tree1);
+  double time;
+  tree1->SetBranchAddress("time", &time);
+  tree1->GetEntry(0);
+  double time0 = time;
+  tree1->GetEntry(1);
+  double time1 = time;
+  delete tree1;
+  file1->Close();
+  delete file1;
+  const double timeStep = time1 - time0;
+
+  const double chunkRatio = 8333333.0; // Number of points that have been determined to work
+  chunkSize = chunkRatio * timeStep;
 }
 
 void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
@@ -31,7 +50,6 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
 
   // To avoid running out of memory, generate the fields in more manageable chunks
   // Avoids having massive versions of unnecessary graphs
-  const double chunkSize = 25e-6;
   double thisChunk = minTime + chunkSize;
   if (thisChunk > maxTime) thisChunk = maxTime;
   double lastChunk = minTime;

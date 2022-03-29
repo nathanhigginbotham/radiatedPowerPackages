@@ -23,6 +23,7 @@ namespace rad
     TGraph* grVoltage;
     IAntenna* theAntenna;
     bool UseRetardedTime;
+    double chunkSize;
     
   public:
     /// Constructor for a voltage
@@ -67,6 +68,9 @@ namespace rad
     /// Returns periodogram
     /// \param loadResistance The resistance of the load circuit
     TGraph* GetPowerPeriodogram(const double loadResistance);
+
+    /// Returns the chunk size used in generating the voltage
+    double GetChunkSize() { return chunkSize; }
   };
 }
 
