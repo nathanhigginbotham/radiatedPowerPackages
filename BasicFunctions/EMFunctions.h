@@ -21,6 +21,8 @@ namespace rad
   ROOT::Math::XYZVector CalcEField(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const ROOT::Math::XYZVector eVelocity, const ROOT::Math::XYZVector eAcceleration);
   /// Calculates electric field using TVector3 framework
   ROOT::Math::XYZVector CalcEField(const TVector3 fieldPoint, const TVector3 ePosition, const TVector3 eVelocity, const TVector3 eAcceleration);
+  /// Calculate the far field component only
+  TVector3 CalcEFarField(const TVector3 fieldPoint, const TVector3 ePosition, const TVector3 eVelocity, const TVector3 eAcceleration);
   
   /// Calculates magnetic field from a moving electron at a point
   /// Coordinates are all in same reference framce
@@ -32,7 +34,9 @@ namespace rad
   ROOT::Math::XYZVector CalcBField(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const ROOT::Math::XYZVector eVelocity, const ROOT::Math::XYZVector eAcceleration);
   /// Calculates magnetic field using TVector3 framework
   ROOT::Math::XYZVector CalcBField(const TVector3 fieldPoint, const TVector3 ePosition, const TVector3 eVelocity, const TVector3 eAcceleration); 
-
+  /// Calculate the far field component only
+  TVector3 CalcBFarField(const TVector3 fieldPoint, const TVector3 ePosition, const TVector3 eVelocity, const TVector3 eAcceleration);
+  
   /// Calculates Poynting vector from a moving electron at a point
   /// Coordinates are all in same reference framce
   /// \param fieldPoint Vector of field point

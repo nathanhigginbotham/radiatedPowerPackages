@@ -32,6 +32,19 @@ ROOT::Math::XYZVector rad::CalcEField(const TVector3 fieldPoint, const TVector3 
   return field;
 }
 
+TVector3 rad::CalcEFarField(const TVector3 fieldPoint, const TVector3 ePosition,
+			    const TVector3 eVelocity, const TVector3 eAcceleration)
+{
+  const TVector3 beta = eVelocity * (1.0 / TMath::C());
+  const TVector3 betaDot = eAcceleration * (1.0 / TMath::C());
+  double premult = TMath::Qe() / (4.0 * EPSILON0 * TMath::Pi());
+  const double r = (fieldPoint - ePosition).Mag();
+  const TVector3 rHat = (fieldPoint - ePosition).Unit();
+  TVector3 field = rHat.Cross( (rHat-beta).Cross(betaDot) ) * (1.0 / ( TMath::C()*r*pow(1-rHat.Dot(beta), 3) ));
+  field *= premult;
+  return field;
+}
+
 // Magnetic field at the field point, calculated from Lienard-Wiechert potentials
 ROOT::Math::XYZVector rad::CalcBField(const ROOT::Math::XYZPoint fieldPoint,
 				      const ROOT::Math::XYZPoint ePosition,
@@ -57,6 +70,19 @@ ROOT::Math::XYZVector rad::CalcBField(const TVector3 fieldPoint, const TVector3 
   ROOT::Math::XYZVector ev(eVelocity.X(), eVelocity.Y(), eVelocity.Z());
   ROOT::Math::XYZVector ea(eAcceleration.X(), eAcceleration.Y(), eAcceleration.Z());
   ROOT::Math::XYZVector field = CalcBField(fp, ep, ev, ea);
+  return field;
+}
+
+TVector3 rad::CalcBFarField(const TVector3 fieldPoint, const TVector3 ePosition,
+			    const TVector3 eVelocity, const TVector3 eAcceleration)
+{
+  double premult = -1.0 * MU0 * TMath::Qe() / (4.0 * TMath::Pi());
+  const TVector3 beta = eVelocity * (1.0 / TMath::C());
+  const TVector3 betaDot = eAcceleration * (1.0 / TMath::C());
+  const double r = TMath::Sqrt((fieldPoint - ePosition).Mag2());
+  const TVector3 rHat = (fieldPoint - ePosition).Unit();
+  TVector3 field = rHat.Cross(betaDot + rHat.Cross(beta.Cross(betaDot))) * (1.0 / (r * pow(1.0 - beta.Dot(rHat), 3) ));
+  field *= premult;
   return field;
 }
 
