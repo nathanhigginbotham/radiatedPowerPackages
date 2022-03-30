@@ -196,6 +196,7 @@ void rad::FieldPoint::GenerateFields(const double minTime, const double maxTime)
     tPrime->SetPoint(tPrime->GetN(), time, CalcRetardedTime(antennaPoint, ePos, time));
   }
 
+  delete tree;
   fin->Close();
   delete fin;
 }
