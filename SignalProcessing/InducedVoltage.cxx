@@ -40,7 +40,7 @@ rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, IAntenna* myAnte
   const double timeStep = time1 - time0;
 
   const double chunkRatio = 8333333.0; // Number of points that have been determined to work
-  chunkSize = chunkRatio * timeStep;
+  chunkSize = chunkRatio * timeStep; // Adaptive time chunk size
 }
 
 void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
@@ -83,6 +83,7 @@ rad::InducedVoltage::InducedVoltage(const InducedVoltage &iv) {
   theAntenna = iv.theAntenna;
   theFile = iv.theFile;
   UseRetardedTime = iv.UseRetardedTime;
+  chunkSize = iv.chunkSize;
 }
 
 TGraph* rad::InducedVoltage::GetVoltageGraph() {

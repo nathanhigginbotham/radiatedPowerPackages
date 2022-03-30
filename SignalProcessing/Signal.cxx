@@ -257,9 +257,8 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   // Split the signal up into chunks to avoid memory issues
   if (maxTime < 0) maxTime = iv.GetFinalTime();
   
-  const double chunkSize = iv.GetChunkSize();
   double lastChunk = 0;
-  double thisChunk = lastChunk + chunkSize;
+  double thisChunk = lastChunk + iv.GetChunkSize();
   if (thisChunk > maxTime) thisChunk = maxTime;
 
   double thisSample = 0;
@@ -268,7 +267,7 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
   while (thisChunk <= maxTime && thisChunk != lastChunk) {
     ProcessTimeChunk(iv, lo, thisChunk, lastChunk, noiseTerms, thisSample, this10Sample);
     lastChunk = thisChunk;
-    thisChunk += chunkSize;
+    thisChunk += iv.GetChunkSize();
     if (thisChunk > maxTime) thisChunk = maxTime;
   }
 }
