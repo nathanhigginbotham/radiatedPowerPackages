@@ -16,6 +16,20 @@
 
 namespace rad
 {
+  /// Class describing a uniform magnetic field pointing in the +z direction
+  class UniformField : public BaseField {
+  private:
+    double fieldStrength;
+
+  public:
+    /// \param field The magnitude of the field in Tesla 
+    UniformField(double field) : fieldStrength(field) {}
+
+    /// \param vec Position vector of charge
+    /// \returns The magnetic field vector at the point
+    TVector3 evaluate_field_at_point(const TVector3 vec);
+  };
+  
   /// Class describing the magnetic field of an infinitesimally thin current coil
   /// in the x-y plane
   class CoilField : public BaseField {

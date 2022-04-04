@@ -12,6 +12,11 @@
 #include <boost/math/special_functions/ellint_2.hpp>
 #include <boost/math/special_functions/heuman_lambda.hpp>
 
+TVector3 rad::UniformField::evaluate_field_at_point(const TVector3 vec) {
+  TVector3 BField(0, 0, fieldStrength);
+  return BField;
+}
+
 rad::CoilField::CoilField(const double radius, const double current, const double z, const double mu) {
   coilRadius = radius;
   coilCurrent = current;
