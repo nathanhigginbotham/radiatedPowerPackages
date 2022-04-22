@@ -110,13 +110,7 @@ TGraph* rad::FieldPoint::MakeRetardedTimeGraph(const TGraph* grOriginal) {
   TSpline3 *spgrOriginal = new TSpline3("spgrOriginal", grOriginal);
 
   // Need to work out the first time that we should take this spline from
-  double timeToStart = 0;
-  for (int i = 0; i < tPrime->GetN(); i++) {
-    if (tPrime->GetPointY(i) > 0) {
-      timeToStart = tPrime->GetPointX(i);
-      break;
-    }
-  }
+  double timeToStart = tPrime->GetPointX(0);
   
   TGraph *grOut = new TGraph();
   for (int i = 0; i < grOriginal->GetN(); i++) {
@@ -193,7 +187,7 @@ void rad::FieldPoint::GenerateFields(const double minTime, const double maxTime)
     pos[1]->SetPoint(pos[1]->GetN(), time, yPos);
     pos[2]->SetPoint(pos[2]->GetN(), time, zPos);
 
-    tPrime->SetPoint(tPrime->GetN(), time, CalcRetardedTime(antennaPoint, ePos, time));
+    tPrime->SetPoint(tPrime->GetN(), CalcTimeFromRetardedTime(antennaPoint, ePos, time), time);
   }
 
   delete tree;
