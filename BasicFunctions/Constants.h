@@ -4,6 +4,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#include "TMath.h"
+
 namespace rad
 {
   constexpr double EPSILON0 = 8.8541878128e-12;
@@ -11,9 +13,16 @@ namespace rad
 
   // Electron rest mass in kg
   constexpr double ME = 9.1093837015e-31;
-
+  // Electron rest mass in eV
+  constexpr double ME_EV = ME*TMath::C()*TMath::C()/TMath::Qe();
+  
   // Classical electron radius in metres
   constexpr double R_E = 2.8179403227e-15;
+
+  // Fermi coupling constant
+  constexpr double G_F = 1.1663787e-23; // eV^{-2}
+
+  constexpr double ALPHA = 7.2973525698e-3;
 }
  
 #endif
