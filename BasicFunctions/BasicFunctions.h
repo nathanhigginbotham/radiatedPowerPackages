@@ -113,6 +113,12 @@ namespace rad
   /// \param grInput The input real-valued time series data
   /// \Returns The FFT magnitudes in frequency space
   TGraph* MakeFFTMagGraph(TGraph* grInput);
+
+  /// Heaviside step function
+  /// \param x Input parameter
+  /// \Returns 1, for x > 0
+  /// \Returns 0, for x <= 0
+  double HeavisideFunc(double x);
 }
  
 #endif
