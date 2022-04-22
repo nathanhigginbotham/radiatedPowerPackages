@@ -32,6 +32,13 @@ namespace rad
   
   double CalcRetardedTime(const ROOT::Math::XYZPoint fieldPoint, const ROOT::Math::XYZPoint ePosition, const double labTime);
 
+  /// For a given retarded time, source and field point, returns the lab time
+  /// \param fieldPoint The field point at the retarded time
+  /// \param ePosition The source position at the retarded time
+  /// \param tRet The retarded time being evaluated (in seconds)
+  /// \Returns The corresponding lab time
+  double CalcTimeFromRetardedTime(ROOT::Math::XYZPoint fieldPoint, ROOT::Math::XYZPoint ePosition, double tRet);
+
   // Produces power spectrum with the desired normalisation
   TGraph* MakePowerSpectrumNorm(const TGraph* grWave);
 

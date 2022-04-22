@@ -74,6 +74,14 @@ double rad::CalcRetardedTime(const ROOT::Math::XYZPoint fieldPoint, const ROOT::
   return time;
 }
 
+double rad::CalcTimeFromRetardedTime(ROOT::Math::XYZPoint fieldPoint, ROOT::Math::XYZPoint ePosition,
+				     double tRet)
+{
+  double time = tRet + TMath::Sqrt((ePosition - fieldPoint).Mag2()) / TMath::C();
+  return time;
+}
+
+
 // Very similar to the FFTtools implementation but without the scaling of the x axis the MHz
 TGraph* rad::MakePowerSpectrumNorm(const TGraph* grWave)
 {
