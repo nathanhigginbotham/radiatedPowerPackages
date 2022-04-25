@@ -39,6 +39,10 @@ namespace rad
   /// \Returns The corresponding lab time
   double CalcTimeFromRetardedTime(ROOT::Math::XYZPoint fieldPoint, ROOT::Math::XYZPoint ePosition, double tRet);
 
+  /// Same function but using TVector3 apparatus
+  double CalcTimeFromRetardedTime(TVector3 fieldPoint, TVector3 ePosition, double tRet);
+
+  
   // Produces power spectrum with the desired normalisation
   TGraph* MakePowerSpectrumNorm(const TGraph* grWave);
 
