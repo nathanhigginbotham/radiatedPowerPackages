@@ -13,7 +13,7 @@ ROOT::Math::XYZVector rad::CalcEField(const ROOT::Math::XYZPoint fieldPoint,
 {  
   const ROOT::Math::XYZVector beta = eVelocity * (1.0 / TMath::C());
   const ROOT::Math::XYZVector betaDot = eAcceleration * (1.0 / TMath::C());
-  double premult = TMath::Qe() / (4.0 * EPSILON0 * TMath::Pi());
+  double premult = -1.0*TMath::Qe() / (4.0 * EPSILON0 * TMath::Pi());
   const double r = TMath::Sqrt((fieldPoint - ePosition).Mag2());
   const ROOT::Math::XYZVector rHat = (fieldPoint - ePosition).Unit();
   ROOT::Math::XYZVector term1 = (rHat - beta)*(1 - beta.Dot(beta)) * (1.0/( pow(1-beta.Dot(rHat) , 3) * r*r));
@@ -37,7 +37,7 @@ TVector3 rad::CalcEFarField(const TVector3 fieldPoint, const TVector3 ePosition,
 {
   const TVector3 beta = eVelocity * (1.0 / TMath::C());
   const TVector3 betaDot = eAcceleration * (1.0 / TMath::C());
-  double premult = TMath::Qe() / (4.0 * EPSILON0 * TMath::Pi());
+  double premult = -1.0*TMath::Qe() / (4.0 * EPSILON0 * TMath::Pi());
   const double r = (fieldPoint - ePosition).Mag();
   const TVector3 rHat = (fieldPoint - ePosition).Unit();
   TVector3 field = rHat.Cross( (rHat-beta).Cross(betaDot) ) * (1.0 / ( TMath::C()*r*pow(1-rHat.Dot(beta), 3) ));
