@@ -9,6 +9,7 @@
 #include "TGraph.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TAxis.h"
 
 #include <iostream>
 
@@ -22,7 +23,9 @@ rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, IAntenna* myAnte
   theAntenna = myAntenna;
   UseRetardedTime = kUseRetardedTime;
   grVoltage = new TGraph();
-
+  grVoltage->GetXaxis()->SetTitle("Time [s]");
+  grVoltage->GetXaxis()->SetTitle("Voltage [V]");
+  
   // Get the time spacing in the input file
   TFile* file1 = new TFile(theFile, "READ");
   assert(file1);
@@ -127,6 +130,8 @@ TGraph* rad::InducedVoltage::GetPowerPeriodogram(const double loadResistance) {
   TGraph* grV = GetVoltageGraph();
   TGraph* pgram = MakePowerSpectrumPeriodogram(grV);
   ScaleGraph(pgram, 1.0 / loadResistance);
+  pgram->GetXaxis()->SetTitle("Frequency [Hz]");
+  pgram->GetYaxis()->SetTitle("Power [W]");
   delete grV;
   return pgram;
 }
