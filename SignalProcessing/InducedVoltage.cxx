@@ -24,7 +24,7 @@ rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, IAntenna* myAnte
   UseRetardedTime = kUseRetardedTime;
   grVoltage = new TGraph();
   grVoltage->GetXaxis()->SetTitle("Time [s]");
-  grVoltage->GetXaxis()->SetTitle("Voltage [V]");
+  grVoltage->GetYaxis()->SetTitle("Voltage [V]");
   
   // Get the time spacing in the input file
   TFile* file1 = new TFile(theFile, "READ");
