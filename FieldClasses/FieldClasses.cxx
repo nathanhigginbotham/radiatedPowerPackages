@@ -51,11 +51,21 @@ rad::FieldPoint::FieldPoint(TString trajectoryFilePath, IAntenna* myAnt) {
   // Now check that the input file exists
   TFile* f = new TFile(trajectoryFilePath, "read");
   assert(f);
+  TTree* tree = (TTree*)f->Get("tree");
+  assert(tree);
+  double timeTemp;
+  tree->SetBranchAddress("time", &timeTemp);
+  tree->GetEntry(0);
+  fileStartTime = timeTemp;
+  delete tree;
   f->Close();
   delete f;
   inputFile = trajectoryFilePath;
 
   myAntenna = myAnt;
+
+  minCutTime = 0.0;
+  maxCutTime = 0.0;
 }
 
 // Copy constructor
@@ -69,8 +79,11 @@ rad::FieldPoint::FieldPoint(const FieldPoint &fp) {
     pos[coord] = (TGraph*)fp.pos[coord]->Clone();
   }
   tPrime = (TGraph*)fp.tPrime->Clone();
-
+  fileStartTime = fp.fileStartTime;
   myAntenna = fp.myAntenna;
+
+  minCutTime = fp.minCutTime;
+  maxCutTime = fp.maxCutTime;
 }
 
 void rad::FieldPoint::ResetFields() {
@@ -127,10 +140,29 @@ TGraph* rad::FieldPoint::MakeRetardedTimeGraph(const TGraph* grOriginal) {
   return grOut;
 }
 
+TGraph* rad::FieldPoint::TrimGraphToTime(const TGraph* grIn)
+{
+  TGraph* grOut = new TGraph();
+  setGraphAttr(grOut);
+  grOut->GetXaxis()->SetTitle("Time [s]");
+  grOut->GetYaxis()->SetTitle(grIn->GetYaxis()->GetTitle());
+  for (int i = 0; i < grIn->GetN(); i++) {
+    double thisTime = grIn->GetPointX(i);
+    if (thisTime < minCutTime) continue;
+    if (thisTime >= maxCutTime) break;
+
+    grOut->SetPoint(grOut->GetN(), thisTime, grIn->GetPointY(i)); 
+  }
+  return grOut;
+}
+
 // From an input TFile generate the E and B fields for a given time
 // maxTime is the final time in seconds (if less than the time in the file)
 void rad::FieldPoint::GenerateFields(const double minTime, const double maxTime) {
   ResetFields();
+
+  minCutTime = minTime;
+  maxCutTime = maxTime;
   
   TFile *fin = new TFile(inputFile, "READ");
   assert(fin);
@@ -159,12 +191,25 @@ void rad::FieldPoint::GenerateFields(const double minTime, const double maxTime)
   tree->GetEntry(1);
   const double t1 = time;
   const double timeStepSize = t1 - t0;
+
+  double minGenTime, maxGenTime; // Minimum and maximum time to generate the fields between
+  // If we are at the start of the file then work as normal
+  if (fileStartTime == minTime) {
+    minGenTime = minTime;
+    maxGenTime = maxTime;
+  }
+  else {
+    // Generate fields a small amount of time earlier than asked for
+    // This allows for the generation of retarded time graphs which link up across time chunks
+    minGenTime = minTime - 4e-9;
+    maxGenTime = maxTime;
+  }
   
   // Loop through the entries and get the fields at each point
   for (int e = 0; e < tree->GetEntries(); e++) {
     tree->GetEntry(e);
-    if (time < minTime) continue;
-    if (time > maxTime) break;
+    if (time < minGenTime) continue;
+    if (time > maxGenTime) break;
 
     if (std::fmod(time, 1e-6) < timeStepSize) {
       std::cout<<time<<" seconds generated..."<<std::endl;
@@ -189,7 +234,7 @@ void rad::FieldPoint::GenerateFields(const double minTime, const double maxTime)
 
     tPrime->SetPoint(tPrime->GetN(), CalcTimeFromRetardedTime(antennaPoint, ePos, time), time);
   }
-
+  
   delete tree;
   fin->Close();
   delete fin;
@@ -233,7 +278,9 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetar
     delete grRet;
   }
   delete gr;
-  return grOut;
+  TGraph* grTrimmed = TrimGraphToTime(grOut);
+  delete grOut;
+  return grTrimmed;
 }
 
 TGraph* rad::FieldPoint::GetPositionTimeDomain(Coord_t coord, const bool kUseRetardedTime,
@@ -274,7 +321,9 @@ TGraph* rad::FieldPoint::GetPositionTimeDomain(Coord_t coord, const bool kUseRet
     delete grRet;
   }
   delete gr;
-  return grOut;
+  TGraph* grTrimmed = TrimGraphToTime(grOut);
+  delete grOut;
+  return grTrimmed;
 }
 
 
@@ -291,12 +340,16 @@ TGraph* rad::FieldPoint::GetEFieldMagTimeDomain(const bool kUseRetardedTime) {
   grMag->GetYaxis()->SetTitle("|E| [V m^{-1}]");
 
   if (!kUseRetardedTime) {
-    return grMag;
+    TGraph* grTrimmed = TrimGraphToTime(grMag);
+    delete grMag;
+    return grTrimmed;
   }
   else {
     TGraph* grMagRet = MakeRetardedTimeGraph(grMag);
     delete grMag;
-    return grMagRet;
+    TGraph* grTrimmed = TrimGraphToTime(grMagRet);
+    delete grMagRet;
+    return grTrimmed;
   }
 }
 
@@ -318,12 +371,16 @@ TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord, const bool kUseRetar
   gr->GetXaxis()->SetTitle("Time [s]");
 
   if (!kUseRetardedTime) {
-    return gr;
+    TGraph* grTrimmed = TrimGraphToTime(gr);
+    delete gr;
+    return grTrimmed;
   }
   else {
     TGraph* grRet = MakeRetardedTimeGraph(gr);
     delete gr;
-    return grRet;
+    TGraph* grTrimmed = TrimGraphToTime(grRet);
+    delete grRet;
+    return grTrimmed;
   }
 }
 
@@ -340,12 +397,16 @@ TGraph* rad::FieldPoint::GetBFieldMagTimeDomain(const bool kUseRetardedTime) {
   grMag->GetYaxis()->SetTitle("|B| [T]");
 
   if (!kUseRetardedTime) {
-    return grMag;
+    TGraph* grTrimmed = TrimGraphToTime(grMag);
+    delete grMag;
+    return grTrimmed;
   }
   else {
     TGraph* grMagRet = MakeRetardedTimeGraph(grMag);
     delete grMag;
-    return grMagRet;
+    TGraph* grTrimmed = TrimGraphToTime(grMagRet);
+    delete grMagRet;
+    return grTrimmed;
   }
 }
 
@@ -372,12 +433,16 @@ TGraph* rad::FieldPoint::GetPoyntingVecTimeDomain(Coord_t coord, const bool kUse
   grS->GetXaxis()->SetTitle("Time [s]");
 
   if (!kUseRetardedTime) {
-    return grS;
+    TGraph* grTrimmed = TrimGraphToTime(grS);
+    delete grS;
+    return grTrimmed;
   }
   else {
     TGraph* grSRet = MakeRetardedTimeGraph(grS);
     delete grS;
-    return grSRet;
+    TGraph* grTrimmed = TrimGraphToTime(grSRet);
+    delete grSRet;
+    return grTrimmed;
   }
 }
 
@@ -396,12 +461,16 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
   grSMag->GetYaxis()->SetTitle("|S| [W m^{-2}]");
 
   if (!kUseRetardedTime) {
-    return grSMag;
+    TGraph* grTrimmed = TrimGraphToTime(grSMag);
+    delete grSMag;
+    return grTrimmed;
   }
   else {
     TGraph* grSMagRet = MakeRetardedTimeGraph(grSMag);
     delete grSMag;
-    return grSMagRet;
+    TGraph* grTrimmed = TrimGraphToTime(grSMagRet);
+    delete grSMagRet;
+    return grTrimmed;
   }
 }
 

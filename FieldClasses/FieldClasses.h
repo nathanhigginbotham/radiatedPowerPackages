@@ -41,6 +41,20 @@ namespace rad
     TGraph* MakeRetardedTimeGraph(const TGraph* grOriginal);
 
     IAntenna* myAntenna; // The chosen antenna, contains position and direction info
+
+    double fileStartTime; // First time in the file (in seconds)
+
+    /// Variables to record the times to which graphs should be trimmed down to
+    /// This is necessary when making multiple retarded time graphs
+    double minCutTime;
+    double maxCutTime;
+
+    /// Function to cut time series graphs down to a specified time
+    /// \param grIn The input time series graph
+    /// \param minCutTime The minimum time at which the outputted graph should start
+    /// \param maxCutTime The maximum time at which the outputted graph should end
+    /// \returns The trimmed graph
+    TGraph* TrimGraphToTime(const TGraph* grIn);
     
   public:
     enum Coord_t{
