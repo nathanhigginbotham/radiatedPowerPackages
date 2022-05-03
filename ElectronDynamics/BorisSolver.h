@@ -40,6 +40,10 @@ namespace rad
     TVector3 calc_b_field(const TVector3 pos);
     
   public:
+    /// Default constructor
+    /// By default a uniform field is used
+    BorisSolver();
+		
     /// \param field_v Pointer to a magnetic field calculator
     /// \param charge_v Particle charge. Default is electron charge
     /// \param mass_v Particle mass. Default is electron mass

@@ -6,11 +6,20 @@
 
 #include "ElectronDynamics/BorisSolver.h"
 #include "ElectronDynamics/BaseField.h"
+#include "ElectronDynamics/QTNMFields.h"
 
 #include "TMath.h"
 #include "TVector3.h"
 
 #include <tuple>
+
+rad::BorisSolver::BorisSolver()
+{
+  mass   = ME;
+  charge = -TMath::Qe();
+  tau    = 0.0;
+  field  = new UniformField(1.0);
+}
 
 rad::BorisSolver::BorisSolver(BaseField* field_v, const double charge_v, const double mass_v, const double tau_v) {
   charge = charge_v;
