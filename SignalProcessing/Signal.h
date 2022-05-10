@@ -31,7 +31,7 @@ namespace rad
     /// Function to actually do the signal processing for a given time chunk
     void ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo, double thisChunk, double lastChunk,
 			  std::vector<GaussianNoise> noiseTerms,
-			  double &firstSampleTime, double &firstSample10Time);
+			  double &firstSampleTime, double &firstSample10Time, bool firstVoltage=true);
     
   protected:
     TGraph* grVITime; // In phase component
@@ -91,6 +91,14 @@ namespace rad
     /// \param srate The sample rate of a hypothetical ADC
     /// \param noiseTerms A vector of noise terms to be added to the signal
     Signal(InducedVoltage iv, LocalOscillator lo, double srate,
+	   std::vector<GaussianNoise> noiseTerms={}, double maxTime=-1);
+
+    /// Constructor for multiple induced voltages
+    /// \param iv The vector of induced voltages
+    /// \param lo The local oscillator used to do the downmixing
+    /// \param srate The sample rate of a hypothetical ADC
+    /// \param noiseTerms A vector of noise terms to be added to the signal
+    Signal(std::vector<InducedVoltage> iv, LocalOscillator lo, double srate,
 	   std::vector<GaussianNoise> noiseTerms={}, double maxTime=-1);
     
     /// Copy constructor

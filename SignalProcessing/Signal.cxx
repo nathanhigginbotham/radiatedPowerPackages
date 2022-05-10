@@ -179,7 +179,8 @@ rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
 void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 				   double thisChunk, double lastChunk,
 				   std::vector<GaussianNoise> noiseTerms, 
-				   double &firstSampleTime, double &firstSample10Time)
+				   double &firstSampleTime, double &firstSample10Time,
+				   bool firstVoltage)
 {
   iv.ResetVoltage();
   iv.GenerateVoltage(lastChunk, thisChunk);
@@ -223,13 +224,38 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
     grVITimeTemp = BandPassFilter(grVITimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
     grVQTimeTemp = BandPassFilter(grVQTimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
   }
-  
+
   // Now add the information from these temporary graphs to the larger ones
-  for (int i = 0; i < grVITimeTemp->GetN(); i++) {
-    grVITime->SetPoint(grVITime->GetN(), grVITimeTemp->GetPointX(i), grVITimeTemp->GetPointY(i));
-    grVQTime->SetPoint(grVQTime->GetN(), grVQTimeTemp->GetPointX(i), grVQTimeTemp->GetPointY(i));
+  if (firstVoltage) {
+    // We are filling this graph or a new section of the graph for the first time
+    for (int i = 0; i < grVITimeTemp->GetN(); i++) {
+      grVITime->SetPoint(grVITime->GetN(), grVITimeTemp->GetPointX(i), grVITimeTemp->GetPointY(i));
+      grVQTime->SetPoint(grVQTime->GetN(), grVQTimeTemp->GetPointX(i), grVQTimeTemp->GetPointY(i));
+    }
   }
+  else {
+    double tempStartTime = grVITimeTemp->GetPointX(0);
+    int startPnt = -1;
+    // Loop through main graph to find start points
+    for (int iMain = 0; iMain < grVITime->GetN(); iMain++) {
+      if (abs(tempStartTime - grVITime->GetPointX(iMain)) < 1e-11) {
+	startPnt = iMain;
+	break;
+      }
+    }
     
+    // Now add the points to the main graph
+    for (int i = 0; i < grVITimeTemp->GetN(); i++) {
+      // We are adding to existing voltages
+      double viTmp = grVITime->GetPointY(startPnt + i);
+      double vqTmp = grVQTime->GetPointY(startPnt + i);
+      viTmp += grVITimeTemp->GetPointY(i);
+      vqTmp += grVQTimeTemp->GetPointY(i);
+      grVITime->SetPointY(startPnt + i, viTmp);
+      grVQTime->SetPointY(startPnt + i, vqTmp);
+    }
+  }
+      
   delete grVITimeTemp;
   delete grVQTimeTemp;
 }
@@ -270,6 +296,50 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
     thisChunk += iv.GetChunkSize();
     if (thisChunk > maxTime) thisChunk = maxTime;
   }
+}
+
+rad::Signal::Signal(std::vector<InducedVoltage> iv, LocalOscillator lo, double srate,
+		    std::vector<GaussianNoise> noiseTerms, double maxTime)
+{
+  sampleRate = srate;
+
+  // Make sure the noise terms are all set up correctly
+  for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
+    (noiseTerms.at(iNoise)).SetSampleFreq(sampleRate);
+    (noiseTerms.at(iNoise)).SetSigma();
+  }
+
+  // The actual output graphs
+  grVITime = new TGraph();
+  grVQTime = new TGraph();  
+  setGraphAttr(grVITime);
+  setGraphAttr(grVQTime);
+  grVITime->GetYaxis()->SetTitle("V_{I}");
+  grVQTime->GetYaxis()->SetTitle("V_{Q}");
+  grVITime->GetXaxis()->SetTitle("Time [s]");
+  grVQTime->GetXaxis()->SetTitle("Time [s]");
+
+  // Process each voltage one at a time
+  for (int iVolt = 0; iVolt < iv.size(); iVolt++) {
+  
+    if (maxTime < 0) maxTime = iv[iVolt].GetFinalTime();
+
+    // Split the signal up into chunks to avoid memory issues
+    double lastChunk = 0;
+    double thisChunk = lastChunk + iv[iVolt].GetChunkSize();
+    if (thisChunk > maxTime) thisChunk = maxTime;
+
+    double thisSample = 0;
+    double this10Sample = 0;
+
+    while (thisChunk <= maxTime && thisChunk != lastChunk) {
+      bool firstVoltage = (iVolt == 0);
+      ProcessTimeChunk(iv[iVolt], lo, thisChunk, lastChunk, noiseTerms, thisSample, this10Sample, firstVoltage);
+      lastChunk = thisChunk;
+      thisChunk += iv[iVolt].GetChunkSize();
+      if (thisChunk > maxTime) thisChunk = maxTime;
+    }    
+  } // Loop over InducedVoltage vector
 }
 
 rad::Signal::Signal(const Signal &s1) {
