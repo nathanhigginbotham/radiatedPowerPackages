@@ -197,67 +197,75 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
   delete grVITimeUnfiltered;
   delete grVQTimeUnfiltered;
   firstSample10Time = grVITimeFirstSample->GetPointX(grVITimeFirstSample->GetN()-1) + 1/(10*sampleRate);
-  
-  // Now we need to filter and then sample these signals
-  std::cout<<"Filtering.."<<std::endl;
-  TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
-  TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
 
-  delete grVITimeFirstSample;
-  delete grVQTimeFirstSample;
-
-  // Now do sampling  
-  // Use simple linear interpolation for the job
-  std::cout<<"Sampling..."<<std::endl;
-  TGraph* grVITimeTemp = SampleWaveform(grVITimeUnsampled, sampleRate, firstSampleTime);
-  TGraph* grVQTimeTemp = SampleWaveform(grVQTimeUnsampled, sampleRate, firstSampleTime);
-  delete grVITimeUnsampled;
-  delete grVQTimeUnsampled;
-  firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
-
-  std::cout<<"Adding noise..."<<std::endl;
-  AddGaussianNoise(grVITimeTemp, noiseTerms);
-  AddGaussianNoise(grVQTimeTemp, noiseTerms);  
-  
-  if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
-    std::cout<<"Implementing antenna bandwidth..."<<std::endl;
-    grVITimeTemp = BandPassFilter(grVITimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
-    grVQTimeTemp = BandPassFilter(grVQTimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
+  // Check that the graph contains points
+  if (grVITimeFirstSample->GetN() == 0) {
+    std::cout<<"We have produced a graph with no sampled points! Finishing this signal chunk."<<std::endl;
+    delete grVITimeFirstSample;
+    delete grVQTimeFirstSample;    
   }
+  else {  
+    // Now we need to filter and then sample these signals
+    std::cout<<"Filtering.."<<std::endl;
+    TGraph* grVITimeUnsampled = BandPassFilter(grVITimeFirstSample, 0.0, sampleRate/2.0);
+    TGraph* grVQTimeUnsampled = BandPassFilter(grVQTimeFirstSample, 0.0, sampleRate/2.0);
 
-  // Now add the information from these temporary graphs to the larger ones
-  if (firstVoltage) {
-    // We are filling this graph or a new section of the graph for the first time
-    for (int i = 0; i < grVITimeTemp->GetN(); i++) {
-      grVITime->SetPoint(grVITime->GetN(), grVITimeTemp->GetPointX(i), grVITimeTemp->GetPointY(i));
-      grVQTime->SetPoint(grVQTime->GetN(), grVQTimeTemp->GetPointX(i), grVQTimeTemp->GetPointY(i));
+    delete grVITimeFirstSample;
+    delete grVQTimeFirstSample;
+
+    // Now do sampling  
+    // Use simple linear interpolation for the job
+    std::cout<<"Sampling..."<<std::endl;
+    TGraph* grVITimeTemp = SampleWaveform(grVITimeUnsampled, sampleRate, firstSampleTime);
+    TGraph* grVQTimeTemp = SampleWaveform(grVQTimeUnsampled, sampleRate, firstSampleTime);
+    delete grVITimeUnsampled;
+    delete grVQTimeUnsampled;
+    firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
+
+    std::cout<<"Adding noise..."<<std::endl;
+    AddGaussianNoise(grVITimeTemp, noiseTerms);
+    AddGaussianNoise(grVQTimeTemp, noiseTerms);  
+  
+    if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
+      std::cout<<"Implementing antenna bandwidth..."<<std::endl;
+      grVITimeTemp = BandPassFilter(grVITimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
+      grVQTimeTemp = BandPassFilter(grVQTimeTemp, iv.GetLowerAntennaBandwidth()-lo.GetFrequency(), iv.GetUpperAntennaBandwidth()-lo.GetFrequency());
     }
-  }
-  else {
-    double tempStartTime = grVITimeTemp->GetPointX(0);
-    int startPnt = -1;
-    // Loop through main graph to find start points
-    for (int iMain = 0; iMain < grVITime->GetN(); iMain++) {
-      if (abs(tempStartTime - grVITime->GetPointX(iMain)) < 1e-11) {
-	startPnt = iMain;
-	break;
+
+    // Now add the information from these temporary graphs to the larger ones
+    if (firstVoltage) {
+      // We are filling this graph or a new section of the graph for the first time
+      for (int i = 0; i < grVITimeTemp->GetN(); i++) {
+	grVITime->SetPoint(grVITime->GetN(), grVITimeTemp->GetPointX(i), grVITimeTemp->GetPointY(i));
+	grVQTime->SetPoint(grVQTime->GetN(), grVQTimeTemp->GetPointX(i), grVQTimeTemp->GetPointY(i));
       }
     }
+    else {
+      double tempStartTime = grVITimeTemp->GetPointX(0);
+      int startPnt = -1;
+      // Loop through main graph to find start points
+      for (int iMain = 0; iMain < grVITime->GetN(); iMain++) {
+	if (abs(tempStartTime - grVITime->GetPointX(iMain)) < 1e-11) {
+	  startPnt = iMain;
+	  break;
+	}
+      }
     
-    // Now add the points to the main graph
-    for (int i = 0; i < grVITimeTemp->GetN(); i++) {
-      // We are adding to existing voltages
-      double viTmp = grVITime->GetPointY(startPnt + i);
-      double vqTmp = grVQTime->GetPointY(startPnt + i);
-      viTmp += grVITimeTemp->GetPointY(i);
-      vqTmp += grVQTimeTemp->GetPointY(i);
-      grVITime->SetPointY(startPnt + i, viTmp);
-      grVQTime->SetPointY(startPnt + i, vqTmp);
+      // Now add the points to the main graph
+      for (int i = 0; i < grVITimeTemp->GetN(); i++) {
+	// We are adding to existing voltages
+	double viTmp = grVITime->GetPointY(startPnt + i);
+	double vqTmp = grVQTime->GetPointY(startPnt + i);
+	viTmp += grVITimeTemp->GetPointY(i);
+	vqTmp += grVQTimeTemp->GetPointY(i);
+	grVITime->SetPointY(startPnt + i, viTmp);
+	grVQTime->SetPointY(startPnt + i, vqTmp);
+      }
     }
-  }
       
-  delete grVITimeTemp;
-  delete grVQTimeTemp;
+    delete grVITimeTemp;
+    delete grVQTimeTemp;
+  } // Sampled graph has non-zero size
 }
 
 rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
