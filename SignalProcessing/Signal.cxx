@@ -221,10 +221,6 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
     delete grVITimeUnsampled;
     delete grVQTimeUnsampled;
     firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
-
-    std::cout<<"Adding noise..."<<std::endl;
-    AddGaussianNoise(grVITimeTemp, noiseTerms);
-    AddGaussianNoise(grVQTimeTemp, noiseTerms);  
   
     if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
       std::cout<<"Implementing antenna bandwidth..."<<std::endl;
@@ -304,6 +300,10 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
     thisChunk += iv.GetChunkSize();
     if (thisChunk > maxTime) thisChunk = maxTime;
   }
+
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grVITime, noiseTerms);
+  AddGaussianNoise(grVQTime, noiseTerms);  
 }
 
 rad::Signal::Signal(std::vector<InducedVoltage> iv, LocalOscillator lo, double srate,
@@ -348,6 +348,10 @@ rad::Signal::Signal(std::vector<InducedVoltage> iv, LocalOscillator lo, double s
       if (thisChunk > maxTime) thisChunk = maxTime;
     }    
   } // Loop over InducedVoltage vector
+
+  std::cout<<"Adding noise..."<<std::endl;
+  AddGaussianNoise(grVITime, noiseTerms);
+  AddGaussianNoise(grVQTime, noiseTerms);  
 }
 
 rad::Signal::Signal(const Signal &s1) {
