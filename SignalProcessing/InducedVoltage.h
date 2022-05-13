@@ -13,6 +13,8 @@
 #include "TGraph.h"
 #include "TString.h"
 
+#include <vector>
+
 namespace rad
 {
   class InducedVoltage
@@ -21,7 +23,7 @@ namespace rad
     // Open circuit voltage with no signal processing performed
     TString theFile;
     TGraph* grVoltage;
-    IAntenna* theAntenna;
+    std::vector<IAntenna*> theAntennas;
     bool UseRetardedTime;
     double chunkSize;
     
@@ -33,6 +35,14 @@ namespace rad
     InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna,
 		   const bool kUseRetardedTime=false);
 
+    /// Constructor taking a vector of antennas as an argument
+    /// \param trajectoryFilePath Path to the file containing the electron trajectory
+    /// \param antennaVec Vector of antenna points to generate the voltages at
+    /// \param kUseRetardedTime Boolean to select the use of the retarded time
+    InducedVoltage(TString trajectoryFilePath, std::vector<IAntenna*> antennaVec,
+		   const bool kUseRetardedTime=false);
+
+    
     /// Generates the voltage between the specified times
     /// \param minTime First time point to generate voltage from
     /// \param maxTime Maximum time period to generate voltage for
