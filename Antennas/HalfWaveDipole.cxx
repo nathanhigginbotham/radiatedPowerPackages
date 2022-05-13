@@ -7,7 +7,7 @@
 #include "TVector3.h"
 
 rad::HalfWaveDipole::HalfWaveDipole(TVector3 antPos, TVector3 antXAx, TVector3 antZAx,
-				    const double freq) {
+				    double freq, double delay) {
   // Make sure all axes are unit vectors initially
   antXAx = antXAx.Unit();
   antZAx = antZAx.Unit();
@@ -20,7 +20,8 @@ rad::HalfWaveDipole::HalfWaveDipole(TVector3 antPos, TVector3 antXAx, TVector3 a
   antennaYAxis = antZAx.Cross(antXAx);
   antennaZAxis = antZAx;
   centralFreq = freq;
-
+  timeDelay = delay;
+  
   SetBandwidth();
 }
 

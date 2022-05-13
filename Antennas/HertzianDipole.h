@@ -19,7 +19,9 @@ namespace rad {
     /// \param antPos The position of the antenna
     /// \param antXAx Antenna defined X axis
     /// \param antZAx Antenna defined Z axis
-    HertzianDipole(TVector3 antPos, TVector3 antXAx, TVector3 antZAx, const double freq);
+    /// \param freq Central frequency of the antenna
+    /// \param delay Time delay of this antenna
+    HertzianDipole(TVector3 antPos, TVector3 antXAx, TVector3 antZAx, double freq, double delay=0.0);
     
     TVector3 GetETheta(const TVector3 electronPosition);
     TVector3 GetEPhi(const TVector3 electronPosition);

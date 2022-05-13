@@ -34,6 +34,8 @@ namespace rad {
     double GetBandwidthLowerLimit() { return lowerBandwidth; }
 
     void SetBandwidth(const double lowerLimit=-DBL_MAX, const double upperLimit=DBL_MAX);
+
+    double GetTimeDelay() { return timeDelay; }
     
   protected:
     TVector3 antennaPosition;
@@ -41,12 +43,15 @@ namespace rad {
     TVector3 antennaYAxis;
     TVector3 antennaZAxis;
     
-    // The upper and lower frequency bandwidths 
+    /// The upper and lower frequency bandwidths 
     double lowerBandwidth;
     double upperBandwidth;
     
     /// Central frequency of the antenna bandwidth
     double centralFreq;
+
+    /// Time delay for this antenna
+    double timeDelay; 
     
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The unit vector in the theta direction (relative to antenna axis) in global coords
@@ -63,7 +68,6 @@ namespace rad {
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The azimuthal angle phi w.r.t. the antenna axis
     double GetPhi(const TVector3 electronPosition);
-    
   };
 
 }

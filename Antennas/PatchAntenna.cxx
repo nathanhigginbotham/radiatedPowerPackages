@@ -8,7 +8,7 @@
 #include "TMath.h"
 
 rad::PatchAntenna::PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antZAx,
-				const double length, const double width, const double permittivity) {
+				const double length, const double width, const double permittivity, double delay) {
   antXAx = antXAx.Unit();
   antZAx = antZAx.Unit();
 
@@ -24,6 +24,7 @@ rad::PatchAntenna::PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antZA
   W = width;
   relativePerm = permittivity;
   centralFreq = TMath::C() / (2.0 * L * TMath::Sqrt(relativePerm));
+  timeDelay = delay;
   
   SetBandwidth();
 }

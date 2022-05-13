@@ -20,7 +20,7 @@ namespace rad {
     
   public:
     PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antZAx,
-		 const double length, const double width, const double permittivity=1.0);
+		 const double length, const double width, const double permittivity=1.0, double delay=0.0);
     
     TVector3 GetETheta(const TVector3 electronPosition);
     TVector3 GetEPhi(const TVector3 electronPosition);
