@@ -95,7 +95,6 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     while (thisChunk <= maxTime && thisChunk != lastChunk) {
       fp.GenerateFields(lastChunk, thisChunk);
       TGraph* voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
-      if (voltageTemp->GetPointX(0) > latestStartTime) latestStartTime = voltageTemp->GetPointX(0);
       
       // Now write this to the main voltage graph
       std::cout<<"Writing to main voltage graph"<<std::endl;
@@ -114,7 +113,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
 	if (lastChunk == minTime) {
 	  // This is the first time chunk
 	  // Check if this voltage has a later start time than current limit
-	  if (voltageTemp->GetPointX(0) > latestStartTime) latestStartTime = voltageTemp->GetPointX(0);
+	  if (voltageTemp->GetPointX(0) > latestStartTime)  latestStartTime = voltageTemp->GetPointX(0);
 
 	  // Now figure out where to start adding these points to the existing graph
 	  int startPntTmp = -1;
@@ -183,7 +182,14 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     } // Keep processing chunks
   } // Loop over antenna points
 
-  
+  std::cout<<"Removing points up to "<<latestStartTime<<std::endl;
+  // Now remove the initial points that are before the first matching start time
+  for (int i = 0; i < grVoltage->GetN(); i++) {
+    if (grVoltage->GetPointX(0) >= latestStartTime)
+      break;
+    else
+      grVoltage->RemovePoint(0);
+  } // Remove unmatched points
 }
 
 rad::InducedVoltage::InducedVoltage(const InducedVoltage &iv) {
