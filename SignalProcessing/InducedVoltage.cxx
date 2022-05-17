@@ -10,12 +10,29 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TAxis.h"
+#include "TSpline.h"
 
 #include <iostream>
 
 rad::InducedVoltage::~InducedVoltage() {
   delete grVoltage;
   theAntennas.clear();
+}
+
+TGraph* rad::InducedVoltage::DelayVoltage(TGraph* grIn, IAntenna* ant)
+{
+  double delay = ant->GetTimeDelay();
+  TGraph* grOut = new TGraph();
+  setGraphAttr(grOut);
+  TSpline3* sp = new TSpline3("sp", grIn);
+  for (int iPnt = 0; iPnt < grIn->GetN(); iPnt++) {
+    if (grIn->GetPointX(iPnt) - delay < grIn->GetPointX(0)) continue;
+    double theTime = grIn->GetPointX(iPnt);
+    grOut->SetPoint(grOut->GetN(), theTime, sp->Eval(theTime - delay));
+  }
+  
+  delete sp;
+  return grOut;
 }
 
 rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, IAntenna* myAntenna,
@@ -90,7 +107,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     // Avoids having massive versions of unnecessary graphs
     double thisChunk = minTime + chunkSize;
     if (thisChunk > maxTime) thisChunk = maxTime;
-    double lastChunk = minTime;
+    double lastChunk = minTime;    
     std::cout<<"Generating voltages"<<std::endl;
     while (thisChunk <= maxTime && thisChunk != lastChunk) {
       fp.GenerateFields(lastChunk, thisChunk);
