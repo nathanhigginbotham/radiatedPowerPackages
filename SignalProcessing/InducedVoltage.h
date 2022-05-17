@@ -26,6 +26,9 @@ namespace rad
     std::vector<IAntenna*> theAntennas;
     bool UseRetardedTime;
     double chunkSize;
+
+    /// Produce a shifted version of a voltage graph according to the delay of the antenna
+    TGraph* DelayVoltage(TGraph* grIn, IAntenna* ant);
     
   public:
     /// Constructor for a voltage

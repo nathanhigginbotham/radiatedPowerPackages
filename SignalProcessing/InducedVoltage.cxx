@@ -107,11 +107,22 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     // Avoids having massive versions of unnecessary graphs
     double thisChunk = minTime + chunkSize;
     if (thisChunk > maxTime) thisChunk = maxTime;
-    double lastChunk = minTime;    
+    double lastChunk = minTime;
+
+    double timeDelay = theAntennas[iAnt]->GetTimeDelay();
     std::cout<<"Generating voltages"<<std::endl;
     while (thisChunk <= maxTime && thisChunk != lastChunk) {
-      fp.GenerateFields(lastChunk, thisChunk);
-      TGraph* voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
+      fp.GenerateFields(lastChunk-timeDelay, thisChunk);
+
+      TGraph* voltageTemp = 0;
+      if (timeDelay != 0.0) {
+	TGraph* voltageUnshifted = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
+	voltageTemp = DelayVoltage(voltageUnshifted, theAntennas[iAnt]);
+	delete voltageUnshifted;
+      }
+      else {
+	voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
+      }
       
       // Now write this to the main voltage graph
       std::cout<<"Writing to main voltage graph"<<std::endl;
