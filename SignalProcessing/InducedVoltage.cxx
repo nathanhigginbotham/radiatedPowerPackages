@@ -94,6 +94,102 @@ rad::InducedVoltage::InducedVoltage(TString trajectoryFilePath, std::vector<IAnt
   chunkSize = chunkRatio * timeStep; // Adaptive time chunk size
 }
 
+void rad::InducedVoltage::ProcessTimeChunk(FieldPoint fp, double firstTime, double lastTime, double minTime, double &latestStartTime, bool kFirstAntenna)
+{
+  double timeDelay = fp.GetAntenna()->GetTimeDelay();
+  fp.GenerateFields(firstTime-timeDelay, lastTime);
+
+  TGraph* voltageTemp = 0;
+  if (timeDelay != 0.0) {
+    TGraph* voltageUnshifted = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
+    voltageTemp = DelayVoltage(voltageUnshifted, fp.GetAntenna());
+    delete voltageUnshifted;
+  }
+  else {
+    voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
+  }
+
+  // Now write this to the main voltage graph
+  std::cout<<"Writing to main voltage graph"<<std::endl;
+  if (kFirstAntenna) {
+    // This is the first antenna so write to the main graph normally
+    for (int i = 0; i < voltageTemp->GetN(); i++) {
+      grVoltage->SetPoint(grVoltage->GetN(), voltageTemp->GetPointX(i), voltageTemp->GetPointY(i));
+    }
+    latestStartTime = grVoltage->GetPointX(0);
+  }
+  else {
+    // We have already written to this graph once
+    // Need to find where to start writing this graph to
+    // Is this the first time chunk in the sequence?
+    if (firstTime == minTime) {
+      // This is the first time chunk
+      // Check if this voltage has a later start time than current limit
+      if (voltageTemp->GetPointX(0) > latestStartTime)  latestStartTime = voltageTemp->GetPointX(0);
+
+      // Now figure out where to start adding these points to the existing graph
+      int startPntTmp = -1;
+      double startTimeTmp = 0.0;
+      // Loop through points of temporary graph to determine the start time / point
+      for (int iTemp = 0; iTemp < voltageTemp->GetN(); iTemp++) {
+	if (voltageTemp->GetPointX(iTemp) < latestStartTime) {
+	  continue;
+	}
+	else {
+	  startPntTmp = iTemp;
+	  startTimeTmp = voltageTemp->GetPointX(iTemp);
+	  break;
+	}	  
+      }
+
+      // Now find the corresponding point on the main graph that corresponds to this time
+      int startPntMain = -1;
+      for (int iMain = 0; iMain < grVoltage->GetN(); iMain++) {
+	if (grVoltage->GetPointX(iMain) == startTimeTmp) {
+	  startPntMain = iMain;
+	  break;
+	}
+	    
+	if (iMain == grVoltage->GetN()-1) {
+	  std::cout<<"We seem to have not found a matching time point. Exiting..."<<std::endl;
+	  exit(1);
+	}
+      }
+
+      // Now we have these two points, can add voltages to existing graph
+      for (int i = 0; i < voltageTemp->GetN() - startPntTmp; i++) {
+	double existingVoltage = grVoltage->GetPointY(startPntMain+i);
+	grVoltage->SetPointY(startPntMain+i, existingVoltage + voltageTemp->GetPointY(i+startPntTmp));
+      } 
+    }
+    else {
+      // This is NOT the first time chunk
+      // Therefore the first point of the temporary graph should match with a main graph point
+      int startPntMain = -1;
+      for (int iMain = 0; iMain < grVoltage->GetN(); iMain++) {
+	if (grVoltage->GetPointX(iMain) == voltageTemp->GetPointX(0)) {
+	  startPntMain = iMain;
+	  break;
+	}
+
+	if (iMain == grVoltage->GetN()-1) {
+	  std::cout<<"We seem to have not found a matching time point. Exiting..."<<std::endl;
+	  exit(1);
+	}
+      } // Loop over main graph points
+
+      // Now write to the main voltage graph
+      for (int i = 0; i < voltageTemp->GetN(); i++) {
+	double existingVoltage = grVoltage->GetPointY(startPntMain+i);
+	grVoltage->SetPointY(startPntMain+i, existingVoltage + voltageTemp->GetPointY(i));
+      } // Write to main voltage graph
+	  
+    } // This is not the first time chunk
+  } // Already written to the main graph at least once
+  
+  delete voltageTemp;
+}
+
 void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
   double latestStartTime = -DBL_MAX;
   
@@ -102,7 +198,8 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     FieldPoint fp(theFile, theAntennas[iAnt]);
     if (minTime == -1) minTime = 0.0;
     if (maxTime == -1) maxTime = fp.GetFinalTime();
-
+    bool firstAntenna = (iAnt == 0);
+    
     // To avoid running out of memory, generate the fields in more manageable chunks
     // Avoids having massive versions of unnecessary graphs
     double thisChunk = minTime + chunkSize;
@@ -112,98 +209,7 @@ void rad::InducedVoltage::GenerateVoltage(double minTime, double maxTime) {
     double timeDelay = theAntennas[iAnt]->GetTimeDelay();
     std::cout<<"Generating voltages"<<std::endl;
     while (thisChunk <= maxTime && thisChunk != lastChunk) {
-      fp.GenerateFields(lastChunk-timeDelay, thisChunk);
-
-      TGraph* voltageTemp = 0;
-      if (timeDelay != 0.0) {
-	TGraph* voltageUnshifted = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
-	voltageTemp = DelayVoltage(voltageUnshifted, theAntennas[iAnt]);
-	delete voltageUnshifted;
-      }
-      else {
-	voltageTemp = fp.GetAntennaLoadVoltageTimeDomain(UseRetardedTime);
-      }
-      
-      // Now write this to the main voltage graph
-      std::cout<<"Writing to main voltage graph"<<std::endl;
-      // This is the first time we are writing to the graph
-      if (iAnt == 0) {
-	// Write to the main graph normally
-	for (int i = 0; i < voltageTemp->GetN(); i++) {
-	  grVoltage->SetPoint(grVoltage->GetN(), voltageTemp->GetPointX(i), voltageTemp->GetPointY(i));
-	}
-	latestStartTime = grVoltage->GetPointX(0);
-      }
-      else {
-	// We have already written to this graph once
-	// Need to find where to start writing this graph to
-	// Is this the first time chunk in the sequence?
-	if (lastChunk == minTime) {
-	  // This is the first time chunk
-	  // Check if this voltage has a later start time than current limit
-	  if (voltageTemp->GetPointX(0) > latestStartTime)  latestStartTime = voltageTemp->GetPointX(0);
-
-	  // Now figure out where to start adding these points to the existing graph
-	  int startPntTmp = -1;
-	  double startTimeTmp = 0.0;
-	  // Loop through points of temporary graph to determine the start time / point
-	  for (int iTemp = 0; iTemp < voltageTemp->GetN(); iTemp++) {
-	    if (voltageTemp->GetPointX(iTemp) < latestStartTime) {
-	      continue;
-	    }
-	    else {
-	      startPntTmp = iTemp;
-	      startTimeTmp = voltageTemp->GetPointX(iTemp);
-	      break;
-	    }	  
-	  }
-
-	  // Now find the corresponding point on the main graph that corresponds to this time
-	  int startPntMain = -1;
-	  for (int iMain = 0; iMain < grVoltage->GetN(); iMain++) {
-	    if (grVoltage->GetPointX(iMain) == startTimeTmp) {
-	      startPntMain = iMain;
-	      break;
-	    }
-	    
-	    if (iMain == grVoltage->GetN()-1) {
-	      std::cout<<"We seem to have not found a matching time point. Exiting..."<<std::endl;
-	      exit(1);
-	    }
-	  }
-
-	  // Now we have these two points, can add voltages to existing graph
-	  for (int i = 0; i < voltageTemp->GetN() - startPntTmp; i++) {
-	    double existingVoltage = grVoltage->GetPointY(startPntMain+i);
-	    grVoltage->SetPointY(startPntMain+i, existingVoltage + voltageTemp->GetPointY(i+startPntTmp));
-	  }
-	}
-	else {
-	  // This is NOT the first time chunk
-	  // Therefore the first point of the temporary graph should match with a main graph point
-	  int startPntMain = -1;
-	  for (int iMain = 0; iMain < grVoltage->GetN(); iMain++) {
-	    if (grVoltage->GetPointX(iMain) == voltageTemp->GetPointX(0)) {
-	      startPntMain = iMain;
-	      break;
-	    }
-
-	    if (iMain == grVoltage->GetN()-1) {
-	      std::cout<<"We seem to have not found a matching time point. Exiting..."<<std::endl;
-	      exit(1);
-	    }
-	  } // Loop over main graph points
-
-	  // Now write to the main voltage graph
-	  for (int i = 0; i < voltageTemp->GetN(); i++) {
-	    double existingVoltage = grVoltage->GetPointY(startPntMain+i);
-	    grVoltage->SetPointY(startPntMain+i, existingVoltage + voltageTemp->GetPointY(i));
-	  } // Write to main voltage graph
-	  
-	} // This is not the first time chunk
-      } // Already written to the main graph at least once 
-      
-      delete voltageTemp;
+      ProcessTimeChunk(fp, lastChunk, thisChunk, minTime, latestStartTime, firstAntenna);
       lastChunk = thisChunk;
       thisChunk += chunkSize;
       if (thisChunk > maxTime) thisChunk = maxTime;

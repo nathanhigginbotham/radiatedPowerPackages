@@ -8,6 +8,7 @@
 #ifndef INDUCED_VOLTAGE_H
 #define INDUCED_VOLTAGE_H
 
+#include "FieldClasses/FieldClasses.h"
 #include "Antennas/IAntenna.h"
 
 #include "TGraph.h"
@@ -28,7 +29,19 @@ namespace rad
     double chunkSize;
 
     /// Produce a shifted version of a voltage graph according to the delay of the antenna
+    /// \param grIn The graph to be delayed
+    /// \param ant The antenna which is delayed a certain amount
+    /// \return The time series voltage graph of the delayed signal
     TGraph* DelayVoltage(TGraph* grIn, IAntenna* ant);
+
+    /// Function for processing time chunks of the voltage
+    /// \param fp The FieldPoint for which to generate the voltage
+    /// \param firstTime The first time from which to generate from
+    /// \param lastTime The last time from which to generate from
+    /// \param minTime The first time in the whole file to generate from
+    /// \param latestStartTime Variable keeping track of the points to cut following processing
+    /// \param kFirstAntenna Boolean for keeping track of whether this is the first antenna in a series
+    void ProcessTimeChunk(FieldPoint fp, double firstTime, double lastTime, double minTime, double &latestStartTime, bool kFirstAntenna);
     
   public:
     /// Constructor for a voltage
