@@ -72,6 +72,9 @@ namespace rad
     /// Copy constructor
     FieldPoint(const FieldPoint &fp);
 
+    /// Returns a pointer to the antenna used for the calculations
+    IAntenna* GetAntenna() { return myAntenna; }
+    
     /// Fills the class members between two given times
     /// \param minTime The initial time in the input file
     /// \param maxTime The final time to use in the input file
