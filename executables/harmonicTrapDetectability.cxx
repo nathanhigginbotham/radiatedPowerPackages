@@ -172,8 +172,8 @@ int main(int argc, char* argv[])
   fout->cd();
   grVSig->Write("grVSig");
   grVSigPgram->Write("grVSigPgram");
-  grVSig->Write("grVSigNoNoise");
-  grVSigPgram->Write("grVSigNoNoisePgram");
+  grVSigNoNoise->Write("grVSigNoNoise");
+  grVSigNoNoisePgram->Write("grVSigNoNoisePgram");
 
   delete grVSig;
   delete grVSigNoNoise;
