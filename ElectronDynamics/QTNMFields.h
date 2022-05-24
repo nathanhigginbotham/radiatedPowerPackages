@@ -78,7 +78,7 @@ namespace rad
   };
 
   /// Class describing the field of a finite solenoid
-  /// Axis of the solenoid coincides with z axis with origin at z = 0
+  /// Axis of the solenoid coincides with z axis 
   class SolenoidField : public BaseField {
   private:
     double r;
@@ -86,7 +86,8 @@ namespace rad
     double i;
     double n;
     double mu;
-
+    double zOff;
+    
     /// Gives the on axis field for the solenoid
     /// \param z The position along the z axis
     /// \Returns The magnetic field in Tesla
@@ -97,7 +98,9 @@ namespace rad
     /// \param length The length of the bore of the solenoid (in metres)
     /// \param current The current (in amps) passing through each filament
     /// \param turnsPerMetre Number of coil terms per metre
-    SolenoidField(const double radius, const double length, const double current, const double turnsPerMetre, const double perm=MU0) : r(radius), l(length), i(current), n(turnsPerMetre), mu(perm) {}
+    /// \param perm Permeability (default is permeability of free space)
+    /// \param zOffset Offset (in metres) of the solenoid centre from z = 0 (default is 0)
+    SolenoidField(double radius, double length, double current, double turnsPerMetre, double perm=MU0, double zOffset=0.0) : r(radius), l(length), i(current), n(turnsPerMetre), mu(perm), zOff(zOffset) {}
 
     /// Gives the field at a positon vector 
     /// \param vec Position vector of charge

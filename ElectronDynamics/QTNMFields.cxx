@@ -76,8 +76,9 @@ TVector3 rad::BathtubField::evaluate_field_at_point(const TVector3 vec) {
 }
 
 double rad::SolenoidField::on_axis_field(const double z) {
-  const double xiPlus  = z + l/2;
-  const double xiMinus = z - l/2;
+  const double shiftedZ = z - zOff;
+  const double xiPlus  = shiftedZ + l/2;
+  const double xiMinus = shiftedZ - l/2;
   double field = (mu * n * i / 2) * ( (xiPlus/sqrt(xiPlus*xiPlus + r*r)) - (xiMinus/sqrt(xiMinus*xiMinus + r*r)) );
   return field;
 }
@@ -91,8 +92,8 @@ TVector3 rad::SolenoidField::evaluate_field_at_point(const TVector3 vec) {
     return BField;
   }
 
-  double xiPlus  = vec.Z() + l/2;
-  double xiMinus = vec.Z() - l/2;
+  double xiPlus  = (vec.Z() - zOff) + l/2;
+  double xiMinus = (vec.Z() - zOff) - l/2;
 
   double premultR = (mu*n*i/TMath::Pi()) * TMath::Sqrt( r/rad );
   double premultZ = (mu*n*i/4);
