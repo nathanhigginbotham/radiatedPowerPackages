@@ -68,5 +68,6 @@ A ```TGraph``` of the time series signal can then be produced using ```GetVoltag
 ### Signal
 Full signal processing is done using the ```Signal``` class which takes as an input an instance of ```InducedVoltage```, an ```LocalOscillator``` used to define the down-mixing and the sampling rate (in Hertz).
 Additionally a vector of ```GaussianNoise``` terms can be supplied as well as a maximum acquisition time.
+Note: you do not need to call ```GenerateVoltage``` on the supplied ```InducedVoltage``` to get the signal out, the ```Signal``` machinery handles that for you.
 
 [1]: <https://aip.scitation.org/doi/pdf/10.1063/1.5051077>
