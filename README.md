@@ -63,7 +63,7 @@ The required inputs are an electron trajectory file and either a pointer to an a
 Additionally, a boolean can be specified over whether or not to include the signal propagation time when generating the signal.
 
 If one just wants to view this signal without any downmixing, downsampling or noise added then simply call the function ```GenerateVoltage```. 
-A ```TGraph``` of the time series signal can then be produced using ```GetVoltageGraph```
+A ```TGraph``` of the time series signal can then be produced using ```GetVoltageGraph```.
 
 ### Signal
 Full signal processing is done using the ```Signal``` class which takes as an input an instance of ```InducedVoltage```, an ```LocalOscillator``` used to define the down-mixing and the sampling rate (in Hertz).
