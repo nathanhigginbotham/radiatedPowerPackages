@@ -8,21 +8,23 @@
 
 namespace rad
 {
-  constexpr double EPSILON0 = 8.8541878128e-12;
-  constexpr double MU0 = 1.25663706212e-6;
+  // Permittivity of free space
+  inline constexpr double EPSILON0 { 8.8541878128e-12 };
+  // Permeability of free space
+  inline constexpr double MU0 { 1.25663706212e-6 };
 
   // Electron rest mass in kg
-  constexpr double ME = 9.1093837015e-31;
+  inline constexpr double ME { 9.1093837015e-31 };
   // Electron rest mass in eV
-  constexpr double ME_EV = ME*TMath::C()*TMath::C()/TMath::Qe();
+  inline constexpr double ME_EV { ME*TMath::C()*TMath::C()/TMath::Qe() };
   
   // Classical electron radius in metres
-  constexpr double R_E = 2.8179403227e-15;
+  inline constexpr double R_E { 2.8179403227e-15 };
 
   // Fermi coupling constant
-  constexpr double G_F = 1.1663787e-23; // eV^{-2}
+  inline constexpr double G_F { 1.1663787e-23 }; // eV^{-2}
 
-  constexpr double ALPHA = 7.2973525698e-3;
+  inline constexpr double ALPHA { 7.2973525698e-3 }; 
 }
  
 #endif
