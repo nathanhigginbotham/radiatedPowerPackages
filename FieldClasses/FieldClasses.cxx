@@ -600,8 +600,7 @@ TGraph* rad::FieldPoint::GetTotalEFieldPowerSpectrumNorm(const bool kUseRetarded
 
 TGraph* rad::FieldPoint::GetAntennaLoadPowerSpectrumNorm(const double resistance,
 							 const bool kUseRetardedTime,
-							 int firstPoint, int lastPoint,
-							 std::vector<GaussianNoise*> noiseTerms) {
+							 int firstPoint, int lastPoint) {
   TGraph* grVoltage = GetAntennaLoadVoltageTimeDomain(kUseRetardedTime, firstPoint, lastPoint);
   TGraph* grPower = MakePowerSpectrumNorm(grVoltage);
 
