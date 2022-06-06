@@ -252,7 +252,7 @@ TGraph* rad::FieldPoint::GetEFieldTimeDomain(Coord_t coord, const bool kUseRetar
     gr = (TGraph*)EField[1]->Clone("grEy");
     grOut->GetYaxis()->SetTitle("E_{y} [V m^{-1}]");
   }
-  else if (coord = kZ) {
+  else if (coord == kZ) {
     gr = (TGraph*)EField[2]->Clone("grEz");
     grOut->GetYaxis()->SetTitle("E_{z} [V m^{-1}]");
   }
@@ -295,7 +295,7 @@ TGraph* rad::FieldPoint::GetPositionTimeDomain(Coord_t coord, const bool kUseRet
     gr = (TGraph*)pos[1]->Clone("grPosy");
     grOut->GetYaxis()->SetTitle("y [m]");
   }
-  else if (coord = kZ) {
+  else if (coord == kZ) {
     gr = (TGraph*)pos[2]->Clone("grPosz");
     grOut->GetYaxis()->SetTitle("z [m]");
   }
@@ -363,7 +363,7 @@ TGraph* rad::FieldPoint::GetBFieldTimeDomain(Coord_t coord, const bool kUseRetar
     gr = (TGraph*)BField[1]->Clone("grBy");
     gr->GetYaxis()->SetTitle("B_{y} [T]");
   }
-  else if (coord = kZ) {
+  else if (coord == kZ) {
     gr = (TGraph*)BField[2]->Clone("grBz");
     gr->GetYaxis()->SetTitle("B_{z} [T]");
   }
