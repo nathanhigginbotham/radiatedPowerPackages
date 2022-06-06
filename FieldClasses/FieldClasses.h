@@ -13,7 +13,6 @@
 
 #include "BasicFunctions/BasicFunctions.h"
 #include "BasicFunctions/EMFunctions.h"
-#include "SignalProcessing/NoiseFunc.h"
 #include "Antennas/IAntenna.h"
 
 namespace rad
@@ -176,8 +175,7 @@ namespace rad
     /// \param kUseRetardedTime Boolean to use retarded time
     TGraph* GetAntennaLoadPowerSpectrumNorm(const double resistance,
 					    const bool kUseRetardedTime=false,
-					    int firstPoint=-1, int lastPoint=-1,
-					    std::vector<GaussianNoise*> noiseTerms={});
+					    int firstPoint=-1, int lastPoint=-1);
     
     // Functions for various useful things such as the final time in a file
     double GetFinalTime();
