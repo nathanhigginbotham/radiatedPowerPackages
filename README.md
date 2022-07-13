@@ -26,7 +26,7 @@ There are also inter-dependencies between the individual packages:
 | Antennas | | | | | |
 | Electron Dynamics | x | | | | |
 
-Dependencies are listed row by row, for example the Signal Processing package depends requires the Basic Functions, Field Classes and Antennas packages.
+Dependencies are listed row by row, for example the Signal Processing package requires the Basic Functions, Field Classes and Antennas packages.
 
 There are also a set of example programs (radiatedPowerPackages/executables) for which we recommend installing all packages.
 
