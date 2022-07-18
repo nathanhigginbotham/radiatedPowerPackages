@@ -1,11 +1,83 @@
 # radiatedPowerPackages
 Designed to offer easy calculation of EM fields and the associated voltage signals for a moving electron.
 
-## Requirements
-* ROOT 
-* C++17 
-* libRootFftwWrapper (available here https://github.com/nichol77/libRootFftwWrapper)
-* Boost libraries
+## Requirements and Dependencies
+
+The core code requires C++17, built with CMake (3.18+) with the following external dependencies for each package:
+
+|   | BOOST (1.73+) | ROOT (6.14+) | libRootFftwWrapper(*)|
+|:-:|:-------------:|:------------:|:--------------------:|
+| Basic Functions | | x | x |
+| Field Classes | | x | x |
+| Signal Processing | | x | x
+| Antennas | | x | |
+| Electron Dynamics | x | x | |
+
+
+(*) libRootFftwWrapper available at: https://github.com/nichol77/libRootFftwWrapper. Requires an existing FFTW install.
+
+There are also inter-dependencies between the individual packages:
+
+|   | Basic Functions | Field Classes | Signal Processing | Antennas | Electron Dynamics |
+|:-:|:---------------:|:-------------:|:-----------------:|:--------:|:-----------------:|
+| Basic Functions | | | | | |
+| Field Classes | x | | | | |
+| Signal Processing | x | x | | x | |
+| Antennas | | | | | |
+| Electron Dynamics | x | | | | |
+
+Dependencies are listed row by row, for example the Signal Processing package requires the Basic Functions, Field Classes and Antennas packages.
+
+There are also a set of example programs (radiatedPowerPackages/executables) for which we recommend installing all packages.
+
+A docker image containing the required external libraries is available at: https://hub.docker.com/repository/docker/tomgoffrey/qtnm_deps.
+
+A minimal set of instructions to install the required dependencies using Ubuntu 20.04 are:
+
+### Basic build environment
+```
+$ sudo apt-get update -y
+$ sudo apt-get upgrade -y
+$ sudo apt-get install -y git mpich make wget python3-pip build-essential libssl-dev libfftw3-dev libgsl27
+```
+
+### Install CMake
+```
+$ wget https://github.com/Kitware/CMake/releases/download/v3.20.0/cmake-3.20.0.tar.gz
+$ tar -zxvf cmake-3.20.0.tar.gz
+$ cd cmake-3.20.0
+$ ./bootstrap
+$ make
+$ make install
+```
+
+### Download (pre-compiled) ROOT
+```
+$ wget https://root.cern/download/root_v6.26.04.Linux-ubuntu22-x86_64-gcc11.2.tar.gz
+$ tar -xzvf root_v6.26.04.Linux-ubuntu22-x86_64-gcc11.2.tar.gz
+$ echo "source /path/to/root/bin/thisroot.sh" >> ~/.bashrc
+$ source ~/.bashrc
+```
+
+### BOOST
+```
+$ wget https://boostorg.jfrog.io/artifactory/main/release/1.73.0/source/boost_1_73_0.tar.bz2
+$ tar --bzip2 -xf boost_1_73_0.tar.bz2
+$ cd "boost_1_73_0/"
+$ ./bootstrap.sh --prefix=/usr/local --with-libraries=program_options
+$ ./b2 install
+```
+
+### libROOTFFTW
+```
+$ git clone https://github.com/nichol77/libRootFftwWrapper.git
+$ cd "libRootFftwWrapper"
+$ mkdir build
+$ cd build
+$ cmake .. 
+$ make 
+$ make install
+```
 
 ## Build instructions
 The package is designed to be built with CMake and the build instructions are as follows.
