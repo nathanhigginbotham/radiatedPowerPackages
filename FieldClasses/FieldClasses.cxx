@@ -624,8 +624,8 @@ double rad::FieldPoint::GetFinalTime() {
   double lastTime;
   tree->SetBranchAddress("time", &lastTime);
   tree->GetEntry(tree->GetEntries()-1);
-  fin->Close();
   delete tree;
+  fin->Close();
   delete fin;
   return lastTime;
 }
