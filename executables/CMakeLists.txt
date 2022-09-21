@@ -34,3 +34,6 @@ target_link_libraries(crudeEnergyResolution PUBLIC ElectronDynamics SignalProces
 
 add_executable(harmonicTrapDetectability harmonicTrapDetectability.cxx)
 target_link_libraries(harmonicTrapDetectability PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
+
+add_executable(PhasedArrayVariableField PhasedArrayVariableField.cxx)
+target_link_libraries(PhasedArrayVariableField PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
