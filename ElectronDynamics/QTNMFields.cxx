@@ -113,7 +113,18 @@ TVector3 rad::SolenoidField::evaluate_field_at_point(const TVector3 vec) {
   double phiPlus  = atan( abs(xiPlus / (r - rad)) );
   double phiMinus = atan( abs(xiMinus / (r - rad)) );
 
-  double Bz = ( xiPlus*kPlus*int_kPlus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiPlus*boost::math::heuman_lambda(kPlus,phiPlus)/abs((r-rad)*xiPlus) ) - ( xiMinus*kMinus*int_kMinus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiMinus*boost::math::heuman_lambda(kMinus,phiMinus)/abs((r-rad)*xiMinus) );
+  double Bz{ 0 };
+  if (xiPlus == 0) {
+    Bz = xiPlus*kPlus*int_kPlus/(TMath::Pi()*sqrt(r*rad)) + boost::math::heuman_lambda(kPlus,phiPlus);
+    Bz -= xiMinus*kMinus*int_kMinus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiMinus*boost::math::heuman_lambda(kMinus,phiMinus)/abs((r-rad)*xiMinus);
+  }
+  else if (xiMinus == 0) {
+    Bz = xiPlus*kPlus*int_kPlus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiPlus*boost::math::heuman_lambda(kPlus,phiPlus)/abs((r-rad)*xiPlus);
+    Bz -= xiMinus*kMinus*int_kMinus/(TMath::Pi()*sqrt(r*rad)) + boost::math::heuman_lambda(kMinus,phiMinus);
+  }
+  else {
+    Bz = ( xiPlus*kPlus*int_kPlus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiPlus*boost::math::heuman_lambda(kPlus,phiPlus)/abs((r-rad)*xiPlus) ) - ( xiMinus*kMinus*int_kMinus/(TMath::Pi()*sqrt(r*rad)) + (r - rad)*xiMinus*boost::math::heuman_lambda(kMinus,phiMinus)/abs((r-rad)*xiMinus) );
+  }
   Bz *= premultZ;
 
   TVector3 BField(Br*vec.X()/rad, Br*vec.Y()/rad, Bz);  
