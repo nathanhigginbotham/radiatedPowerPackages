@@ -62,3 +62,8 @@ TVector3 rad::ComsolField::evaluate_field_at_point(const TVector3 vec)
     // Consider B field to only B in z direction
     return TVector3(0, 0, fieldValues->Interpolate(z, r));
 }
+
+rad::ComsolField::~ComsolField()
+{
+    delete fieldValues;
+}
