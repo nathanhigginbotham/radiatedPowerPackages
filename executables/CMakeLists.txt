@@ -38,5 +38,5 @@ target_link_libraries(harmonicTrapDetectability PUBLIC Antennas SignalProcessing
 add_executable(PhasedArrayVariableField PhasedArrayVariableField.cxx)
 target_link_libraries(PhasedArrayVariableField PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
 
-add_executable(mFleckSimulations mFleckSimulations.cxx)
-target_link_libraries(mFleckSimulations PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
+add_executable(RealisticFields RealisticFields.cxx)
+target_link_libraries(RealisticFields PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
