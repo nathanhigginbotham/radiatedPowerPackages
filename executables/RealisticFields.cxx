@@ -33,8 +33,9 @@ int main(int argc, char *argv[])
   int nAntennas{1};
   unsigned int magnetSetup{1};
   double pitchAngle{90.0};
+  double noiseTemp{0};
   
-  while ((opt = getopt(argc, argv, ":d:b:n:m:p:")) != -1) {
+  while ((opt = getopt(argc, argv, ":d:b:n:m:p:t:")) != -1) {
     switch (opt) {
     case 'd':
       outputDir = optarg;
@@ -50,6 +51,9 @@ int main(int argc, char *argv[])
       break;
     case 'p':
       pitchAngle = atof(optarg);
+      break;
+    case 't':
+      noiseTemp = atof(optarg);
       break;
     case ':':
       std::cout<<"Option needs a value"<<std::endl;
@@ -150,7 +154,6 @@ int main(int argc, char *argv[])
   const double sampleRate{ 750e6 };      // Hertz
   const double loFreq{ centralFreq - sampleRate/4.0 };
   LocalOscillator lo(2*TMath::Pi()*loFreq);
-  const double noiseTemp{ 4.0 };         // Kelvin
   GaussianNoise noiseFunc(noiseTemp, loadResistance);
 
   InducedVoltage ivSig(trackFile, antennaArray, true);
@@ -164,16 +167,6 @@ int main(int argc, char *argv[])
   grVSigPgram->Write("grVSigPgram");
   delete grVSig;
   delete grVSigPgram;
-  
-  Signal sigNoNoise(ivSig, lo, sampleRate, {}, tAcq);
-  std::cout<<"Created the signal with no noise"<<std::endl;
-  TGraph* grVSigNoNoise      = sigNoNoise.GetVITimeDomain();
-  TGraph* grVSigNoNoisePgram = sigNoNoise.GetVIPowerPeriodogram(loadResistance);
-  fout->cd();
-  grVSigNoNoise->Write("grVSigNoNoise");
-  grVSigNoNoisePgram->Write("grVSigNoNoisePgram");
-  delete grVSigNoNoise;
-  delete grVSigNoNoisePgram;
 
   const clock_t end_time = clock();
   std::cout<<"Simulation time was "<<float(end_time - begin_time)/CLOCKS_PER_SEC<<" seconds"<<std::endl;
