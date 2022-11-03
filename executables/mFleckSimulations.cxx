@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <string>
+#include <getopt.h>
 
 #include "TFile.h"
 #include "TTree.h"
@@ -35,14 +36,30 @@ int main(int argc, char *argv[])
     const double trapDepth{5e-3};  // Tesla
     const double coilCurrent{2 * trapDepth * coilRadius / MU0};
 
+    const double coilRadius70mm{0.0315};
+    const double coilCurrent70mm{2 * trapDepth * coilRadius70mm / MU0};
+    const double coilRadius110mm{0.05};
+    const double coilCurrent110mm{2 * trapDepth * coilRadius110mm / MU0};
+    const double coilRadius170mm{0.08};
+    const double coilCurrent170mm{2 * trapDepth * coilRadius170mm / MU0};
+
     std::string fieldFileStem{"/home/sjones/work/qtnm/radiatedPowerPackages/files/"};
+    std::string file70mm{"fieldmap_50A_70mmx800mm.csv"};
     std::string file110mm{"fieldmap_50A_110mmx800mm.csv"};
+    std::string file170mm{"fieldmap_50A_170mmx800mm.csv"};
 
     ComsolField *field_110mm = new ComsolField(fieldFileStem + file110mm,
                                                scaleFactor);
+
+    ComsolHarmonicField *harm_70mm =
+        new ComsolHarmonicField(coilRadius70mm, coilCurrent70mm,
+                                fieldFileStem + file70mm/*, scaleFactor*/);
     ComsolHarmonicField *harm_110mm =
-        new ComsolHarmonicField(coilRadius, coilCurrent,
-                                fieldFileStem + file110mm, scaleFactor);
+        new ComsolHarmonicField(coilRadius110mm, coilCurrent110mm,
+                                fieldFileStem + file110mm/*, scaleFactor*/);
+    ComsolHarmonicField *harm_170mm =
+        new ComsolHarmonicField(coilRadius170mm, coilCurrent170mm,
+                                fieldFileStem + file170mm/*, scaleFactor*/);
 
     const double centralField{harm_110mm->evaluate_field_at_point(TVector3(0, 0.001, 0)).Mag()};
 
@@ -74,15 +91,21 @@ int main(int argc, char *argv[])
     std::cout << "Central field = " << centralField << "T\n";
 
     int nMeasuredFieldPoints{201};
-    double zMin{-0.4};
-    double zMax{0.4};
+    double zMin{-0.15};
+    double zMax{0.15};
     TGraph *grFieldMag = new TGraph();
     setGraphAttr(grFieldMag);
     grFieldMag->SetTitle("110mm bore; z [m]; |B| [T]");
 
-    TGraph *grHarmFieldMag = new TGraph();
-    setGraphAttr(grHarmFieldMag);
-    grHarmFieldMag->SetTitle("110mm bore; z [m]; |B| [T]");
+    TGraph *grHarmFieldMag70mm = new TGraph();
+    setGraphAttr(grHarmFieldMag70mm);
+    grHarmFieldMag70mm->SetTitle("70mm bore; z [m]; |B| [T]");
+    TGraph *grHarmFieldMag110mm = new TGraph();
+    setGraphAttr(grHarmFieldMag110mm);
+    grHarmFieldMag110mm->SetTitle("110mm bore; z [m]; |B| [T]");
+    TGraph *grHarmFieldMag170mm = new TGraph();
+    setGraphAttr(grHarmFieldMag170mm);
+    grHarmFieldMag170mm->SetTitle("170mm bore; z [m]; |B| [T]");
 
     for (int iPnt{0}; iPnt < nMeasuredFieldPoints; iPnt++)
     {
@@ -90,18 +113,25 @@ int main(int argc, char *argv[])
         TVector3 thisPoint(0, 0.002, thisZ);
         grFieldMag->SetPoint(iPnt, thisZ,
                              field_110mm->evaluate_field_magnitude(thisPoint));
-        grHarmFieldMag->SetPoint(iPnt, thisZ,
-                                 harm_110mm->evaluate_field_magnitude(thisPoint));
+        grHarmFieldMag70mm->SetPoint(iPnt, thisZ,
+                                     harm_70mm->evaluate_field_magnitude(thisPoint));
+        grHarmFieldMag110mm->SetPoint(iPnt, thisZ,
+                                      harm_110mm->evaluate_field_magnitude(thisPoint));
+        grHarmFieldMag170mm->SetPoint(iPnt, thisZ,
+                                      harm_170mm->evaluate_field_magnitude(thisPoint));
     }
     fout->cd();
     grFieldMag->Write("grFieldMag");
-    grHarmFieldMag->Write("grHarmFieldMag");
+    grHarmFieldMag70mm->Write("grHarmFieldMag70mm");
+    grHarmFieldMag110mm->Write("grHarmFieldMag110mm");
+    grHarmFieldMag170mm->Write("grHarmFieldMag170mm");
 
     const double radiusWavelengths{antennaRadius / centralLambda};
 
     TGraph *grPowerAntennas = new TGraph();
     setGraphAttr(grPowerAntennas);
-    grPowerAntennas->SetTitle(Form("110mm bore B = %d mT; N_{antennas}; Collected Power [fW]", int(desiredField * 1000)));
+    grPowerAntennas->SetTitle(Form("110mm bore B = %d mT; N_{antennas}; Collected Power [fW]",
+                                   int(desiredField * 1000)));
     grPowerAntennas->SetMarkerStyle(20);
 
     for (int iAnt{1}; iAnt < 5; iAnt++)
@@ -140,7 +170,7 @@ int main(int argc, char *argv[])
             if (grPower->GetPointX(n) < centralFreq - 2e9 ||
                 grPower->GetPointX(n) > centralFreq + 2e9)
                 continue;
-                
+
             collectedPower += grPower->GetPointY(n) * 1e15;
         }
 
