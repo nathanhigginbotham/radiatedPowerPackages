@@ -217,6 +217,80 @@ TGraph *rad::BandPassFilter(const TGraph *grWave, const double minFreq, const do
   return grFiltered;
 }
 
+std::vector<double> rad::BandPassFilter(std::vector<double> xVals, std::vector<double> yVals,
+                                        double minFreq, double maxFreq)
+{
+  // Do some input checking
+  if (xVals.size() != yVals.size())
+  {
+    std::cout << "Your x and y values are not the same length. Are you sure this is right?\n";
+  }
+  if (xVals.size() < 2 || yVals.size() < 2)
+  {
+    std::cout << "Invalid input value size. Returning standard output.\n";
+    return std::vector<double>{0};
+  }
+  else
+  {
+    int length = yVals.size();
+    double deltaT{xVals.at(1) - xVals.at(0)};
+    FFTWComplex *theFFT = FFTtools::doFFT(length, &yVals[0]);
+
+    int newLength{(length / 2) + 1};
+    double deltaF{1.0 / (deltaT * length)};
+
+    double tempF{0};
+    for (int i{0}; i < newLength; i++)
+    {
+      if (tempF < minFreq || tempF > maxFreq)
+      {
+        theFFT[i].re = 0;
+        theFFT[i].im = 0;
+      }
+      tempF += deltaT;
+    }
+
+    double *filteredVals = FFTtools::doInvFFT(length, theFFT);
+    std::vector<double> filteredValsVec(filteredVals, filteredVals + length);
+
+    delete[] theFFT;
+    delete[] filteredVals;
+    return filteredValsVec;
+  }
+}
+
+double rad::CubicInterpolation(std::vector<double> xVals, std::vector<double> yVals,
+                               double xInterp)
+{
+  // Check we have the right number of values
+  if (xVals.size() != 4 || yVals.size() != 4)
+  {
+    std::cout << "Invalid interpolation input size! Require 4 values.\n";
+    return 0;
+  }
+  // Check that we have monotonically increasing x values
+  for (unsigned int i{1}; i < xVals.size(); i++)
+  {
+    if (xVals.at(i) - xVals.at(i - 1) <= 0)
+    {
+      std::cout << "x values (for interpolation) do not increase monotonically!\n";
+      return 0;
+    }
+  }
+
+  // First calculate the Lagrange xInterpolating basis functions
+  double l0{(xInterp - xVals[1]) * (xInterp - xVals[2]) * (xInterp - xVals[3]) /
+            ((xVals[0] - xVals[1]) * (xVals[0] - xVals[2]) * (xVals[0] - xVals[3]))};
+  double l1{(xInterp - xVals[0]) * (xInterp - xVals[2]) * (xInterp - xVals[3]) /
+            ((xVals[1] - xVals[0]) * (xVals[1] - xVals[2]) * (xVals[1] - xVals[3]))};
+  double l2{(xInterp - xVals[0]) * (xInterp - xVals[1]) * (xInterp - xVals[3]) /
+            ((xVals[2] - xVals[0]) * (xVals[2] - xVals[1]) * (xVals[2] - xVals[3]))};
+  double l3{(xInterp - xVals[0]) * (xInterp - xVals[1]) * (xInterp - xVals[2]) /
+            ((xVals[3] - xVals[0]) * (xVals[3] - xVals[1]) * (xVals[3] - xVals[2]))};
+
+  return l0 * yVals[0] + l1 * yVals[1] + l2 * yVals[2] + l3 * yVals[3];
+}
+
 double rad::RayleighPDF(const double x, const double sigma)
 {
   double sigmaSq = sigma * sigma;
