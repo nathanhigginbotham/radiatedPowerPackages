@@ -48,3 +48,28 @@ void rad::IAntenna::SetBandwidth(const double lowerLimit, const double upperLimi
   upperBandwidth = upperLimit;
 }
 
+double rad::IAntenna::GetPatternIntegral()
+{
+  // Now calculate the surface integral of the radiation pattern
+  // Need this for proper calculation of the gain
+  const int nPntsTheta{200};
+  const int nPntsPhi{200};
+  // Hypothetical width for integration
+  const double binArea{TMath::Pi() * 2 * TMath::Pi() / double(nPntsPhi * nPntsTheta)}; 
+  const double binWidthTheta{TMath::Pi() / double(nPntsTheta)};
+  const double binWidthPhi{2 * TMath::Pi() / double(nPntsPhi)};
+  double PRad{0};
+  for (int ith{0}; ith < nPntsTheta; ith++)
+  {
+    double theta{double(ith) * binWidthTheta + binWidthTheta / 2};
+    for (int iph{0}; iph < nPntsPhi; iph++)
+    {
+      double phi{double(iph) * binWidthPhi + binWidthPhi / 2};
+      double uSin{(GetETheta(theta, phi) * GetETheta(theta, phi) + 
+                  GetEPhi(theta, phi) * GetEPhi(theta, phi)) * sin(theta)};
+      PRad += uSin * binArea;
+    }
+  }
+  return PRad;
+}
+

@@ -26,7 +26,20 @@ namespace rad {
     TVector3 GetETheta(const TVector3 electronPosition);
     TVector3 GetEPhi(const TVector3 electronPosition);
 
+    double GetETheta(double theta, double phi);
+
+    double GetEPhi(double theta, double phi);
+
     double GetHEff();
+
+    /// Calculates the effective area (position dependent) of the dipole
+    /// \param ePos Radiating electron position vector
+    /// \return The effective area in metres squared
+    double GetAEff(TVector3 ePos); 
+
+  private:
+    double PRad; // Surface integral of radiation pattern, used for normalisation
+
   };
 }
 

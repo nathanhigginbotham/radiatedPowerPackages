@@ -4,6 +4,8 @@
 
 #include "Antennas/PatchAntenna.h"
 
+#include "boost/math/special_functions/sinc.hpp"
+
 #include "TVector3.h"
 #include "TMath.h"
 
@@ -38,6 +40,8 @@ rad::PatchAntenna::PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antYA
   L = LEff - 2 * deltaL;
 
   SetBandwidth();
+
+  PRad = GetPatternIntegral();
 }
 
 TVector3 rad::PatchAntenna::GetETheta(const TVector3 electronPosition)
@@ -45,11 +49,7 @@ TVector3 rad::PatchAntenna::GetETheta(const TVector3 electronPosition)
   TVector3 thetaHat = GetThetaHat(electronPosition);
   double thetaAng = GetTheta(electronPosition);
   double phiAng = GetPhi(electronPosition);
-  const double k = 2 * TMath::Pi() * centralFreq / TMath::C();
-
-  double premult = TMath::Sin(k * W * TMath::Sin(thetaAng) * TMath::Sin(phiAng) / 2.0) * TMath::Cos(k * L * TMath::Sin(thetaAng) * TMath::Cos(phiAng) / 2) * TMath::Cos(phiAng) / (k * W * TMath::Sin(thetaAng) * TMath::Sin(phiAng) / 2);
-  thetaHat *= premult;
-  return thetaHat;
+  return thetaHat * GetETheta(thetaAng, phiAng);
 }
 
 TVector3 rad::PatchAntenna::GetEPhi(const TVector3 electronPosition)
@@ -57,9 +57,35 @@ TVector3 rad::PatchAntenna::GetEPhi(const TVector3 electronPosition)
   TVector3 phiHat = GetPhiHat(electronPosition);
   double thetaAng = GetTheta(electronPosition);
   double phiAng = GetPhi(electronPosition);
-  const double k = 2 * TMath::Pi() * centralFreq / TMath::C();
-
-  double premult = -1 * TMath::Sin(k * W * TMath::Sin(thetaAng) * TMath::Sin(phiAng) / 2.0) * TMath::Cos(k * L * TMath::Sin(thetaAng) * TMath::Cos(phiAng) / 2) * TMath::Cos(thetaAng) * TMath::Sin(phiAng) / (k * W * TMath::Sin(thetaAng) * TMath::Sin(phiAng) / 2);
-  phiHat *= premult;
-  return phiHat;
+  return phiHat * GetEPhi(thetaAng, phiAng);
 }
+
+double rad::PatchAntenna::GetETheta(double theta, double phi)
+{
+  double k{2 * TMath::Pi() * centralFreq / TMath::C()};
+  double F1{boost::math::sinc_pi(k * H * sin(theta) * cos(theta) / 2.0) *
+            boost::math::sinc_pi(k * W * sin(theta) * sin(phi) / 2.0)};
+  double F2{2.0 * cos(k * L * sin(theta) * cos(phi) / 2.0)};
+  double ETheta{cos(phi) * F1 * F2};
+  return ETheta;
+}
+
+double rad::PatchAntenna::GetEPhi(double theta, double phi)
+{
+  double k{2 * TMath::Pi() * centralFreq / TMath::C()};
+  double F1{boost::math::sinc_pi(k * H * sin(theta) * cos(theta) / 2.0) *
+            boost::math::sinc_pi(k * W * sin(theta) * sin(phi) / 2.0)};
+  double F2{2.0 * cos(k * L * sin(theta) * cos(phi) / 2.0)};
+  double EPhi{cos(theta) * sin(phi) * F1 * F2};
+  return EPhi;
+}
+
+double rad::PatchAntenna::GetAEff(TVector3 ePos)
+{
+  double theta{GetTheta(ePos)};
+  double phi{GetPhi(ePos)};
+  double gain{4 * TMath::Pi() * (GetETheta(theta, phi) * GetETheta(theta, phi)) +
+              GetEPhi(theta, phi) * GetEPhi(theta, phi) / PRad};
+  return pow(TMath::C() / centralFreq, 2) * gain / (4 * TMath::Pi());
+}
+

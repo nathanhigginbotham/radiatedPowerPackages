@@ -21,6 +21,8 @@ namespace rad
     double relativePerm; // Relative permettivity
     double LEff;         // Effective length (in metres)
 
+    double PRad;         // Integral of radiation pattern over surface
+
   public:
     PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antYAx,
                  double width, double height, double f0,
@@ -36,11 +38,22 @@ namespace rad
     /// \return The electric field (in V/m)
     TVector3 GetEPhi(const TVector3 electronPosition);
 
+    /// Get the theta component of the electric field
+    double GetETheta(double theta, double phi);
+
+    /// Get the phi component of the electric field
+    double GetEPhi(double theta, double phi);
+
     double GetHEff() { return LEff; }
+
+    /// Calculates the effective area for a given electron position
+    /// \param ePos Electron position vector
+    /// \return The effective area (in metres squared)
+    double GetAEff(TVector3 ePos);
 
     double GetL() { return L; }
 
-    double GetH() {return H; }
+    double GetH() { return H; }
 
     double GetW() { return W; }
   };

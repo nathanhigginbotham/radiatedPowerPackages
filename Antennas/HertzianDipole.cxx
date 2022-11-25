@@ -39,7 +39,25 @@ TVector3 rad::HertzianDipole::GetEPhi(const TVector3 electronPosition) {
   return TVector3(0, 0, 0);
 }
 
+double rad::HertzianDipole::GetETheta(double theta, double phi)
+{
+  return sin(theta);
+}
+
+double rad::HertzianDipole::GetEPhi(double theta, double phi)
+{
+  return 0;
+}
+
 double rad::HertzianDipole::GetHEff() {
   double heff = GetCentralWavelength() * TMath::Sqrt( 3 / (8*TMath::Pi()) );
   return heff;
+}
+
+double rad::HertzianDipole::GetAEff(TVector3 ePos)
+{
+  // Calculate angle between dipole direction and electron
+  double thetaAng{GetTheta(ePos)};
+  double lambda{TMath::C() / centralFreq};
+  return (3 / (8 * TMath::Pi())) * pow(lambda * sin(thetaAng), 2);
 }

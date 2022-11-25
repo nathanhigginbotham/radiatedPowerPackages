@@ -20,8 +20,17 @@ namespace rad {
     virtual TVector3 GetETheta(const TVector3 electronPosition) = 0;
     virtual TVector3 GetEPhi(const TVector3 electronPosition) = 0;
 
+    // Radiation patterns taking angles as arguments
+    virtual double GetETheta(double theta, double phi) = 0;
+    virtual double GetEPhi(double theta, double phi) = 0;
+
     // Returns the effective antenna height/length  
     virtual double GetHEff() = 0;
+
+    /// Virtual function for returning antenna effective area
+    /// \param electronPosition The position vector of the electron
+    /// \return The effective area of the antenna (in metres)
+    virtual double GetAEff(TVector3 electronPosition) = 0;
     
     double GetCentralFrequency(){ return centralFreq; }
     
@@ -68,6 +77,9 @@ namespace rad {
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The azimuthal angle phi w.r.t. the antenna axis
     double GetPhi(const TVector3 electronPosition);
+
+    /// Gets the integral of the radiation pattern. Used for normalisation
+    double GetPatternIntegral();
   };
 
 }
