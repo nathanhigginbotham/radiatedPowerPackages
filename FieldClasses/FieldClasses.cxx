@@ -507,6 +507,33 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(const bool kUseRetarded
   return gr;
 }
 
+TGraph *rad::FieldPoint::GetAntennaPowerTimeDomain(bool kUseRetardedTime)
+{
+  // First of all get the Poynting vector at the point
+  TGraph *grS{GetPoyntingMagTimeDomain(kUseRetardedTime)};
+  // Get the graphs of the electron position
+  TGraph *grX{GetPositionTimeDomain(kX, kUseRetardedTime)};
+  TGraph *grY{GetPositionTimeDomain(kY, kUseRetardedTime)};
+  TGraph *grZ{GetPositionTimeDomain(kZ, kUseRetardedTime)};
+
+  TGraph *grPower = new TGraph();
+  setGraphAttr(grPower);
+  grPower->GetYaxis()->SetTitle("Collected power [W]");
+  grPower->GetXaxis()->SetTitle("Time [s]");
+  for (int n{0}; n < grS->GetN(); n++)
+  {
+    TVector3 ePos(grX->GetPointY(n), grY->GetPointY(n), grZ->GetPointY(n));
+    double AEff{myAntenna->GetAEff(ePos)};
+    grPower->SetPoint(n, grS->GetPointX(n), grS->GetPointY(n) * AEff);
+  }
+
+  delete grS;
+  delete grX;
+  delete grY;
+  delete grZ;
+  return grPower;
+}
+
 TGraph* rad::FieldPoint::GetAntennaLoadPowerTimeDomain(const double loadResistance,
 						       const bool kUseRetardedTime,
 						       int firstPoint, int lastPoint) {
