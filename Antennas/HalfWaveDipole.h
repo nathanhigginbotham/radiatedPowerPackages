@@ -32,6 +32,8 @@ namespace rad {
 
     double GetHEff();
 
+    double GetHEff(TVector3 ePos);
+
     /// Calculates the effective area (position dependent) of the dipole
     /// \param ePos Radiating electron position vector
     /// \return The effective area in metres squared

@@ -95,6 +95,17 @@ double rad::PatchAntenna::GetEPhi(double theta, double phi)
   }
 }
 
+double rad::PatchAntenna::GetHEff(TVector3 ePos)
+{
+  double theta{GetTheta(ePos)};
+  double phi{GetPhi(ePos)};
+  double gain{4 * TMath::Pi() * (GetETheta(theta, phi) * GetETheta(theta, phi) +
+              GetEPhi(theta, phi) * GetEPhi(theta, phi)) / PRad};
+  double imp{50}; // Assume we can match to 50 Ohm load
+  double lambda{TMath::C() / centralFreq};
+  return sqrt(imp * lambda * lambda * gain  / (480 * TMath::Pi() * TMath::Pi()));
+}
+
 double rad::PatchAntenna::GetAEff(TVector3 ePos)
 {
   double theta{GetTheta(ePos)};

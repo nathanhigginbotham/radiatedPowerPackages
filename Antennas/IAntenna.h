@@ -27,6 +27,8 @@ namespace rad {
     // Returns the effective antenna height/length  
     virtual double GetHEff() = 0;
 
+    virtual double GetHEff(TVector3 ePos) = 0;
+
     /// Virtual function for returning antenna effective area
     /// \param electronPosition The position vector of the electron
     /// \return The effective area of the antenna (in metres)

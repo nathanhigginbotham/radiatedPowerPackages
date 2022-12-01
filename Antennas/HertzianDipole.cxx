@@ -54,6 +54,15 @@ double rad::HertzianDipole::GetHEff() {
   return heff;
 }
 
+double rad::HertzianDipole::GetHEff(TVector3 ePos)
+{
+  double lambda{TMath::C() / centralFreq};
+  double thetaAng{GetTheta(ePos)};
+  double imp{50}; // Assume 50 Ohm resistance
+  double gain{1.5 * sin(thetaAng) * sin(thetaAng)};
+  return sqrt(imp * lambda * lambda * gain / (480 * TMath::Pi() * TMath::Pi()));
+}
+
 double rad::HertzianDipole::GetAEff(TVector3 ePos)
 {
   // Calculate angle between dipole direction and electron

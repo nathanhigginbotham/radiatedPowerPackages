@@ -49,6 +49,8 @@ namespace rad
     /// \return The effective height of the patch antenna (in metres) 
     double GetHEff() { return LEff; }
 
+    double GetHEff(TVector3 ePos);
+
     /// Calculates the effective area for a given electron position
     /// \param ePos Electron position vector
     /// \return The effective area (in metres squared)

@@ -32,6 +32,8 @@ namespace rad {
 
     double GetHEff();
 
+    double GetHEff(TVector3 ePos);
+
     /// Returns the effective area of a Hertzian dipole
     /// \param ePos Electron position vector (in metres)
     /// \return The antenna effective area (in metres squared)

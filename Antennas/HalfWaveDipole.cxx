@@ -55,6 +55,17 @@ double rad::HalfWaveDipole::GetHEff() {
   return heff;
 }
 
+double rad::HalfWaveDipole::GetHEff(TVector3 ePos)
+{
+  double theta{GetTheta(ePos)};
+  double phi{GetPhi(ePos)};
+  double gain{4 * TMath::Pi() * (GetETheta(theta, phi) * GetETheta(theta, phi) +
+              GetEPhi(theta, phi) * GetEPhi(theta, phi)) / PRad};
+  double imp{73}; // Characteristic impedance of half-wave dipole
+  double lambda{TMath::C() / centralFreq};
+  return sqrt(imp * lambda * lambda * gain / (480 * TMath::Pi() * TMath::Pi()));
+}
+
 double rad::HalfWaveDipole::GetAEff(TVector3 ePos)
 {
   // Gain of a half-wave dipole is 1.65 at theta = pi / 2
