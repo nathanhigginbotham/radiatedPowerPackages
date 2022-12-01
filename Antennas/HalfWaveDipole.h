@@ -37,6 +37,10 @@ namespace rad {
     /// \return The effective area in metres squared
     double GetAEff(TVector3 ePos); 
 
+    double GetAEffTheta(TVector3 ePos);
+
+    double GetAEffPhi(TVector3 ePos);
+
   private:
     double PRad; // Surface integral of radiation pattern, used for normalisation
 

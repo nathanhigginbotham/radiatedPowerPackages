@@ -1,6 +1,7 @@
 // IAntenna.cxx
 
 #include <cassert>
+#include <iostream>
 
 #include "Antennas/IAntenna.h"
 
@@ -70,6 +71,7 @@ double rad::IAntenna::GetPatternIntegral()
       PRad += uSin * binArea;
     }
   }
+  std::cout<<"PRad = "<<PRad<<std::endl;
   return PRad;
 }
 

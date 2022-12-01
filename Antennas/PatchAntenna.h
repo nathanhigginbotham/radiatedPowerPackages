@@ -22,6 +22,7 @@ namespace rad
     double LEff;         // Effective length (in metres)
 
     double PRad;         // Integral of radiation pattern over surface
+    double directivity;  // Directivity of antenna
 
   public:
     PatchAntenna(TVector3 antPos, TVector3 antXAx, TVector3 antYAx,
@@ -44,6 +45,8 @@ namespace rad
     /// Get the phi component of the electric field
     double GetEPhi(double theta, double phi);
 
+    /// Get the effective height of the antenna
+    /// \return The effective height of the patch antenna (in metres) 
     double GetHEff() { return LEff; }
 
     /// Calculates the effective area for a given electron position
@@ -56,6 +59,18 @@ namespace rad
     double GetH() { return H; }
 
     double GetW() { return W; }
+
+    /// Calculate the input impedance of the patch antenna
+    /// \return The impedance (in Ohms)
+    double GetImpedance();
+
+    /// Calculates patch antenna bandwidth
+    /// \return The antenna bandwidth in Hertz 
+    double GetBandwidth();
+
+    double GetAEffTheta(TVector3 ePos);
+
+    double GetAEffPhi(TVector3 ePos);
   };
 }
 

@@ -45,6 +45,10 @@ namespace rad {
     void SetBandwidth(const double lowerLimit=-DBL_MAX, const double upperLimit=DBL_MAX);
 
     double GetTimeDelay() { return timeDelay; }
+
+    virtual double GetAEffTheta(TVector3 ePos) = 0;
+
+    virtual double GetAEffPhi(TVector3 ePos) = 0;
     
   protected:
     TVector3 antennaPosition;

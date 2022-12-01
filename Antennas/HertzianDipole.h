@@ -36,6 +36,10 @@ namespace rad {
     /// \param ePos Electron position vector (in metres)
     /// \return The antenna effective area (in metres squared)
     double GetAEff(TVector3 ePos);
+
+    double GetAEffTheta(TVector3 ePos);
+
+    double GetAEffPhi(TVector3 ePos);
   };
 }
 

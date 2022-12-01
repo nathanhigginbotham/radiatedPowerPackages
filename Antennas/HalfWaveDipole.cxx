@@ -64,3 +64,16 @@ double rad::HalfWaveDipole::GetAEff(TVector3 ePos)
               GetEPhi(theta, phi) * GetEPhi(theta, phi)) / PRad};
   return pow(TMath::C() / centralFreq, 2) * gain / (4 * TMath::Pi());
 }
+
+double rad::HalfWaveDipole::GetAEffTheta(TVector3 ePos)
+{
+  double theta{GetTheta(ePos)};
+  double phi{GetPhi(ePos)};
+  double gain{4 * TMath::Pi() * GetETheta(theta, phi) * GetETheta(theta, phi) / PRad};
+  return pow(TMath::C() / centralFreq, 2) * gain / (4 * TMath::Pi());
+}
+
+double rad::HalfWaveDipole::GetAEffPhi(TVector3 ePos)
+{
+  return 0;
+}

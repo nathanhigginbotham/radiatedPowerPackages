@@ -61,3 +61,13 @@ double rad::HertzianDipole::GetAEff(TVector3 ePos)
   double lambda{TMath::C() / centralFreq};
   return (3 / (8 * TMath::Pi())) * pow(lambda * sin(thetaAng), 2);
 }
+
+double rad::HertzianDipole::GetAEffTheta(TVector3 ePos)
+{
+  return GetAEff(ePos);
+}
+
+double rad::HertzianDipole::GetAEffPhi(TVector3 ePos)
+{
+  return 0;
+}
