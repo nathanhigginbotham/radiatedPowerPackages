@@ -54,10 +54,16 @@ namespace rad
     /// \return The effective area (in metres squared)
     double GetAEff(TVector3 ePos);
 
+    /// Get the length of the patch
+    /// \return The length of the patch in metres 
     double GetL() { return L; }
 
+    /// Get the height of the substrate
+    /// \return The height of the substrate in metres
     double GetH() { return H; }
 
+    /// Get the width of the patch
+    /// \return The width of the patch in metres
     double GetW() { return W; }
 
     /// Calculate the input impedance of the patch antenna
@@ -68,8 +74,14 @@ namespace rad
     /// \return The antenna bandwidth in Hertz 
     double GetBandwidth();
 
+    /// Get the partial polarisation effective area in the theta direction
+    /// \param ePos The electron position vector
+    /// \return The partial effective area in metres squared
     double GetAEffTheta(TVector3 ePos);
 
+    /// Get the partial polarisation effective area in the phi direction
+    /// \param ePos The electron position vector
+    /// \return The partial effective area in metres squared
     double GetAEffPhi(TVector3 ePos);
   };
 }
