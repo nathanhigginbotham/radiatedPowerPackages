@@ -492,7 +492,8 @@ TGraph* rad::FieldPoint::GetAntennaLoadVoltageTimeDomain(const bool kUseRetarded
   for (int i = 0; i < grEx->GetN(); i++) {
     TVector3 EField(grEx->GetPointY(i), grEy->GetPointY(i), grEz->GetPointY(i));
     TVector3 ePos(grPosx->GetPointY(i), grPosy->GetPointY(i), grPosz->GetPointY(i));
-    double voltage = (EField.Dot(myAntenna->GetETheta(ePos)) + EField.Dot(myAntenna->GetEPhi(ePos))) * myAntenna->GetHEff();
+    double voltage = (EField.Dot(myAntenna->GetETheta(ePos)) + 
+                      EField.Dot(myAntenna->GetEPhi(ePos))) * myAntenna->GetHEff();
     voltage /= 2.0; // Account for re-radiated power
     gr->SetPoint(gr->GetN(), grEx->GetPointX(i), voltage);
   }
