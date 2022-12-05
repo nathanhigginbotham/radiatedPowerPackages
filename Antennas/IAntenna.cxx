@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Antennas/IAntenna.h"
+#include "BasicFunctions/BasicFunctions.h"
 
 #include "TVector3.h"
 #include "TMath.h"
@@ -16,19 +17,85 @@ double rad::IAntenna::GetCentralWavelength() {
 
 TVector3 rad::IAntenna::GetThetaHat(const TVector3 electronPosition) {
   const TVector3 rHat = (antennaPosition - electronPosition).Unit();
-  const double theta = TMath::ACos(antennaZAxis.Dot(rHat));
-  const double phi = TMath::ATan2(antennaYAxis.Dot(rHat), antennaXAxis.Dot(rHat));
-  TVector3 vec(TMath::Cos(theta)*TMath::Cos(phi), TMath::Cos(theta)*TMath::Sin(phi), -1*TMath::Sin(theta));
-  vec.RotateUz(antennaZAxis);
-  return vec;
+  double x{antennaXAxis.Dot(rHat)};
+  double y{antennaYAxis.Dot(rHat)};
+  double z{antennaZAxis.Dot(rHat)};
+  double theta{0};
+  double phi{0};
+
+  // Do theta first 
+  if (z > 0)
+  {
+    theta = atan(sqrt(x * x + y * y) / z);
+  }
+  else if (z < 0)
+  {
+    theta = atan(sqrt(x * x + y * y) / z) + TMath::Pi();
+  }
+  else 
+  {
+    theta = TMath::Pi() / 2;
+  }
+
+  // Now do phi
+  if (x > 0)
+  {
+    phi = atan(y / x);
+  }
+  else if (x < 0 && y >= 0)
+  {
+    phi = atan(y / x) + TMath::Pi();
+  }
+  else if (x < 0 && y < 0)
+  {
+    phi = atan(y / x) - TMath::Pi();
+  }
+  else if (x == 0 && y > 0)
+  {
+    phi = TMath::Pi() / 2;
+  }
+  else 
+  {
+    phi = - TMath::Pi() / 2;
+  }
+
+  TVector3 vec(TMath::Cos(theta)*TMath::Cos(phi), 
+               TMath::Cos(theta)*TMath::Sin(phi), -1*TMath::Sin(theta));
+  TVector3 rotateVec{RotateToGlobalCoords(vec, antennaXAxis, antennaYAxis, 
+                                          antennaZAxis)};
+  return rotateVec;
 }
 
 TVector3 rad::IAntenna::GetPhiHat(const TVector3 electronPosition) {
   const TVector3 rHat = (antennaPosition - electronPosition).Unit();
-  const double phi = TMath::ATan2(antennaYAxis.Dot(rHat), antennaXAxis.Dot(rHat));
+  double x{antennaXAxis.Dot(rHat)};
+  double y{antennaYAxis.Dot(rHat)};
+  double phi{0};
+  if (x > 0)
+  {
+    phi = atan(y / x);
+  }
+  else if (x < 0 && y >= 0)
+  {
+    phi = atan(y / x) + TMath::Pi();
+  }
+  else if (x < 0 && y < 0)
+  {
+    phi = atan(y / x) - TMath::Pi();
+  }
+  else if (x == 0 && y > 0)
+  {
+    phi = TMath::Pi() / 2;
+  }
+  else 
+  {
+    phi = - TMath::Pi() / 2;
+  }
+
   TVector3 vec(-1*TMath::Sin(phi), TMath::Cos(phi), 0);
-  vec.RotateUz(antennaZAxis);
-  return vec;
+  TVector3 rotateVec{RotateToGlobalCoords(vec, antennaXAxis, antennaYAxis, 
+                                          antennaZAxis)};
+  return rotateVec;
 }
 
 double rad::IAntenna::GetTheta(const TVector3 electronPosition) {
@@ -40,6 +107,7 @@ double rad::IAntenna::GetTheta(const TVector3 electronPosition) {
 double rad::IAntenna::GetPhi(const TVector3 electronPosition) {
   const TVector3 rHat = (antennaPosition - electronPosition).Unit();
   double phi = TMath::ATan2(antennaYAxis.Dot(rHat), antennaXAxis.Dot(rHat));
+  if (phi < 0) phi += 2 * TMath::Pi();
   return phi;
 }
 

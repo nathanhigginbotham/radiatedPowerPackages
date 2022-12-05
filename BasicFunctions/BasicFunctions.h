@@ -122,26 +122,34 @@ namespace rad
 
   /// Converts an input TGraph to a histogram
   /// \param grInput Input graph to be converted
-  /// \Returns The converted histogram
+  /// \return The converted histogram
   TH1D* GraphToHistogram(TGraph* grInput);
 
   /// Dowmixes, filters and downsamples a time series graph
   /// \param grInput The inputted time domain voltage graph
   /// \param downmixFreq The frequency at which to downmix, in Hertz
   /// \param sampleRate The frequency at which to sample, in Hertz
-  /// \Returns The downmixed, filtered and sampled time domain graph
+  /// \return The downmixed, filtered and sampled time domain graph
   TGraph* SignalProcessGraph(TGraph* grInput, const double downmixFreq, const double sampleRate);
 
   /// Produces a graph of the FFT magnitudes
   /// \param grInput The input real-valued time series data
-  /// \Returns The FFT magnitudes in frequency space
+  /// \return The FFT magnitudes in frequency space
   TGraph* MakeFFTMagGraph(TGraph* grInput);
 
   /// Heaviside step function
   /// \param x Input parameter
-  /// \Returns 1, for x > 0
-  /// \Returns 0, for x <= 0
+  /// \return 0, for x <= 0 and 1 for x > 0
   double HeavisideFunc(double x);
+
+  /// Rotates a given vector to the global coordinate system
+  /// \param v The vector to be rotated
+  /// \param xAx The X axis of the frame you are rotating from 
+  /// \param yAx The Y axis of the frame you are rotating from
+  /// \param zAx The Z axis of the frame you are rotating from 
+  /// \return The rotated vector
+  TVector3 RotateToGlobalCoords(TVector3 v, 
+                                TVector3 xAx, TVector3 yAx, TVector3 zAx);
 }
  
 #endif
