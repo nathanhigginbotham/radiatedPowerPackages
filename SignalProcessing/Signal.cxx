@@ -16,6 +16,7 @@
 #include "TRandom3.h"
 #include "TAxis.h"
 #include "TMath.h"
+#include "TSpline.h"
 
 #include "FFTtools.h"
 
@@ -36,6 +37,7 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
   assert(fp.size() > 0);
   
   sampleRate = srate;
+  timeDelay = 0;
   
   // Make sure the noise terms are all set up correctly
   for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
@@ -127,6 +129,7 @@ rad::Signal::Signal(std::vector<FieldPoint> fp, LocalOscillator lo, double srate
 rad::Signal::Signal(FieldPoint fp, LocalOscillator lo, double srate,
 		    std::vector<GaussianNoise> noiseTerms, const bool kUseRetardedTime) {
   sampleRate = srate;
+  timeDelay = 0;
   
   // Make sure the noise terms are all set up correctly
   for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
@@ -185,7 +188,7 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 				   bool firstVoltage)
 {
   iv.ResetVoltage();
-  iv.GenerateVoltage(lastChunk, thisChunk);
+  iv.GenerateVoltage(lastChunk - timeDelay, thisChunk);
 
   TGraph* grInputVoltageTemp = iv.GetVoltageGraph();
 
@@ -216,13 +219,29 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
     delete grVITimeFirstSample;
     delete grVQTimeFirstSample;
 
+    TGraph *grVIDelayed = 0;
+    TGraph *grVQDelayed = 0;
+    if (timeDelay > 0)
+    {
+      grVIDelayed = DelayVoltage(grVITimeUnsampled, grVITimeUnsampled->GetPointX(0));
+      grVQDelayed = DelayVoltage(grVQTimeUnsampled, grVQTimeUnsampled->GetPointX(0));
+    }
+    else
+    {
+      grVIDelayed = (TGraph*)grVITimeUnsampled->Clone();
+      grVQDelayed = (TGraph*)grVQTimeUnsampled->Clone();
+    }
+    delete grVITimeUnsampled;
+    delete grVQTimeUnsampled;
+
     // Now do sampling  
     // Use simple linear interpolation for the job
     std::cout<<"Sampling..."<<std::endl;
-    TGraph* grVITimeTemp = SampleWaveform(grVITimeUnsampled, sampleRate, firstSampleTime);
-    TGraph* grVQTimeTemp = SampleWaveform(grVQTimeUnsampled, sampleRate, firstSampleTime);
-    delete grVITimeUnsampled;
-    delete grVQTimeUnsampled;
+    TGraph* grVITimeTemp = SampleWaveform(grVIDelayed, sampleRate, firstSampleTime);
+    TGraph* grVQTimeTemp = SampleWaveform(grVQDelayed, sampleRate, firstSampleTime);
+    delete grVIDelayed;
+    delete grVQDelayed;
+
     firstSampleTime = grVITimeTemp->GetPointX(grVITimeTemp->GetN()-1) + 1/sampleRate;
   
     if (iv.GetLowerAntennaBandwidth() != -DBL_MAX || iv.GetUpperAntennaBandwidth() != DBL_MAX) {
@@ -268,8 +287,11 @@ void rad::Signal::ProcessTimeChunk(InducedVoltage iv, LocalOscillator lo,
 }
 
 rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
-		    std::vector<GaussianNoise> noiseTerms, double maxTime) {
+		                std::vector<GaussianNoise> noiseTerms, 
+                    double maxTime, double delay) 
+{
   sampleRate = srate;
+  timeDelay = delay;
 
   // Make sure the noise terms are all set up correctly
   for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
@@ -312,9 +334,11 @@ rad::Signal::Signal(InducedVoltage iv, LocalOscillator lo, double srate,
 }
 
 rad::Signal::Signal(std::vector<InducedVoltage> iv, LocalOscillator lo, double srate,
-		    std::vector<GaussianNoise> noiseTerms, double maxTime)
+		                std::vector<GaussianNoise> noiseTerms, 
+                    double maxTime, double delay)
 {
   sampleRate = srate;
+  timeDelay = delay;
 
   // Make sure the noise terms are all set up correctly
   for (int iNoise = 0; iNoise < noiseTerms.size(); iNoise++) {
@@ -486,6 +510,28 @@ TGraph* rad::Signal::SampleWaveform(TGraph* grInput, const double sRate, const d
     }
   }
 
+  return grOut;
+}
+
+TGraph *rad::Signal::DelayVoltage(TGraph *grIn, double startTime)
+{
+  TGraph *grOut = new TGraph();
+  TSpline3 *sp = new TSpline3("sp", grIn);
+  for (int iPnt{0}; iPnt < grIn->GetN(); iPnt++)
+  {
+    if (grIn->GetPointX(0) < startTime || 
+        grIn->GetPointX(iPnt) - timeDelay < grIn->GetPointX(0)) 
+    {
+      continue;
+    }
+    else
+    {
+      double theTime{grIn->GetPointX(iPnt)};
+      grOut->SetPoint(grOut->GetN(), theTime, sp->Eval(theTime - timeDelay));
+    }
+  }
+
+  delete sp;
   return grOut;
 }
 
