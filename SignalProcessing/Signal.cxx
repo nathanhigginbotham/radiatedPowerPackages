@@ -428,7 +428,11 @@ TGraph* rad::Signal::SampleWaveform(TGraph* grInput) {
     }
     else {
       // Sample the distribution using linear interpolation
-      double calcV = grInput->GetPointY(i-1) + (sampleTime - grInput->GetPointX(i-1)) * (grInput->GetPointY(i) - grInput->GetPointY(i-1)) / (time - grInput->GetPointX(i-1));
+      std::vector<double> tVals{grInput->GetPointX(i - 3), grInput->GetPointX(i - 2),
+                                grInput->GetPointX(i - 1), grInput->GetPointX(i)};
+      std::vector<double> vVals{grInput->GetPointY(i - 3), grInput->GetPointY(i - 2),
+                                grInput->GetPointY(i - 1), grInput->GetPointY(i)};
+      double calcV{CubicInterpolation(tVals, vVals, sampleTime)};
       grOut->SetPoint(grOut->GetN(), sampleTime, calcV);
       sampleTime += sampleSpacing;      
     }
