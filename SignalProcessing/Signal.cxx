@@ -579,8 +579,7 @@ TGraph* rad::Signal::GetVIPowerPeriodogram(const double loadResistance, int firs
   TGraph* grOut = MakePowerSpectrumPeriodogram(grTime);
   delete grTime;
   setGraphAttr(grOut);
-  grOut->GetXaxis()->SetTitle("Frequency [Hz]");
-  grOut->GetYaxis()->SetTitle("Power [W]");
+  grOut->SetTitle("V_{I}; Frequency [Hz]; Power [W]");
   ScaleGraph(grOut, 1/loadResistance);
   return grOut;
 }
@@ -590,8 +589,7 @@ TGraph* rad::Signal::GetVQPowerPeriodogram(const double loadResistance, int firs
   TGraph* grOut = MakePowerSpectrumPeriodogram(grTime);
   delete grTime;
   setGraphAttr(grOut);
-  grOut->GetXaxis()->SetTitle("Frequency [Hz]");
-  grOut->GetYaxis()->SetTitle("Power [W]");
+  grOut->SetTitle("V_{Q}; Frequency [Hz]; Power [W]");
   ScaleGraph(grOut, 1/loadResistance);
   return grOut;
 }
