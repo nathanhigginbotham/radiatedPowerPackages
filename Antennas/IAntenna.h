@@ -20,6 +20,14 @@ namespace rad {
     virtual TVector3 GetETheta(const TVector3 electronPosition) = 0;
     virtual TVector3 GetEPhi(const TVector3 electronPosition) = 0;
 
+    /// \param electronPosition The position of the electron in global coordinates
+    /// \returns The polar angle theta w.r.t. the antenna axis
+    double GetTheta(const TVector3 electronPosition);
+
+    /// \param electronPosition The position of the electron in global coordinates
+    /// \returns The azimuthal angle phi w.r.t. the antenna axis
+    double GetPhi(const TVector3 electronPosition);
+
     // Radiation patterns taking angles as arguments
     virtual double GetETheta(double theta, double phi) = 0;
     virtual double GetEPhi(double theta, double phi) = 0;
@@ -75,14 +83,6 @@ namespace rad {
     /// \param electronPosition The position of the electron in global coordinates
     /// \returns The unit vector in the phi direction (relative to antenna axis) in global coords
     TVector3 GetPhiHat(const TVector3 electronPosition);
-
-    /// \param electronPosition The position of the electron in global coordinates
-    /// \returns The polar angle theta w.r.t. the antenna axis
-    double GetTheta(const TVector3 electronPosition);
-
-    /// \param electronPosition The position of the electron in global coordinates
-    /// \returns The azimuthal angle phi w.r.t. the antenna axis
-    double GetPhi(const TVector3 electronPosition);
 
     /// Gets the integral of the radiation pattern. Used for normalisation
     double GetPatternIntegral();
