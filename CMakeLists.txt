@@ -22,6 +22,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_library(ROOTFFTW_LIB RootFftwWrapper REQUIRED)
 message("ROOTFFTW_LIB is set to ${ROOTFFTW_LIB}")
 
+# Set build locations for libraries and binaries
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
 # Add libraries
 add_subdirectory(BasicFunctions)
 list(APPEND EXTRA_LIBS BasicFunctions)
