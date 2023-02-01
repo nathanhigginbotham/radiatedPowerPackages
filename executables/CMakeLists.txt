@@ -8,9 +8,6 @@ target_link_libraries(normTest PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW
 add_executable(noiseTests noiseTests.cxx)
 target_link_libraries(noiseTests PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 
-#add_executable(polarPlots polarPlots.cxx)
-#target_link_libraries(polarPlots PUBLIC BasicFunctions ${ROOT_LIBRARIES})
-
 add_executable(signalSum signalSum.cxx)
 target_link_libraries(signalSum PUBLIC ${EXTRA_LIBS} ${ROOT_LIBRARIES} ${ROOTFFTW_LIB})
 
@@ -37,3 +34,6 @@ target_link_libraries(harmonicTrapDetectability PUBLIC Antennas SignalProcessing
 
 add_executable(PhasedArrayVariableField PhasedArrayVariableField.cxx)
 target_link_libraries(PhasedArrayVariableField PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
+
+add_executable(RFBandwidth RFBandwidth.cxx)
+target_link_libraries(RFBandwidth PRIVATE ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
