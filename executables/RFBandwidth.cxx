@@ -110,9 +110,9 @@ int main(int argc, char *argv[])
          << endl;
 
     double f{CalcCyclotronFreq(electronKE, bMean)};
-    grBMean->SetPoint(iPnt, thisAngle, bMean);
-    grF->SetPoint(iPnt, thisAngle, f);
-    grDeltaF->SetPoint(iPnt, thisAngle, f);
+    grBMean->SetPoint(iPnt, thisAngle * 180 / TMath::Pi(), bMean);
+    grF->SetPoint(iPnt, thisAngle * 180 / TMath::Pi(), f);
+    grDeltaF->SetPoint(iPnt, thisAngle * 180 / TMath::Pi(), f);
 
     delete tr;
     fin->Close();
