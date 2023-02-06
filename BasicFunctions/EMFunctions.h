@@ -67,6 +67,14 @@ namespace rad
   /// \param BField Magnetic field vector
   /// \Returns The Poynting vector
   ROOT::Math::XYZVector CalcPoyntingVec(const ROOT::Math::XYZVector EField, const ROOT::Math::XYZVector BField);
+
+  /// \brief Calculate the non-relativistic Poynting vector
+  /// \param fp Position vector of field point
+  /// \param ePos Electron position vector
+  /// \param eVel Electron velocity vector (in metres)
+  /// \param eAcc Electron acceleration vector
+  /// \return Poynting vector in units of W m^-2
+  TVector3 CalcPoyntingVecNR(TVector3 fp, TVector3 ePos, TVector3 eVel, TVector3 eAcc);
 }
 
 #endif
