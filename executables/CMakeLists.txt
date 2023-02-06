@@ -37,3 +37,6 @@ target_link_libraries(PhasedArrayVariableField PUBLIC Antennas SignalProcessing 
 
 add_executable(RFBandwidth RFBandwidth.cxx)
 target_link_libraries(RFBandwidth PRIVATE ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
+
+add_executable(SingleAntennaPower SingleAntennaPower.cxx)
+target_link_libraries(SingleAntennaPower PRIVATE ElectronDynamics BasicFunctions Antennas SignalProcessing FieldClasses ${ROOT_LIBRARIES})
