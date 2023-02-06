@@ -45,6 +45,16 @@ TVector3 rad::CalcEFarField(const TVector3 fieldPoint, const TVector3 ePosition,
   return field;
 }
 
+TVector3 rad::CalcEFieldNR(TVector3 fp, TVector3 ePos, TVector3 eVel, TVector3 eAcc)
+{
+  double premult{-TMath::Qe() / (4 * TMath::Pi() * EPSILON0 * TMath::C())};
+  double r{(fp - ePos).Mag()};
+  TVector3 rHat{(fp - ePos).Unit()};
+  TVector3 betaDot{eAcc * (1 / TMath::C())};
+  TVector3 field{rHat.Cross(rHat.Cross(betaDot)) * (1 / r)};
+  return field * premult;
+}
+
 // Magnetic field at the field point, calculated from Lienard-Wiechert potentials
 ROOT::Math::XYZVector rad::CalcBField(const ROOT::Math::XYZPoint fieldPoint,
 				      const ROOT::Math::XYZPoint ePosition,
@@ -84,6 +94,14 @@ TVector3 rad::CalcBFarField(const TVector3 fieldPoint, const TVector3 ePosition,
   TVector3 field = rHat.Cross(betaDot + rHat.Cross(beta.Cross(betaDot))) * (1.0 / (r * pow(1.0 - beta.Dot(rHat), 3) ));
   field *= premult;
   return field;
+}
+
+TVector3 rad::CalcBFieldNR(TVector3 fp, TVector3 ePos, TVector3 eVel, TVector3 eAcc)
+{
+  TVector3 eField{CalcEFieldNR(fp, ePos, eVel, eAcc)};
+  TVector3 rHat{(fp - ePos).Unit()};
+  TVector3 bField{rHat.Cross(eField) * (1 / TMath::C())};
+  return bField;
 }
 
 // Calculate Poynting vector
