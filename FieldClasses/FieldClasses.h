@@ -19,7 +19,7 @@ namespace rad
 {
   class FieldPoint
   {
-  private:
+  protected:
     // Input file name
     TString inputFile;
     
@@ -188,7 +188,6 @@ namespace rad
     double GetFinalTime();
     double GetSampleRate();
   };
-
 }
 
 #endif

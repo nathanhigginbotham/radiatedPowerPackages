@@ -456,6 +456,9 @@ TGraph* rad::FieldPoint::GetPoyntingMagTimeDomain(const bool kUseRetardedTime) {
     double smag = grEMag->GetPointY(i) * grBMag->GetPointY(i) / MU0;
     grSMag->SetPoint(grSMag->GetN(), grEMag->GetPointX(i), smag);
   }
+  delete grEMag;
+  delete grBMag;
+
   setGraphAttr(grSMag);
   grSMag->GetXaxis()->SetTitle("Time [s]");
   grSMag->GetYaxis()->SetTitle("|S| [W m^{-2}]");
