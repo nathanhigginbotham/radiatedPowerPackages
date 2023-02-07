@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
   cout << "Radiated power (R, NR) = " << radiatedPower * 1e15 << " fW,\t" << radiatedPowerNR << " fW\n";
 
   // Trajectory generating details
-  const double simTime{1e-6};         // seconds
+  const double simTime{1e-6};      // seconds
   const double simStepSize{1e-12}; // seconds
   TString trackFile{"/home/sjones/work/qtnm/outputs/SingleAntennaPower/track.root"};
   ElectronTrajectoryGen traj(trackFile, field, pos0, vel0, simStepSize,
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
   FieldPoint fp(trackFile, antenna);
   fp.GenerateFields(0, simTime);
   TGraph *grS = fp.GetPoyntingMagTimeDomain(true);
-  // Calculate the time average of the Poynting vector 
+  // Calculate the time average of the Poynting vector
   cout << "\n";
   double avgS{0};
   for (int n{0}; n < grS->GetN(); n++)
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
   }
   avgP /= double(grPowerAEff->GetN());
   cout << "Time averaged power (effective area) = " << avgP * 1e15 << " fW\n";
-  cout << "Efficiency = " << avgP * 100 / radiatedPower << "%\n"; 
+  cout << "Efficiency = " << avgP * 100 / radiatedPower << "%\n";
 
   fout->cd();
   grPowerAEff->GetYaxis()->SetRangeUser(0, 0.03e-15);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
   }
   avgPNR /= double(grPowerAEffNR->GetN());
   cout << "Time averaged non-relativistic power (effective area) = " << avgPNR * 1e15 << " fW\n";
-  cout << "Efficiency = " << avgPNR * 100 / radiatedPowerNR << "%\n"; 
+  cout << "Efficiency = " << avgPNR * 100 / radiatedPowerNR << "%\n";
   fout->cd();
   grPowerAEffNR->GetXaxis()->SetRangeUser(1e-9, 1e-9 + xAxisTime);
   grPowerAEffNR->GetYaxis()->SetRangeUser(0, 8e-18);
@@ -165,11 +165,17 @@ int main(int argc, char *argv[])
   fout->cd();
   grVPgram->Write("grVPgram");
   double pgramSum{0};
+  double pgramSumFRange{0}; // Only count frequency range we'd detect
   for (int n{0}; n < grVPgram->GetN(); n++)
   {
     pgramSum += grVPgram->GetPointY(n);
+    if (grVPgram->GetPointX(n) > centralFreq - 500e6 &&
+        grVPgram->GetPointX(n) < centralFreq + 500e6)
+    {
+      pgramSumFRange += grVPgram->GetPointY(n);
+    }
   }
-  cout << "Periodogram power sum = " << pgramSum * 1e15 << " fW\n";
+  cout << "Periodogram power sum (in range of interest)= " << pgramSum * 1e15 << " (" << pgramSumFRange * 1e15 << ") fW\n";
   cout << "Efficiency = " << pgramSum / radiatedPower * 100 << "%\n";
 
   fout->Close();
