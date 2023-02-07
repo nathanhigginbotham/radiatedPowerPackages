@@ -27,6 +27,11 @@ using namespace rad;
 using std::cout;
 using std::endl;
 
+double LarmorPowerNR(double a)
+{
+  return MU0 * pow(TMath::Qe() * a, 2) / (6 * TMath::Pi() * TMath::C());
+}
+
 int main(int argc, char *argv[])
 {
   TString outputFile{argv[1]};
@@ -45,10 +50,12 @@ int main(int argc, char *argv[])
   const double gyroradius{GetGyroradius(vel0, centralField, ME)}; // metres
   TVector3 pos0(0, -gyroradius, 0);
   const double centralFreq{CalcCyclotronFreq(electronKE, centralField.Mag())};
+  const double acc0{electronSpeed * 2 * TMath::Pi() * centralFreq};
   const double gamma{1 / sqrt(1 - pow(electronSpeed / TMath::C(), 2))};
 
   const double radiatedPower{MU0 * pow(TMath::Qe() * 2 * TMath::Pi() * centralFreq * electronSpeed, 2) * pow(gamma, 4) / (6 * TMath::Pi() * TMath::C())};
-  cout << "Radiated power = " << radiatedPower * 1e15 << " fW\n";
+  const double radiatedPowerNR{LarmorPowerNR(acc0)};
+  cout << "Radiated power (R, NR) = " << radiatedPower * 1e15 << " fW,\t" << radiatedPowerNR << " fW\n";
 
   // Trajectory generating details
   const double simTime{1e-6};         // seconds
@@ -110,7 +117,7 @@ int main(int argc, char *argv[])
   cout << "\n";
   FieldPointNR fpNR(trackFile, antenna);
   fpNR.GenerateFields(0, simTime);
-  TGraph *grPowerAEffNR = fpNR.GetAntennaPowerTimeDomain(true);
+  TGraph *grPowerAEffNR{fpNR.GetAntennaPowerTimeDomain(true)};
 
   double avgPNR{0};
   for (int n{0}; n < grPowerAEffNR->GetN(); n++)
@@ -119,7 +126,7 @@ int main(int argc, char *argv[])
   }
   avgPNR /= double(grPowerAEffNR->GetN());
   cout << "Time averaged non-relativistic power (effective area) = " << avgPNR * 1e15 << " fW\n";
-  cout << "Efficiency = " << avgPNR * 100 / radiatedPower << "%\n"; 
+  cout << "Efficiency = " << avgPNR * 100 / radiatedPowerNR << "%\n"; 
   fout->cd();
   grPowerAEffNR->GetXaxis()->SetRangeUser(1e-9, 1e-9 + xAxisTime);
   grPowerAEffNR->GetYaxis()->SetRangeUser(0, 8e-18);
