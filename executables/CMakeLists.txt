@@ -42,4 +42,4 @@ add_executable(SingleAntennaPower SingleAntennaPower.cxx)
 target_link_libraries(SingleAntennaPower PRIVATE ElectronDynamics BasicFunctions Antennas SignalProcessing FieldClasses ${ROOT_LIBRARIES})
 
 add_executable(RadialEnergyResolution RadialEnergyResolution.cxx)
-target_link_libraries(RadialEnergyResolution PRIVATE ElectronDynamics BasicFunctions ${ROOT_LIBRARIES} ${BOOST_LIBRARIES})
+target_link_libraries(RadialEnergyResolution PRIVATE ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
