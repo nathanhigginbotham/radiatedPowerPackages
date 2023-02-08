@@ -568,3 +568,13 @@ TVector3 rad::RotateToGlobalCoords(TVector3 v,
   TVector3 newVector{x1Prime * unitX + x2Prime * unitY + x3Prime * unitZ};
   return newVector;
 }
+
+double rad::SkewedGaussian(double x, double A, double mu,
+                           double sigma, double alpha)
+{
+  // Evaluate gaussian
+  double gaus{A * TMath::Gaus(x, mu, sigma)};
+  // Evaluate
+  double skew{1 + TMath::Erf(alpha * (x - mu) / (sigma * sqrt(2)))};
+  return gaus * skew;
+}
