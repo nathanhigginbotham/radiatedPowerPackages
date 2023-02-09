@@ -101,18 +101,24 @@ int main(int argc, char *argv[])
       // Now open track file
       TFile *fin = new TFile(trackFile, "READ");
       TTree *tr = (TTree *)fin->Get("tree");
+      double time;
       double xPos, yPos, zPos;
+      tr->SetBranchAddress("time", &time);
       tr->SetBranchAddress("xPos", &xPos);
       tr->SetBranchAddress("yPos", &yPos);
       tr->SetBranchAddress("zPos", &zPos);
 
       double bMean{0};
+      TGraph *grZ{new TGraph()};
+      setGraphAttr(grZ);
+      grZ->SetTitle(Form("#theta = %.2f", thisAngle * 180 / TMath::Pi()));
       // Loop over tree entries
       for (int e{0}; e < tr->GetEntries(); e++)
       {
         tr->GetEntry(e);
         TVector3 ePos(xPos, yPos, zPos);
         bMean += field1m->evaluate_field_magnitude(ePos);
+        grZ->SetPoint(e, time, zPos);
       }
       bMean /= double(tr->GetEntries());
       cout << iPnt << ":\t bMean = " << bMean << " T\n";
@@ -121,6 +127,10 @@ int main(int argc, char *argv[])
       grBMean->SetPoint(iPnt, thisAngle * 180 / TMath::Pi(), bMean);
       grF->SetPoint(iPnt, thisAngle * 180 / TMath::Pi(), f);
       grDeltaF->SetPoint(iPnt, thisAngle * 180 / TMath::Pi(), f);
+
+      fout->cd();
+      grZ->Write(Form("grZ_%d_%d", iBkg, iPnt));
+      delete grZ;
 
       delete tr;
       fin->Close();
