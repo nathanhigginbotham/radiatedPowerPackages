@@ -47,3 +47,5 @@ target_link_libraries(RadialEnergyResolution PRIVATE ElectronDynamics BasicFunct
 add_executable(RealisticFields RealisticFields.cxx)
 target_link_libraries(RealisticFields PUBLIC Antennas SignalProcessing ElectronDynamics BasicFunctions ${ROOT_LIBRARIES})
 
+add_executable(CreateElectronTrajectories CreateElectronTrajectories.cxx)
+target_link_libraries(CreateElectronTrajectories PUBLIC BasicFunctions ElectronDynamics ${ROOT_LIBRARIES})
